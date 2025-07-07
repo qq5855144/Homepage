@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脚本转换工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c5;
+            --secondary: #00cec9;
+            --dark: #2d3436;
+            --darker: #1e2223;
+            --light: #f7f7f7;
+            --gray: #b2bec3;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #ff7675;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker), #121416);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(40, 44, 52, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-header h2 i {
+            color: var(--secondary);
+        }
+        
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* 防止flex元素溢出 */
+        }
+        
+        textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 300px;
+            background: rgba(30, 34, 39, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--light);
+            font-family: 'Consolas', monospace;
+            font-size: 15px;
+            resize: none;
+            transition: all 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.3);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--darker);
+        }
+        
+        .btn-secondary:hover {
+            background: #00b4b1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 206, 201, 0.4);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #00a885;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--darker);
+        }
+        
+        .btn-warning:hover {
+            background: #fdc04e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(253, 203, 110, 0.4);
+        }
+        
+        .preview-container {
+    background: rgba(30, 34, 39, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    height: 300px; /* 设置固定高度 */
+    overflow-y: auto; /* 添加垂直滚动条 */
+    font-family: 'Consolas', monospace;
+    font-size: 15px;
+    line-height: 1.5;
+    word-break: break-word; /* 防止内容撑开布局 */
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    flex: 0 0 auto; /* 防止flex元素溢出 */
+}
+
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .feature-card {
+            background: rgba(40, 44, 52, 0.6);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-card p {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .panel, .feature-card {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        .panel:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .feature-card:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+        
+        .feature-card:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+        
+        .feature-card:nth-child(3) {
+            animation-delay: 0.5s;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 600px) {
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .panel {
+                padding: 15px;
+            }
+        }
+        
+        /* 长内容处理 */
+        .code-block {
+            max-width: 100%;
+            overflow: auto;
+        }
+        
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 34, 39, 0.5);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+        
+        /* 文件上传样式 */
+        .file-upload-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(30, 34, 39, 0.3);
+        }
+        
+        .file-upload-label:hover {
+            border-color: var(--secondary);
+            background: rgba(0, 206, 201, 0.1);
+        }
+        
+        .file-upload-label i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+        
+        .file-upload-label h3 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .file-upload-label p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        /* 文件信息显示 */
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 206, 201, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        /* 新增：文件上传成功动画 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .upload-success {
+            animation: pulse 0.5s ease;
+            color: #00b894 !important;
+        }
+        
+        /* 新增：进度条样式 */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--secondary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-code"></i> 脚本转换工具</h1>
+            <p>自动精灵（多动作 转 动作组）脚本转换工具，支持一键复制与下载功能，提高您的开发效率</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-pen"></i> 输入脚本</h2>
+                </div>
+                <div class="editor-container">
+                    <!-- 文件上传区域 -->
+                    <div class="file-upload-container">
+                        <label for="fileInput" class="file-upload-label" id="fileUploadLabel">
+                            <i class="fas fa-file-upload"></i>
+                            <h3>点击或拖拽文件到此处</h3>
+                            <p>支持.txt和.json格式的文件 (最大10MB)</p>
+                        </label>
+                        <input type="file" id="fileInput" accept=".txt,.json">
+                        <div class="file-info" id="fileInfo"></div>
+                        <div class="progress-container" id="progressContainer" style="display:none;">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+                    
+                    <textarea id="inputScript" placeholder="在此处粘贴您的脚本内容..."></textarea>
+                    <div class="actions">
+                        <button id="convertButton" class="btn btn-primary">
+                            <i class="fas fa-sync-alt"></i> 转换脚本
+                        </button>
+                        <button id="clearButton" class="btn btn-warning">
+                            <i class="fas fa-trash-alt"></i> 清空内容
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-file-code"></i> 转换结果</h2>
+                </div>
+                <div class="editor-container">
+                    <div class="preview-container" id="outputScript">转换后的脚本将显示在这里...</div>
+                    <div class="stats">
+                        <div id="charCount">字符数: 0</div>
+                        <div id="lineCount">行数: 0</div>
+                    </div>
+                    <div class="actions">
+                        <button id="copyButton" class="btn btn-success">
+                            <i class="fas fa-copy"></i> 复制到剪贴板
+                        </button>
+                        <button id="downloadButton" class="btn btn-primary">
+                            <i class="fas fa-download"></i> 下载脚本文件
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3><i class="fas fa-bolt"></i> 高效转换</h3>
+                <p>采用优化的转换算法，即使是大型脚本文件也能快速处理，节省您的宝贵时间。</p>
+            </div>
+            <div class="feature-card">
+                <h3><i class="fas fa-shield-alt"></i> 安全可靠</h3>
+                <p>所有处理都在浏览器本地完成，您的脚本内容不会上传到任何服务器，确保数据安全。</p>
+            </div>
+            <div class="feature-card">
+                <h3><i class="fas fa-mobile-alt"></i> 多设备支持</h3>
+                <p>响应式设计，在桌面、平板和手机设备上都能提供完美的使用体验。</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 脚本转换工具 | 专业开发者工具 | 版本 2.1</p>
+        </footer>
+    </div>
+    
+    <script>
+        // 获取DOM元素
+        const inputScript = document.getElementById('inputScript');
+        const outputScript = document.getElementById('outputScript');
+        const convertButton = document.getElementById('convertButton');
+        const copyButton = document.getElementById('copyButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const clearButton = document.getElementById('clearButton');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const charCount = document.getElementById('charCount');
+        const lineCount = document.getElementById('lineCount');
+        const fileUploadLabel = document.getElementById('fileUploadLabel');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        
+        // 存储上传的文件名
+        let uploadedFileName = '';
+        
+        // 更新字符和行数统计
+        function updateStats() {
+            const text = outputScript.innerText;
+            const chars = text.length;
+            const lines = text.split('\n').length;
+            
+            charCount.textContent = `字符数: ${chars}`;
+            lineCount.textContent = `行数: ${lines}`;
+        }
+        
+        // 转换脚本函数
+        function convertScript(input) {
+            const lines = input.split('\n');
+            let header = null;
+            const actions = [];
+            
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) continue;
+                
+                try {
+                    const parsedLine = JSON.parse(trimmedLine);
+                    if ('type' in parsedLine) {
+                        actions.push(parsedLine);
+                    } else {
+                        header = parsedLine;
+                    }
+                } catch (error) {
+                    // 忽略无法解析的行
+                }
+            }
+            
+            // 构建动作组
+            const actionGroup = {
+                "type": "运行多个动作",
+                "delayUnit": 1,
+                "scriptSet": actions,
+                "runMode": "normal"
+            };
+            
+            // 构建输出脚本
+            const output = [];
+            if (header) output.push(JSON.stringify(header));
+            output.push(JSON.stringify(actionGroup, null, 0));
+            
+            return output.join('\n');
+        }
+        
+        // 转换按钮点击事件
+        convertButton.addEventListener('click', function() {
+            const input = inputScript.value;
+            if (!input.trim()) {
+                outputScript.textContent = "请输入要转换的脚本内容";
+                return;
+            }
+            
+            try {
+                const converted = convertScript(input);
+                outputScript.textContent = converted;
+                updateStats();
+                
+                // 转换成功提示
+                const originalText = convertButton.innerHTML;
+                convertButton.innerHTML = '<i class="fas fa-check"></i> 转换成功!';
+                convertButton.style.backgroundColor = '#00b894';
+                
+                setTimeout(() => {
+                    convertButton.innerHTML = originalText;
+                    convertButton.style.backgroundColor = '';
+                }, 2000);
+            } catch (error) {
+                outputScript.textContent = `转换出错: ${error.message}`;
+                updateStats();
+            }
+        });
+        
+        // 复制按钮点击事件
+        copyButton.addEventListener('click', function() {
+            const text = outputScript.textContent;
+            if (!text || text === "转换后的脚本将显示在这里..." || text.startsWith("转换出错")) {
+                alert("没有可复制的内容");
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // 创建复制成功提示
+                const originalText = copyButton.innerHTML;
+                copyButton.innerHTML = '<i class="fas fa-check"></i> 已复制!';
+                copyButton.style.backgroundColor = '#00b894';
+                
+                setTimeout(() => {
+                    copyButton.innerHTML = originalText;
+                    copyButton.style.backgroundColor = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                alert("复制失败，请手动选择文本复制");
+            });
+        });
+        
+        // 下载按钮点击事件
+        downloadButton.addEventListener('click', function() {
+            const text = outputScript.textContent;
+            if (!text || text === "转换后的脚本将显示在这里..." || text.startsWith("转换出错")) {
+                alert("没有可下载的内容");
+                return;
+            }
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // 根据上传的文件名自动命名下载文件
+            let downloadName = 'converted-script.txt';
+            if (uploadedFileName) {
+                // 移除原文件扩展名并添加-converted.txt
+                const fileNameWithoutExt = uploadedFileName.replace(/\.[^/.]+$/, "");
+                downloadName = `${fileNameWithoutExt}-converted.txt`;
+            }
+            a.download = downloadName;
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            // 清理
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                // 创建下载成功提示
+                const originalText = downloadButton.innerHTML;
+                downloadButton.innerHTML = '<i class="fas fa-check"></i> 已下载!';
+                downloadButton.style.backgroundColor = '#00b894';
+                
+                setTimeout(() => {
+                    downloadButton.innerHTML = originalText;
+                    downloadButton.style.backgroundColor = '';
+                }, 2000);
+            }, 100);
+        });
+        
+        // 清空按钮
+        clearButton.addEventListener('click', function() {
+            inputScript.value = '';
+            outputScript.textContent = '转换后的脚本将显示在这里...';
+            updateStats();
+            
+            // 显示清空成功提示
+            const originalText = clearButton.innerHTML;
+            clearButton.innerHTML = '<i class="fas fa-check"></i> 已清空!';
+            clearButton.style.backgroundColor = '#00b894';
+            
+            setTimeout(() => {
+                clearButton.innerHTML = originalText;
+                clearButton.style.backgroundColor = '';
+            }, 2000);
+        });
+        
+        // 文件上传处理 - 修复版本
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // 存储文件名
+            uploadedFileName = file.name;
+            
+            // 显示进度条
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            
+            // 检查文件大小（最大10MB）
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                alert('文件大小超过限制（最大10MB）');
+                progressContainer.style.display = 'none';
+                return;
+            }
+            
+            // 检查文件类型
+            const validTypes = ['text/plain', 'application/json'];
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(txt|json)$/i)) {
+                alert('请上传文本文件（.txt或.json格式）');
+                progressContainer.style.display = 'none';
+                return;
+            }
+            
+            // 显示文件信息
+            fileInfo.innerHTML = `
+                <div><i class="fas fa-file"></i> ${file.name}</div>
+                <div><i class="fas fa-hdd"></i> ${(file.size / 1024).toFixed(2)} KB</div>
+                <div><i class="fas fa-clock"></i> ${new Date(file.lastModified).toLocaleString()}</div>
+            `;
+            fileInfo.style.display = 'block';
+            
+            // 读取文件内容
+            const reader = new FileReader();
+            
+            // 更新进度条
+            reader.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = `${percent}%`;
+                }
+            };
+            
+            reader.onload = function(e) {
+                inputScript.value = e.target.result;
+                progressBar.style.width = '100%';
+                
+                // 显示上传成功提示
+                fileUploadLabel.innerHTML = `
+                    <i class="fas fa-check-circle" style="color: #00b894;"></i>
+                    <h3>文件上传成功</h3>
+                    <p>${file.name} 已加载到编辑器</p>
+                `;
+                fileUploadLabel.classList.add('upload-success');
+                
+                // 2秒后恢复原始状态
+                setTimeout(() => {
+                    fileUploadLabel.innerHTML = `
+                        <i class="fas fa-file-upload"></i>
+                        <h3>点击或拖拽文件到此处</h3>
+                        <p>支持.txt和.json格式的文件 (最大10MB)</p>
+                    `;
+                    fileUploadLabel.classList.remove('upload-success');
+                    progressContainer.style.display = 'none';
+                    
+                    // 关键修复：重置文件输入框的值
+                    fileInput.value = '';
+                }, 3000);
+            };
+            
+            reader.onerror = function() {
+                alert('读取文件时发生错误');
+                fileInfo.style.display = 'none';
+                progressContainer.style.display = 'none';
+            };
+            
+            reader.readAsText(file);
+        });
+        
+        // 拖放文件支持
+        fileUploadLabel.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--secondary)';
+            this.style.backgroundColor = 'rgba(0, 206, 201, 0.2)';
+        });
+        
+        fileUploadLabel.addEventListener('dragleave', function() {
+            this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            this.style.backgroundColor = 'rgba(30, 34, 39, 0.3)';
+        });
+        
+        fileUploadLabel.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            this.style.backgroundColor = 'rgba(30, 34, 39, 0.3)';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+        
+        // 初始化统计信息
+        updateStats();
+    </script>
+</body>
+</html>
