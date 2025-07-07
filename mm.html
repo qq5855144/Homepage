@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机视频</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            background: #000;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 主容器 */
+        .player-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* 视频播放区域 - 最大化 */
+        .video-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1;
+            touch-action: pan-y; /* 允许垂直滑动 */
+        }
+        
+        /* 视频元素 */
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            outline: none;
+        }
+        
+        /* 频道名称显示 */
+        .channel-name {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            z-index: 20;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: calc(100% - 40px);
+        }
+        
+        /* 频道侧边栏 */
+        .channels-sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100%;
+            background: rgba(10, 10, 30, 0.97);
+            z-index: 100;
+            transition: transform 0.4s ease;
+            padding: 20px 15px;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            overflow-y: auto;
+        }
+        
+        .channels-sidebar.show {
+            transform: translateX(-300px);
+        }
+        
+        .channel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .channel-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        
+        .channel-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .channel-item {
+            padding: 15px;
+            background: linear-gradient(145deg, #1a1a3a, #0f0f2a);
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .channel-item i {
+            font-size: 18px;
+            color: #6a7bff;
+            min-width: 25px;
+            text-align: center;
+        }
+        
+        .channel-item:hover {
+            background: linear-gradient(145deg, #2a2a5a, #1a1a4a);
+            transform: translateX(-5px);
+        }
+        
+        .channel-item.active {
+            background: linear-gradient(145deg, #3a3a7a, #2a2a6a);
+            border: 1px solid rgba(106, 123, 255, 0.3);
+            box-shadow: 0 0 15px rgba(106, 123, 255, 0.4);
+        }
+        
+        /* 控制面板 - 优化部分 */
+        .control-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 50px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-evenly; /* 按钮均匀分布 */
+            align-items: center;
+            width: 85%; /* 增加宽度 */
+            max-width: 550px; /* 设置最大宽度 */
+            z-index: 30;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            opacity: 1;
+        }
+        
+        .control-panel.hidden {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+            pointer-events: none;
+        }
+        
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(30, 30, 60, 0.7);
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #e0e0e0;
+            font-size: 20px;
+            position: relative;
+        }
+        
+        .control-btn:hover {
+            background: rgba(106, 123, 255, 0.8);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(106, 123, 255, 0.4);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 按钮标签 */
+        .btn-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #aaa;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .control-btn:hover .btn-label {
+            opacity: 1;
+        }
+        
+        /* 频道按钮 */
+        .channel-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 40;
+            font-size: 22px;
+            color: #e0e0e0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .channel-btn:hover {
+            background: rgba(106, 123, 255, 0.8);
+            transform: scale(1.1);
+        }
+        
+        /* 加载动画 */
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.9);
+            z-index: 50;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(106, 123, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid #6a7bff;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        .loading-text {
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: 500;
+            margin-top: 25px;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        /* 动画效果 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 状态指示灯 */
+        .status-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 5px #4CAF50;
+        }
+        
+        /* 滑动提示 */
+        .swipe-hint {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 25;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        
+        .swipe-hint.show {
+            opacity: 1;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .control-panel {
+                padding: 12px 15px;
+                bottom: 20px;
+                width: 90%;
+                max-width: 480px;
+            }
+            
+            .control-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+            
+            .btn-label {
+                font-size: 10px;
+                bottom: -22px;
+            }
+            
+            .channels-sidebar {
+                width: 260px;
+                right: -260px;
+            }
+            
+            .channels-sidebar.show {
+                transform: translateX(-260px);
+            }
+            
+            .channel-item {
+                padding: 12px;
+                font-size: 15px;
+            }
+            
+            .channel-name {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .control-panel {
+                padding: 10px 12px;
+                border-radius: 40px;
+                bottom: 15px;
+                width: 95%;
+                max-width: 360px;
+            }
+            
+            .control-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+            
+            .btn-label {
+                display: none; /* 小屏幕上隐藏标签 */
+            }
+            
+            .channel-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 20px;
+                top: 15px;
+                right: 15px;
+            }
+            
+            .channel-name {
+                top: 15px;
+                left: 15px;
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+            
+            .channels-sidebar {
+                width: 85%;
+                right: -85%;
+            }
+            
+            .channels-sidebar.show {
+                transform: translateX(-85%);
+            }
+            
+            .channel-header h2 {
+                font-size: 20px;
+            }
+            
+            .channel-item {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+            
+            .swipe-hint {
+                bottom: 80px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 播放器容器 -->
+    <div class="player-container">
+        <!-- 视频区域 -->
+        <div class="video-area" id="videoArea">
+            <!-- 频道名称 -->
+            <div class="channel-name" id="channelName">
+                <i class="fas fa-satellite"></i> 线路1
+            </div>
+            
+            <!-- 视频播放器 -->
+            <video id="videoPlayer" muted autoplay preload="auto" aria-label="视频播放器">
+                <source src="" type="video/mp4">
+                您的浏览器不支持HTML5视频。
+            </video>
+            
+            <!-- 加载状态 -->
+            <div class="loading" id="loading">
+                <div class="loader"></div>
+                <div class="loading-text">加载视频中...</div>
+            </div>
+            
+            
+        </div>
+        
+        <!-- 频道侧边栏 -->
+        <div class="channels-sidebar" id="channelsSidebar">
+            <div class="channel-header">
+                <h2><i class="fas fa-broadcast-tower"></i> 频道列表</h2>
+                <button class="close-btn" id="closeSidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="channel-list" id="channelList">
+                <!-- 频道列表由JS动态生成 -->
+            </div>
+        </div>
+        
+        <!-- 频道按钮 -->
+        <button class="channel-btn" id="channelButton">
+            <i class="fas fa-list"></i>
+        </button>
+        
+        <!-- 控制面板 -->
+        <div class="control-panel" id="controlPanel">
+            <button class="control-btn" onclick="prevVideo()">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            <button class="control-btn" onclick="togglePlayPause()">
+                <i class="fas fa-pause" id="playPauseIcon"></i>
+            </button>
+            <button class="control-btn" onclick="nextVideo()">
+                <i class="fas fa-step-forward"></i>
+            </button>
+            <button class="control-btn" onclick="toggleMute()">
+                <i class="fas fa-volume-mute" id="muteIcon"></i>
+            </button>
+            <button class="control-btn" onclick="toggleFullscreen()">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const apiUrls = [
+            'http://api.yujn.cn/api/zzxjj.php?type=video',
+            'https://api.linhun.vip/api/Littlesistervideo?type=video&apiKey=48b0b2ef0f8483326c3c5424911d5924',
+            'https://api.yujn.cn/api/nvda.php?type=video',
+            'http://api.yujn.cn/api/heisis.php?type=video',
+            'http://api.yujn.cn/api/manyao.php?type=video',
+            'http://api.yujn.cn/api/diaodai.php?type=video',
+            'http://api.yujn.cn/api/qingchun.php?type=video',
+            'http://api.yujn.cn/api/nvgao.php?type=video',
+            'http://api.yujn.cn/api/tianmei.php?type=video'
+        ];
+        
+        const channelNames = [
+            '线路1', '线路2', '女大', '黑丝', '慢摇', 
+            '吊带', '清纯', '女高', '甜妹'
+        ];
+        
+        const channelIcons = [
+            'fa-signal', 'fa-wifi', 'fa-graduation-cap', 'fa-socks', 'fa-music',
+            'fa-tshirt', 'fa-snowflake', 'fa-user-graduate', 'fa-candy-cane'
+        ];
+        
+        let currentVideoIndex = 0;
+        let currentApiIndex = 0;
+        const videoPlayer = document.getElementById('videoPlayer');
+        const loadingIndicator = document.getElementById('loading');
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        const muteIcon = document.getElementById('muteIcon');
+        const channelName = document.getElementById('channelName');
+        const channelsSidebar = document.getElementById('channelsSidebar');
+        const channelButton = document.getElementById('channelButton');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const channelList = document.getElementById('channelList');
+        const controlPanel = document.getElementById('controlPanel');
+        const videoArea = document.getElementById('videoArea');
+        const swipeHint = document.getElementById('swipeHint');
+        
+        // 触摸事件变量
+        let startY = 0;
+        let endY = 0;
+        const swipeThreshold = 50; // 滑动阈值
+        
+        // 初始化频道列表
+        function initChannelList() {
+            channelList.innerHTML = '';
+            channelNames.forEach((name, index) => {
+                const channelItem = document.createElement('div');
+                channelItem.className = `channel-item ${index === 0 ? 'active' : ''}`;
+                channelItem.innerHTML = `
+                    <i class="fas ${channelIcons[index]}"></i>
+                    <span>${name}</span>
+                `;
+                channelItem.onclick = () => changeVideo(index);
+                channelList.appendChild(channelItem);
+            });
+        }
+        
+        function changeVideo(index) {
+            // 更新活跃频道
+            document.querySelectorAll('.channel-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelectorAll('.channel-item')[index].classList.add('active');
+            
+            currentApiIndex = index;
+            currentVideoIndex = 0;
+            channelName.innerHTML = `<i class="fas ${channelIcons[index]}"></i> ${channelNames[index]}`;
+            loadVideo();
+            toggleSidebar();
+        }
+        
+        function loadVideo() {
+            loadingIndicator.style.display = 'flex';
+            const apiUrl = `${apiUrls[currentApiIndex]}&index=${currentVideoIndex}`;
+            videoPlayer.src = apiUrl;
+            
+            videoPlayer.onloadeddata = () => {
+                setTimeout(() => {
+                    loadingIndicator.style.display = 'none';
+                    videoPlayer.play();
+                    playPauseIcon.className = 'fas fa-pause';
+                    
+                    // 显示滑动提示
+                    showSwipeHint();
+                }, 800);
+            };
+            
+            videoPlayer.onended = nextVideo;
+            videoPlayer.onerror = handleVideoError;
+        }
+        
+        function togglePlayPause() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+                playPauseIcon.className = 'fas fa-pause';
+            } else {
+                videoPlayer.pause();
+                playPauseIcon.className = 'fas fa-play';
+            }
+        }
+        
+        function toggleMute() {
+            videoPlayer.muted = !videoPlayer.muted;
+            muteIcon.className = videoPlayer.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        }
+        
+        function prevVideo() {
+            if (currentVideoIndex > 0) {
+                currentVideoIndex--;
+            } else {
+                currentVideoIndex = 5; // 回到最后一个视频
+            }
+            loadVideo();
+        }
+        
+        function nextVideo() {
+            currentVideoIndex++;
+            loadVideo();
+        }
+        
+        function handleVideoError() {
+            console.log('视频加载失败，尝试下一个...');
+            nextVideo();
+        }
+        
+        function toggleSidebar() {
+            channelsSidebar.classList.toggle('show');
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`全屏请求错误: ${err.message}`);
+                });
+                document.body.classList.add('fullscreen');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    document.body.classList.remove('fullscreen');
+                }
+            }
+        }
+        
+        // 显示滑动提示
+        function showSwipeHint() {
+            swipeHint.classList.add('show');
+            setTimeout(() => {
+                swipeHint.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 触摸事件处理
+        function handleTouchStart(e) {
+            startY = e.touches[0].clientY;
+        }
+        
+        function handleTouchMove(e) {
+            endY = e.touches[0].clientY;
+        }
+        
+        function handleTouchEnd() {
+            const deltaY = endY - startY;
+            
+            // 如果滑动距离大于阈值
+            if (Math.abs(deltaY) > swipeThreshold) {
+                if (deltaY > 0) {
+                    // 向下滑动 - 上一个视频
+                    prevVideo();
+                } else {
+                    // 向上滑动 - 下一个视频
+                    nextVideo();
+                }
+            }
+            
+            // 重置位置
+            startY = 0;
+            endY = 0;
+        }
+        
+        // 鼠标滚轮事件处理
+        function handleWheel(e) {
+            // 阻止默认滚动行为
+            e.preventDefault();
+            
+            if (e.deltaY > 0) {
+                // 向下滚动 - 下一个视频
+                nextVideo();
+            } else {
+                // 向上滚动 - 上一个视频
+                prevVideo();
+            }
+        }
+        
+        // 初始化
+        window.onload = () => {
+            initChannelList();
+            loadVideo();
+            
+            // 设置事件监听器
+            channelButton.addEventListener('click', toggleSidebar);
+            closeSidebar.addEventListener('click', toggleSidebar);
+            
+            // 视频区域点击事件
+            videoPlayer.addEventListener('click', togglePlayPause);
+            
+            // 鼠标移动时显示控制面板
+            document.addEventListener('mousemove', () => {
+                resetHideControlsTimer();
+            });
+            
+            // 点击视频外部关闭侧边栏
+            document.addEventListener('click', (e) => {
+                if (!channelButton.contains(e.target) && !channelsSidebar.contains(e.target)) {
+                    channelsSidebar.classList.remove('show');
+                }
+            });
+            
+            // 全屏切换事件
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    document.body.classList.remove('fullscreen');
+                }
+            });
+            
+            // 初始化控制面板计时器
+            resetHideControlsTimer();
+            
+            // 添加触摸事件监听
+            videoArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+            videoArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+            videoArea.addEventListener('touchend', handleTouchEnd, { passive: false });
+            
+            // 添加鼠标滚轮事件监听
+            videoArea.addEventListener('wheel', handleWheel, { passive: false });
+        };
+        
+        // 控制面板自动隐藏
+        let hideControlsTimeout;
+        function resetHideControlsTimer() {
+            clearTimeout(hideControlsTimeout);
+            controlPanel.classList.remove('hidden');
+            
+            hideControlsTimeout = setTimeout(() => {
+                if (!videoPlayer.paused) {
+                    controlPanel.classList.add('hidden');
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
