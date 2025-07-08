@@ -744,18 +744,11 @@
             videoArea.addEventListener('wheel', handleWheel, { passive: false });
         };
         
-        // 控制面板自动隐藏
-        let hideControlsTimeout;
-        function resetHideControlsTimer() {
-            clearTimeout(hideControlsTimeout);
-            controlPanel.classList.remove('hidden');
-            
-            hideControlsTimeout = setTimeout(() => {
-                if (!videoPlayer.paused) {
-                    controlPanel.classList.add('hidden');
-                }
-            }, 3000);
-        }
+let hideControlsTimeout;
+function resetHideControlsTimer() {
+    clearTimeout(hideControlsTimeout);
+    controlPanel.classList.remove('hidden');  原隐藏逻辑已被删除
+}
     </script>
 </body>
 </html>
