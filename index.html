@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>主页</title>
+    <script src="img/FileSaver.min.js"></script>
     <style>
+        /* 全局样式 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
@@ -13,6 +16,7 @@
             height: 100vh;
             background-color: transparent;
         }
+
         .app {
             display: flex;
             flex-direction: column;
@@ -25,16 +29,155 @@
             background-size: cover;
             background-position: center;
         }
-        .mask {
+        
+        /* 修改后的时钟容器样式 */
+.clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    backdrop-filter: blur(0px); 
-    background-color: rgba(0, 0, 0, 0);
-    z-index: 1; 
+    top: calc(40vh - 150px); /* 120px高度 + 30px间隔 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
 }
+        /* 时钟面 */
+        .clock-face {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                inset 0 2px 4px rgba(255, 255, 255, 0.05),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 时钟刻度 */
+        .clock-mark {
+            position: absolute;
+            width: 2px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.7);
+            left: 50%;
+            top: 5px;
+            transform-origin: 50% 45px;
+        }
+
+        /* 时钟指针 */
+        .hand {
+            position: absolute;
+            left: 50%;
+            bottom: 50%;
+            transform-origin: 50% 100%;
+            border-radius: 4px;
+        }
+
+        .hour-hand {
+            width: 4px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            margin-left: -2px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .minute-hand {
+            width: 3px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.9);
+            margin-left: -1.5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .second-hand {
+            width: 1px;
+            height: 40px;
+            background: rgba(255, 0, 0, 0.8);
+            margin-left: -0.5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 中心点 */
+        .center-point {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 数字标记 */
+        .number {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 10px;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+        }
+        
+        .number-12 {
+            top: 10%;
+            left: 50%;
+        }
+        
+        .number-3 {
+            top: 50%;
+            left: 90%;
+        }
+        
+        .number-6 {
+            top: 90%;
+            left: 50%;
+        }
+        
+        .number-9 {
+            top: 50%;
+            left: 10%;
+        }
+        
+        /* 添加的文字样式 */
+        .happy-text {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 8px;
+            font-weight: bold;
+            top: 75%;
+            left: 50%;
+            transform: translate(-45%, -55%);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* 遮罩层 */
+        .mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(0px); /* 默认模糊值 */
+            background-color: rgba(0, 0, 0, 0);
+            z-index: 1; /* 确保在其他元素之上 */
+        }
+
+        /* 搜索框容器 - 位置不变 */
         .search-container {
             position: fixed;
             top: 40vh;
@@ -44,6 +187,8 @@
             height: 40px;
             z-index: 1000;
         }
+
+        /* 搜索输入框 - 添加拟物化效果 */
         .search-input-wrapper {
             position: relative;
             width: 360px;
@@ -52,6 +197,7 @@
             flex-direction: column;
             align-items: center;
         }
+
         .search-input-style {
             width: 288px;
             height: 40px;
@@ -71,9 +217,11 @@
             backdrop-filter: blur(12px);
             transition: all 0.3s ease;
         }
+
         .search-input-style::placeholder {
             color: rgba(255, 255, 255, 0.6);
         }
+
         .search-input-style:focus {
             width: 345.6px;
             background: rgba(255, 255, 255, 0.18);
@@ -83,9 +231,12 @@
                 inset 0 2px 0 rgba(255, 255, 255, 0.2),
                 inset 0 -2px 0 rgba(0, 0, 0, 0.1);
         }
-.search-container:focus-within {
-    top: 10px; 
-}
+        /* 搜索容器聚焦时的样式 */
+        .search-container:focus-within {
+            top: 10px; /* 聚焦时移动到距离顶部10px */
+        }
+
+        /* 清除按钮 - 添加金属质感 */
         .clear-button {
             position: absolute;
             right: 42px;
@@ -93,7 +244,7 @@
             transform: translateY(-50%);
             width: 22px;
             height: 22px;
-            cursor: pointer;
+            
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>') center no-repeat;
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.15);
@@ -103,20 +254,25 @@
             transition: all 0.2s ease;
             display: none;
         }
+
         .clear-button:hover {
             background-color: rgba(255, 255, 255, 0.25);
             box-shadow: 
                 0 3px 6px rgba(0, 0, 0, 0.25),
                 inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
+
         .search-input-style:focus + .clear-button {
             transform: translateY(-50%) translateX(30px);
         }
+
         @media (orientation:landscape) {
             .search-input-style:focus + .clear-button {
                 transform: translateY(-50%) translateX(52px);
             }
         }
+
+        /* 建议列表 - 玻璃拟态效果 */
         .suggestions {
             max-height: 600px;
             overflow-y: auto;
@@ -135,25 +291,31 @@
                 0 15px 35px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
+
+        /* 建议项样式 - 磨砂玻璃效果 */
         .suggestion-item {
             padding: 12px 20px;
-            cursor: pointer;
+            
             transition: background-color 0.3s;
             color: #ffffff;
             display: flex;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .suggestion-item:hover {
             background-color: rgba(255, 255, 255, 0.15);
         }
+
         .suggestion-icon {
             width: 22px;
             height: 22px;
-            cursor: pointer;
+            
             margin: 0 12px 0 5px;
             vertical-align: middle;
         }
+
+        /* 引擎容器 - 金属质感 */
         .engine-container {
             display: none;
             width: 345.6px;
@@ -166,6 +328,8 @@
             margin-bottom: 1px;
             position: absolute;
             top: 50px;
+            left: 50%; 
+    transform: translateX(-50%);
             transition: top 0.3s ease;
             border-radius: 12px;
             backdrop-filter: blur(8px);
@@ -175,6 +339,7 @@
                 0 8px 20px rgba(0, 0, 0, 0.2),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
+
         .engine-display {
             display: flex;
             overflow-x: auto;
@@ -184,6 +349,8 @@
             padding: 0 8px;
             align-items: center;
         }
+
+        /* 引擎按钮 - 金属按钮效果 */
         .engine-button {
             width: 48px;
             height: 28px;
@@ -192,7 +359,7 @@
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.15);
             font-size: 14px;
-            cursor: pointer;
+            
             margin: 0 1px;
             background-size: 70%;
             background-repeat: no-repeat;
@@ -207,51 +374,63 @@
             color: rgba(255, 255, 255, 0.8);
             font-weight: 500;
         }
-.engine-button:focus {
-    outline: none; 
-    border-color: #eee; 
-}
-.engine-button.selected {
-    border: 1px solid #eee; 
-    color: transparent; 
-}
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, 66px);
-            grid-template-rows: repeat(auto-fill, 68px);
-            gap: 0;
-            margin: 10px 0;
-            max-width: 330px;
-            max-height: 268px;
-            overflow-y: auto;
-            position: fixed;
-            top: calc(40vh + 55px);            
-            z-index: 500;
-            padding: 10px;
-            border-radius: 18px;
-            background: rgba(0, 0, 0, 0);
+
+        /* 引擎按钮聚焦时的样式 */
+        .engine-button:focus {
+            outline: none; /* 去掉外边框 */
+            border-color: #eee; /* 边框颜色 */
         }
+
+        /* 选中的引擎按钮样式 */
+        .engine-button.selected {
+            border: 1px solid #eee; /* 边框颜色 */
+            color: transparent; /* 字体颜色透明 */
+        }
+
+        /* 网格容器 - 位置不变 */
+        .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 66px);
+    grid-template-rows: repeat(auto-fill, 68px);
+    gap: 0;
+    margin: 10px 0;
+    max-width: 330px;
+    max-height: 268px;
+    overflow-y: auto;
+    position: fixed;
+    top: calc(40vh + 55px);
+    left: 50%; 
+    transform: translateX(-50%); 
+    z-index: 500;
+    padding: 10px;
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0);
+}
+
+        /* 网格项 - 玻璃卡片效果 */
         .grid-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            
             position: relative;
             width: 66px;
             height: 68px;
             transition: all 0.2s ease;
         }
+
         .grid-item:hover {
             transform: translateY(-3px);
         }
+
         .grid-item img {
             width: 38px;
             height: 38px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.15);
             margin-bottom: 6px;
-            cursor: pointer;
+            
             padding: 1px;
             box-sizing: border-box;
             background: rgba(255, 255, 255, 0.05);
@@ -261,6 +440,7 @@
                 0 12px 30px rgba(0, 0, 0, 0.25),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
+
         .grid-item span {
             font-size: 10px;
             text-align: center;
@@ -268,26 +448,42 @@
             white-space: nowrap;
             overflow: hidden;
             width: 66px;
-            cursor: pointer;
+            
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
             font-weight: 500;
         }
+
+        /* 拖动手柄样式 */
         .drag-handle {
             width: 100%;
+            /* 宽度 */
             height: 100%;
+            /* 高度 */
             position: absolute;
+            /* 绝对定位 */
             top: 0;
             left: 0;
+            /* 填满父元素 */
             cursor: move;
+            /* 拖动指针样式 */
             z-index: 1;
+            /* z轴顺序 */
         }
+
+        /* 对话框样式 */
         .dialog {
             display: none;
+            /* 默认隐藏 */
             position: fixed;
+            /* 固定定位 */
             top: 50%;
+            /* 垂直居中 */
             left: 50%;
+            /* 水平居中 */
             transform: translate(-50%, -50%);
+            /* 精确定位 */
             border-radius: 20px;
+            /* 圆角 */
             background: rgba(255, 255, 255, 0.12);
             padding: 25px;
             z-index: 2000;
@@ -299,58 +495,109 @@
                 0 25px 50px rgba(0, 0, 0, 0.4),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
             padding: 20px;
+            /* 内边距 */
             z-index: 2000;
+            /* 高于其他元素 */
             width: 300px;
+            /* 宽度 */
             border: 1px solid #eee;
+            /* 边框 */
             box-sizing: border-box;
+            /* 包含内边距和边框 */
             backdrop-filter: blur(5px);
+            /* 背景模糊效果 */
         }
+
+        /* 对话框标题样式 */
         .dialog h3 {
             margin: 0 0 15px;
+            /* 上边距和下边距 */
             text-align: center;
+            /* 文本居中 */
             color: #444444;
+            /* 字体颜色 */
         }
+
+        /* 对话框输入框样式 */
         .dialog input[type="text"] {
             margin-bottom: 10px;
+            /* 下边距 */
             width: 100%;
+            /* 宽度 */
             padding: 10px 15px;
+            /* 内边距 */
             border: 1px solid #eee;
+            /* 边框 */
             border-radius: 10px;
+            /* 圆角 */
             background-color: rgba(240, 240, 244, 0.5);
+            /* 背景透明色 */
             color: #444444;
+            /* 字体颜色 */
             font-size: 14px;
+            /* 字体大小 */
             box-sizing: border-box;
+            /* 包含内边距和边框 */
             transition: background-color 0.3s, transform 0.2s;
+            /* 动画效果 */
             backdrop-filter: blur(5px);
+            /* 背景模糊效果 */
         }
+
+        /* 对话框输入框聚焦时的样式 */
         .dialog input[type="text"].dialog-input:focus {
             outline: none;
+            /* 去掉外边框 */
             width: 100%;
+            /* 宽度 */
         }
+
+        /* 对话框按钮样式 */
         .dialog button {
             flex: 1;
+            /* 等比缩放 */
             margin: 0 5px;
+            /* 左右边距 */
             padding: 10px 15px;
+            /* 内边距 */
             border: 1px solid #eee;
+            /* 边框 */
             border-radius: 10px;
+            /* 圆角 */
             background-color: rgba(240, 240, 244, 0.5);
+            /* 背景透明色 */
             color: #444444;
+            /* 字体颜色 */
             font-size: 14px;
-            cursor: pointer;
+            /* 字体大小 */
+            
+            /* 鼠标指针样式 */
             transition: background-color 0.3s, transform 0.2s;
+            /* 动画效果 */
         }
+
+        /* 对话框按钮悬停时的样式 */
         .dialog button:hover {
             background-color: rgba(240, 240, 244, 0.5);
+            /* 悬停时背景色 */
             transform: translateY(-1px);
+            /* 向上移动 */
         }
+
+        /* 对话框按钮点击时的样式 */
         .dialog button:active {
             transform: translateY(1px);
+            /* 向下移动 */
         }
+        /* 控制面板样式 */
         .control-panel {
             display: none;
+            /* 默认隐藏 */
             position: absolute;
+            /* 绝对定位 */
             top: 0;
             left: 0;
+            /* 填满父元素 */
             background: rgba(245, 245, 245, 0.2);
             box-shadow: 
                 0 4px 8px rgba(0, 0, 0, 0.2),
@@ -358,111 +605,127 @@
                 inset 0 -2px 4px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
+            /* 圆角 */
             z-index: 1000;
+            /* 高于其他元素 */
             padding: 8px;
+            /* 内边距 */
+            
             opacity: 0;
+            /* 初始透明度 */
         }
+
+        /* 控制按钮样式 */
         .control-button {
             padding: 1px 5px;
+            /* 内边距 */
             margin: 2px;
-            cursor: pointer;
+            /* 边距 */
+            
+            /* 鼠标指针样式 */
             background-color: transparent;
+            /* 背景透明 */
             color: red;
+            /* 字体颜色 */
             border: none;
+            /* 无边框 */
             border-radius: 5px;
+            /* 圆角 */
+            
         }
+
+        /* 控制按钮悬停时的样式 */
         .control-button:hover {
             background-color: #ff1c1c;
+            /* 悬停时背景色 */
         }
+
+        /* 侧边栏 */
         .sidebar {
-    position: fixed;
-    bottom: -25%;
-    left: 0;
-    width: 100%;
-    height: 25%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border-radius: 30px 30px 0 0;
-    z-index: 2000;
-    transition: bottom 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-.sidebar.open {
-    bottom: 0;
-}
-.sidebar-content {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    justify-items: center; 
-    gap: 10px;
-    padding: 20px 10px; 
-    width: 100%;
-    box-sizing: border-box;
-    overflow-y: auto;
-}
-.sidebar-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    width: 100%;
-    max-width: 50px; 
-}
-.sidebar-icon {
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: rgba(245, 245, 245, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 5px;
-    transition: all 0.2s ease;
-}
-.sidebar-icon:hover {
-    background: var(--primary-color);
-    transform: scale(1.1);
-}
-.sidebar-label {
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.9);
-    text-align: center;
-    margin-top: 2px;
-}
-.neumorphic-text {
-    display: table;
-    height: 128px;
-    width: 360px;
-    background-position: center;
-    background-size: cover;
-    font-size: 90px;
-    font-weight: bold;
-    color: #eab308;
-    text-align: center;
-    position: fixed;
-    top: 15vh; 
-    z-index: 3;
-}
-        .neumorphic-text span {
-            display: table-cell;
-            vertical-align: middle;
+            position: fixed;
+            bottom: -25%;
+            left: 0;
+            width: 100%;
+            height: 25%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 30px 30px 0 0;
+            z-index: 2000;
+            transition: bottom 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
+
+        .sidebar.open {
+            bottom: 0;
+        }
+
+        .sidebar-content {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            justify-items: center; /* 网格项水平居中 */
+            gap: 10px;
+            padding: 20px 10px; /* 左右对称 padding */
+            width: 100%;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;                    width: 100%;
+            max-width: 50px; /* 限制按钮最大宽度 */
+        }
+
+        .sidebar-icon {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: rgba(245, 245, 245, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-icon:hover {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .sidebar-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        /* 日间模式样式 */
         body {
             background-color: transparent;
+            /* 页面背景色 */
         }
+
         .background-container {
             background-size: cover;
             background-position: center;
             background: #f5f5f5;
+            /* 白天模式背景样式 */
             box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+            /* 白天模式阴影效果 */
         }
+
+        /* 夜间模式样式 */
         .night-mode {
             background-color: #333333;
+            /* 页面背景色 */
         }
+
         .night-mode .search-input-style,
         .night-mode .dialog,
         .night-mode .background-container,
@@ -472,677 +735,790 @@
         .night-mode .grid-item img {
             background: linear-gradient(145deg, #2e2e2e, #373737);
         }
-        .night-mode .neumorphic-text {
+
+        .night-mode .clock-container {
             color: #eab308;
+            /* 字体颜色可以根据需要调整 */
         }
     </style>
 </head>
+
 <body>
-    <div class="app">
-        <div class="neumorphic-text" onclick="toggleSidebar()">
-            <span></span>
-        </div>
-        <div class="mask" id="mask"></div>
-        <div class="search-container">
-            <div class="search-input-wrapper">
-                <input type="text" class="search-input-style" id="search-input" placeholder="搜索..."
-                    onfocus="setSearchFocus(true);" onblur="setSearchFocus(false);"
-                    onkeypress="if(event.key==='Enter') performSearch()" oninput="showSuggestions()"
-                    autocomplete="off">
-                <div class="clear-button" id="clear-button"></div>
+    <div class="app">        
+        <div class="clock-container" onclick="toggleSidebar()">
+            <div class="clock-face">
+                <!-- 只保留非数字位置的刻度 -->
+                <div class="clock-mark" style="transform: rotate(30deg)"></div>
+                <div class="clock-mark" style="transform: rotate(60deg)"></div>
+                <div class="clock-mark" style="transform: rotate(120deg)"></div>
+                <div class="clock-mark" style="transform: rotate(150deg)"></div>
+                <div class="clock-mark" style="transform: rotate(210deg)"></div>
+                <div class="clock-mark" style="transform: rotate(240deg)"></div>
+                <div class="clock-mark" style="transform: rotate(300deg)"></div>
+                <div class="clock-mark" style="transform: rotate(330deg)"></div>
+                
+                <!-- 时钟数字 -->
+                <div class="number number-12">12</div>
+                <div class="number number-3">3</div>
+                <div class="number number-6">6</div>
+                <div class="number number-9">9</div>
+                
+                <!-- 添加的文字 -->
+                <div class="happy-text">Be happy</div>            
+                
+                <!-- 时钟指针 -->
+                <div class="hand hour-hand"></div>
+                <div class="hand minute-hand"></div>
+                <div class="hand second-hand"></div>
+                <div class="center-point"></div>
             </div>
-            <div class="suggestions" id="suggestions-box"></div>
-        </div>
-        <div class="engine-container" id="engine-container">
-            <div class="engine-display" id="engine-display">
-                <button class="engine-button" onclick="setSearchEngine('bing',this)"
-                    style="background-image:url('img/bing.png');" onmousedown="event.preventDefault();"></button>
-                <button class="engine-button" onclick="setSearchEngine('baidu',this)"
-                    style="background-image:url('img/baidu.png');" onmousedown="event.preventDefault();"></button>
-                <button class="engine-button" onclick="setSearchEngine('google',this)"
-                    style="background-image:url('img/google.png');" onmousedown="event.preventDefault();"></button>
-                <button class="engine-button" onclick="setSearchEngine('yandex',this)"
-                    style="background-image:url('img/yandex.png');" onmousedown="event.preventDefault();"></button>
-                <button class="engine-button" onclick="setSearchEngine('bita',this)"
-                    style="background-image:url('img/metaso.png');" onmousedown="event.preventDefault();"></button>
-                <button class="engine-button" onclick="setSearchEngine('zhihu', this)"
-                    style="background-image:url('img/zhihu.png');" onmousedown="event.preventDefault();"></button>
-                <button class="engine-button" onclick="setSearchEngine('imageSearch',this)"
-                    style="background-image:url('img/quark.png');" onmousedown="event.preventDefault();"></button>
-                <button class="engine-button" onclick="setSearchEngine('apkpure',this)"
-                    style="background-image:url('img/apkpure.png');" onmousedown="event.preventDefault();"></button>
-                <button class="engine-button" onclick="setSearchEngine('backdata',this)"
-                    style="background-image:url('img/backdata.png');" onmousedown="event.preventDefault();"></button>
-            </div>
-        </div>
-        <div class="grid-container" id="shortcut-container"></div>
-        <div class="dialog" id="add-dialog">
-            <h3 style="margin:0 0 10px;">添加快捷方式</h3>
-            <input type="text" class="search-input-style dialog-input" id="icon-title" placeholder="请输入标题"
-                onfocus="hideSearch();" onblur="showSearch();">
-            <input type="text" class="search-input-style dialog-input" id="icon-url" placeholder="请输入网页链接"
-                onfocus="hideSearch();" onblur="showSearch();" oninput="fetchFavicon(this.value)">
-            <input type="text" class="search-input-style dialog-input" id="icon-image" placeholder="请输入图标链接（可选）"
-                onfocus="hideSearch();" onblur="showSearch();">
-            <div style="display:flex;justify-content:space-between;">
-                <button onclick="chooseImage()">相册</button>
-                <button onclick="addShortcut()">确定</button>
-                <button onclick="closeAddDialog()">关闭</button>
-            </div>
-        </div>
-        <div class="dialog" id="background-dialog" style="display:none;">
-            <h3 style="margin:0 0 10px;">设置背景图片</h3>
-            <input type="text" class="search-input-style dialog-input" id="background-url" placeholder="请输入背景图片链接"
-                onfocus="hideSearch();" onblur="showSearch();">
-            <div style="display:flex;justify-content:space-between;">
-                <button onclick="chooseBackgroundImage()">相册</button>
-                <button onclick="setBackground()">确定</button>
-                <button onclick="closeBackgroundDialog()">关闭</button>
-            </div>
-        </div>
-        <div class="dialog" id="export-import-dialog" style="display:none;">
-            <h3 style="margin:0 0 10px;">数据备份</h3>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <button onclick="exportData()">备份</button>
-                <button onclick="importData()">恢复</button>
-                <button onclick="closeExportImportDialog()">关闭</button>
-            </div>
-        </div>
-        <div class="dialog" id="blur-dialog" style="display:none;">
-            <h3 style="margin:0 0 10px;">设置模糊/遮罩值</h3>
-            <input type="range" id="blur-range" min="0" max="50" value="0" style="width:100%;"
-                oninput="updateBlurValue(this.value)">
-            <h3 style="margin:0px 0;text-align:center;font-size:1.17em;"></h3>
-            <input type="range" id="mask-range" min="0" max="100" value="0" style="width:100%;"
-                oninput="updateMaskValue(this.value)">
-            <div style="display:flex;justify-content:space-between;">
-                <button onclick="setBlur()">确定</button>
-                <button onclick="closeBlurDialog()">关闭</button>
-            </div>
-        </div>
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-content">
-                <div class="sidebar-item" onclick="openAddDialog();closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/tj.svg" alt="添加" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">添加网站</span>
-                </div>
-                <div class="sidebar-item" onclick="openExportImportDialog();closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/dc.svg" alt="导入导出" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">数据备份</span>
-                </div>
-                <div class="sidebar-item" onclick="toggleShortcutNames();closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/txt.svg" alt="隐藏名称" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">隐藏名称</span>
-                </div>
-                <div class="sidebar-item" onclick="openBlurDialog();closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/mf.svg" alt="调整模糊" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">背景模糊</span>
-                </div>
-                <div class="sidebar-item" onclick="openBackgroundDialog();closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/bj.svg" alt="设置背景" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">背景设置</span>
-                </div>
-                <div class="sidebar-item" onclick="window.location.href='img/you.html';closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/you.svg" alt="YOU" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">油猴脚本</span>
-                </div>
-                <div class="sidebar-item" onclick="window.location.href='img/mm.html';closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/mm.svg" alt="MM" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">随机视频</span>
-                </div>
-                <div class="sidebar-item" onclick="window.location.href='img/gsmf.html';closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/gsmf.svg" alt="GSMF" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">注释去除</span>
-                </div>
-                <div class="sidebar-item" onclick="window.location.href='img/脚本转换.html';closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/脚本转换.svg" alt="脚本转换" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">脚本转换</span>
-                    </div>
-                <div class="sidebar-item" onclick="window.location.href='img/工作日记.html';closeSidebar();">
-                    <div class="sidebar-icon"><img src="img/工作日记.svg" alt="工作日记" style="width:15px;height:15px;"></div>
-                    <span class="sidebar-label">工作日记</span>
-                </div>
-            </div>
-        </div>
-        <div class="control-panel" id="control-panel">
-            <button class="control-button" id="edit-button" onclick="editShortcut()">编辑</button>
-            <button class="control-button" id="delete-button" onclick="deleteShortcut()">删除</button>
         </div>
     </div>
-    <script>        
-let searchEngine = 'bing', deleteMode = false, showShortcutNames = localStorage.getItem('showShortcutNames') !== 'false', storedBackground = localStorage.getItem('userBackground'), mask = document.getElementById('mask'), storedBlurValue = localStorage.getItem('blurValue') || 0, storedMaskValue = localStorage.getItem('maskValue') || 0; 
-mask.style.backdropFilter = `blur(${storedBlurValue}px)`; 
-mask.style.backgroundColor = `rgba(0,0,0,${storedMaskValue / 100})`; 
-if (storedBackground) {
-    document.querySelector('.app').style.backgroundImage = `url('${storedBackground}')`;
-}
-let isSearchFocused = false, searchQuery = sessionStorage.getItem('searchQuery') || ''; 
-document.getElementById('search-input').value = searchQuery; 
-let isEditing = false, currentEditIndex = -1; 
-window.onload = function () { 
-    loadShortcuts(); 
-    updateTextColorBasedOnBackground(); 
-    const storedVisibility = localStorage.getItem('shortcutsVisible'); 
-    if (storedVisibility !== null) { 
-        shortcutsVisible = storedVisibility === 'true'; 
-    } 
-    const shortcutContainer = document.getElementById('shortcut-container'); 
-    shortcutContainer.style.display = shortcutsVisible ? 'grid' : 'none'; 
-    updateClearButton();
-};
-class SearchHint {
-    constructor() { this.searchInput = document.getElementById('search-input'); this.suggestionsBox = document.getElementById('suggestions-box'); this.init(); }
-    init() { this.watchInput(); this.searchInput.onblur = () => { setTimeout(() => { this.suggestionsBox.style.display = 'none'; }, 200); setSearchFocus(false); }; }
-    watchInput() { 
-        this.searchInput.onkeyup = () => { 
-            if (this.searchInput.value.length === 0) { 
-                this.clearSuggestions(); 
-                return; 
-            } 
-            this.fetchSuggestions(); 
-        }; 
-        this.searchInput.onfocus = () => { 
-            setSearchFocus(true); 
-            if (this.searchInput.value.length > 0) { 
-                this.suggestionsBox.style.display = 'block'; 
-            } 
-        }; 
+        
+      
+    <div class="mask" id="mask"></div>
+    <div class="search-container">
+        <div class="search-input-wrapper">
+            <input type="text" class="search-input-style" id="search-input" placeholder="搜索..."
+                onfocus="setSearchFocus(true);" onblur="setSearchFocus(false);"
+                onkeypress="if(event.key==='Enter') performSearch()" oninput="showSuggestions()"
+                autocomplete="off">
+            <div class="clear-button" id="clear-button"></div>
+        </div>
+        <div class="suggestions" id="suggestions-box"></div>
+    </div>
+    <div class="engine-container" id="engine-container">
+        <div class="engine-display" id="engine-display">
+            <button class="engine-button" onclick="setSearchEngine('bing',this)"
+                style="background-image:url('img/bing.png');" onmousedown="event.preventDefault();"></button>
+            <button class="engine-button" onclick="setSearchEngine('baidu',this)"
+                style="background-image:url('img/baidu.png');" onmousedown="event.preventDefault();"></button>
+            <button class="engine-button" onclick="setSearchEngine('google',this)"
+                style="background-image:url('img/google.png');" onmousedown="event.preventDefault();"></button>
+            <button class="engine-button" onclick="setSearchEngine('yandex',this)"
+                style="background-image:url('img/yandex.png');" onmousedown="event.preventDefault();"></button>
+            <button class="engine-button" onclick="setSearchEngine('bita',this)"
+                style="background-image:url('img/metaso.png');" onmousedown="event.preventDefault();"></button>
+            <button class="engine-button" onclick="setSearchEngine('zhihu', this)"
+                style="background-image:url('img/zhihu.png');" onmousedown="event.preventDefault();"></button>
+            <button class="engine-button" onclick="setSearchEngine('imageSearch',this)"
+                style="background-image:url('img/quark.png');" onmousedown="event.preventDefault();"></button>
+            <button class="engine-button" onclick="setSearchEngine('apkpure',this)"
+                style="background-image:url('img/apkpure.png');" onmousedown="event.preventDefault();"></button>
+            <button class="engine-button" onclick="setSearchEngine('backdata',this)"
+                style="background-image:url('img/backdata.png');" onmousedown="event.preventDefault();"></button>
+        </div>
+    </div>
+    <div class="grid-container" id="shortcut-container"></div>
+    <div class="dialog" id="add-dialog">
+        <h3 style="margin:0 0 10px;">添加快捷方式</h3>
+        <input type="text" class="search-input-style dialog-input" id="icon-title" placeholder="请输入标题"
+            onfocus="hideSearch();" onblur="showSearch();">
+        <input type="text" class="search-input-style dialog-input" id="icon-url" placeholder="请输入网页链接"
+            onfocus="hideSearch();" onblur="showSearch();" oninput="fetchFavicon(this.value)">
+        <input type="text" class="search-input-style dialog-input" id="icon-image" placeholder="请输入图标链接（可选）"
+            onfocus="hideSearch();" onblur="showSearch();">
+        <div style="display:flex;justify-content:space-between;">
+            <button onclick="chooseImage()">相册</button>
+            <button onclick="addShortcut()">确定</button>
+            <button onclick="closeAddDialog()">关闭</button>
+        </div>
+    </div>
+    <div class="dialog" id="background-dialog" style="display:none;">
+        <h3 style="margin:0 0 10px;">设置背景图片</h3>
+        <input type="text" class="search-input-style dialog-input" id="background-url" placeholder="请输入背景图片链接"
+            onfocus="hideSearch();" onblur="showSearch();">
+        <div style="display:flex;justify-content:space-between;">
+            <button onclick="chooseBackgroundImage()">相册</button>
+            <button onclick="setBackground()">确定</button>
+            <button onclick="closeBackgroundDialog()">关闭</button>
+        </div>
+    </div>
+    <div class="dialog" id="export-import-dialog" style="display:none;">
+        <h3 style="margin:0 0 10px;">数据备份</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <button onclick="exportData()">备份</button>
+            <button onclick="importData()">恢复</button>
+            <button onclick="closeExportImportDialog()">关闭</button>
+        </div>
+    </div>
+    <div class="dialog" id="blur-dialog" style="display:none;">
+        <h3 style="margin:0 0 10px;">设置模糊/遮罩值</h3>
+        <input type="range" id="blur-range" min="0" max="50" value="0" style="width:100%;"
+            oninput="updateBlurValue(this.value)">
+        <h3 style="margin:0px 0;text-align:center;font-size:1.17em;"></h3>
+        <input type="range" id="mask-range" min="0" max="100" value="0" style="width:100%;"
+            oninput="updateMaskValue(this.value)">
+        <div style="display:flex;justify-content:space-between;">
+            <button onclick="setBlur()">确定</button>
+            <button onclick="closeBlurDialog()">关闭</button>
+        </div>
+    </div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-item" onclick="openAddDialog();closeSidebar();">
+                <div class="sidebar-icon"><img src="img/tj.svg" alt="添加" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">添加网站</span>
+            </div>
+            <div class="sidebar-item" onclick="openExportImportDialog();closeSidebar();">
+                <div class="sidebar-icon"><img src="img/dc.svg" alt="导入导出" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">数据备份</span>
+            </div>
+            <div class="sidebar-item" onclick="toggleShortcutNames();closeSidebar();">
+                <div class="sidebar-icon"><img src="img/txt.svg" alt="隐藏名称" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">隐藏名称</span>
+            </div>
+            <div class="sidebar-item" onclick="openBlurDialog();closeSidebar();">
+                <div class="sidebar-icon"><img src="img/mf.svg" alt="调整模糊" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">背景模糊</span>
+            </div>
+            <div class="sidebar-item" onclick="openBackgroundDialog();closeSidebar();">
+                <div class="sidebar-icon"><img src="img/bj.svg" alt="设置背景" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">背景设置</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='img/you.html';closeSidebar();">
+                <div class="sidebar-icon"><img src="img/you.svg" alt="YOU" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">油猴脚本</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='img/mm.html';closeSidebar();">
+                <div class="sidebar-icon"><img src="img/mm.svg" alt="MM" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">随机视频</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='img/gsmf.html';closeSidebar();">
+                <div class="sidebar-icon"><img src="img/gsmf.svg" alt="GSMF" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">注释去除</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='img/脚本转换.html';closeSidebar();">
+                <div class="sidebar-icon"><img src="img/脚本转换.svg" alt="脚本转换" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">脚本转换</span>
+            </div>
+            <div class="sidebar-item" onclick="window.location.href='img/工作日记.html';closeSidebar();">
+                <div class="sidebar-icon"><img src="img/工作日记.svg" alt="工作日记" style="width:15px;height:15px;"></div>
+                <span class="sidebar-label">工作日记</span>
+            </div>
+        </div>
+    </div>
+    <div class="control-panel" id="control-panel">
+        <button class="control-button" id="edit-button" onclick="editShortcut()">编辑</button>
+        <button class="control-button" id="delete-button" onclick="deleteShortcut()">删除</button>
+    </div>
+    <script>
+    // 时钟功能
+    function updateClock() {
+        const now = new Date();
+        const hours = now.getHours() % 12;
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        
+        // 计算指针角度
+        const hourDegrees = (hours * 30) + (minutes * 0.5);
+        const minuteDegrees = minutes * 6;
+        const secondDegrees = seconds * 6;
+        
+        // 应用旋转
+        document.querySelector('.hour-hand').style.transform = `rotate(${hourDegrees}deg)`;
+        document.querySelector('.minute-hand').style.transform = `rotate(${minuteDegrees}deg)`;
+        document.querySelector('.second-hand').style.transform = `rotate(${secondDegrees}deg)`;
     }
-    fetchSuggestions() { 
-        const script = document.createElement('script'); 
-        script.src = `https://www.baidu.com/su?wd=${encodeURIComponent(this.searchInput.value)}&cb=showSuggestions`; 
-        document.body.appendChild(script); 
-        document.body.removeChild(script); 
+    
+    // 每秒更新时钟
+    setInterval(updateClock, 1000);
+    updateClock();
+    
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }       
+    
+    let searchEngine = 'bing', deleteMode = false, showShortcutNames = localStorage.getItem('showShortcutNames') !== 'false', storedBackground = localStorage.getItem('userBackground'), mask = document.getElementById('mask'), storedBlurValue = localStorage.getItem('blurValue') || 0, storedMaskValue = localStorage.getItem('maskValue') || 0; 
+    mask.style.backdropFilter = `blur(${storedBlurValue}px)`; 
+    mask.style.backgroundColor = `rgba(0,0,0,${storedMaskValue / 100})`; 
+
+    if (storedBackground) {
+        document.querySelector('.app').style.backgroundImage = `url('${storedBackground}')`;
     }
-    clearSuggestions() { 
-        this.suggestionsBox.innerHTML = ''; 
-        this.suggestionsBox.style.display = 'none'; 
-    }
-    showMsg(msg) { 
-        if (!this.suggestionsBox) return;
-        let str = msg.s.map(suggestion => 
-            `<div class="suggestion-item">
-                <img src="img/ss.png" alt="搜索" class="suggestion-icon" onmousedown="performSearchWithSuggestion('${suggestion}'); event.stopPropagation();">
-                <span onmousedown="performSearchWithSuggestion('${suggestion}'); event.stopPropagation();">${suggestion}</span>
-                <img src="img/lt.png" alt="替换" class="suggestion-icon" onmousedown="replaceSearchInput('${suggestion}', event);">
-            </div>`
-        ).join(''); 
-        this.suggestionsBox.innerHTML = str; 
-        this.suggestionsBox.style.display = str ? 'block' : 'none'; 
-    }
-}
-function showSuggestions(msg) { new SearchHint().showMsg(msg); }
-function performSearchWithSuggestion(suggestion) { 
-    const searchInput = document.getElementById('search-input'); 
-    searchInput.value = suggestion; 
-    performSearch(); 
-}
-function replaceSearchInput(suggestion, event) { 
-    event.preventDefault(); 
-    const searchInput = document.getElementById('search-input'); 
-    searchInput.value = suggestion; 
-    if (window.SearchHint) {
-        new SearchHint().fetchSuggestions();
-    } 
-    else if (searchInput.value.length > 0) {
-        const script = document.createElement('script'); 
-        script.src = `https://www.baidu.com/su?wd=${encodeURIComponent(searchInput.value)}&cb=showSuggestions`; 
-        document.body.appendChild(script); 
-        document.body.removeChild(script); 
-    } else {
-        document.getElementById('suggestions-box').style.display = 'none';
-    }
-    searchInput.focus();
-}
-function setSearchEngine(engine, button) { 
-    searchEngine = engine; 
-    document.querySelectorAll('.engine-button').forEach(btn => btn.classList.remove('selected')); 
-    button.classList.add('selected'); 
-    const query = document.getElementById('search-input').value; 
-    if (query) { 
-        performSearch(); 
-    } 
-}
-function performSearch() {
-    const query = document.getElementById('search-input').value;
-    sessionStorage.setItem('searchQuery', query);
-    if (!query) return;
-    const urlPattern = /^(https?:\/\/)?([a-z0-9-]+(\.[a-z0-9-]+)+)(:\d+)?(\/[^\s]*)?$/i;
-    if (urlPattern.test(query)) {
-        window.open(query.startsWith('http') ? query : 'http://' + query, '_self');
-        resetSearchInput();
-        return;
-    }
-    const searchUrls = {
-        bing: `https://cn.bing.com/search?q=${encodeURIComponent(query)}`,
-        baidu: `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`,
-        google: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
-        yandex: `https://www.yandex.com/search/touch/?text=${encodeURIComponent(query)}`,
-        bita: `https://metaso.cn/?q=${encodeURIComponent(query)}`,
-        zhihu: `https://www.zhihu.com/search?type=content&q=${encodeURIComponent(query)}`,
-        imageSearch: `https://quark.sm.cn/s?q=` + encodeURIComponent(query),
-        apkpure: `https://apkpure.com/search?q=${encodeURIComponent(query)}`,
-        backdata: `https://backdata.net/search.html?q=${encodeURIComponent(query)}`
-    };
-    window.open(searchUrls[searchEngine], '_self');
-    resetSearchInput();
-}
-function resetSearchInput() { 
-    const searchInput = document.getElementById('search-input'); 
-    searchInput.value = ''; 
-    searchInput.blur(); 
-    setSearchFocus(false); 
-    updateClearButton();
-}
-function clearSearchInput() {
-    const searchInput = document.getElementById('search-input');
-    searchInput.value = '';
-    searchInput.focus();
-    document.getElementById('suggestions-box').style.display = 'none';
-    updateClearButton();
-}
-function setSearchFocus(focused) {
-    isSearchFocused = focused;
-    sessionStorage.setItem('isSearchFocused', focused);
-    const engineContainer = document.getElementById('engine-container');
-    engineContainer.style.display = focused ? 'flex' : 'none';
-    updateClearButton();
-}
-function updateClearButton() {
-    const clearButton = document.getElementById('clear-button');
-    const searchInput = document.getElementById('search-input');
-    if (searchInput.value.length > 0) {
-        clearButton.style.display = 'block';
-    } else {
-        clearButton.style.display = 'none';
-    }
-}
-document.getElementById('search-input').addEventListener('input', function () {
-    updateClearButton();
-    showSuggestions(); 
-});
-document.getElementById('clear-button').addEventListener('click', function (event) {
-    event.stopPropagation();
-    clearSearchInput();
-});
-document.getElementById('clear-button').addEventListener('mousedown', function (event) {
-    event.preventDefault();
-});
-function loadShortcuts() { 
-    const shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || [], 
-        shortcutContainer = document.getElementById('shortcut-container'); 
-    shortcutContainer.innerHTML = ''; 
-    if (shortcuts.length === 0) { 
-        const defaultShortcuts = [
-            { title: '小霸王', url: 'https://www.yikm.net/', image: 'img/yx.png' }, 
-            { title: 'Github', url: 'https://github.com/', image: 'img/github.png' }, 
-            { title: 'AGE动漫', url: 'https://m.agedm.org/#/update', image: 'img/age.png' }, 
-            { title: '哔哩哔哩', url: 'https://m.bilibili.com/', image: 'img/bilibili.png' }, 
-            { title: '格式转换', url: 'https://qq5855144.github.io/-/', image: 'img/my.png' }
-        ]; 
-        localStorage.setItem('shortcuts', JSON.stringify(defaultShortcuts)); 
-        defaultShortcuts.forEach(shortcut => createShortcutElement(shortcut)); 
-    } else { 
-        shortcuts.forEach(createShortcutElement); 
-    } 
-}
-function createShortcutElement({ title, url, image }) { 
-    const shortcutContainer = document.getElementById('shortcut-container'); 
-    const newItem = document.createElement('div'); 
-    newItem.className = 'grid-item'; 
-    newItem.setAttribute('draggable', 'true'); 
-    newItem.onclick = () => window.open(url, '_self'); 
-    newItem.innerHTML = image ? 
-        `<img src="${image}" alt="${title}" data-url="${url}"><span style="display:${showShortcutNames ? 'block' : 'none'};">${title}</span><div class="drag-handle" onmousedown="event.preventDefault();"></div>` : 
-        `<div style="width:40px;height:40px;border-radius:20%;display:flex;align-items:center;justify-content:center;color:#ffffff;box-shadow:0px 0px 0px rgba(0,0,0,0.2),0px 0px 0px rgba(255,255,255,1),12px 12px 20px rgba(0,0,0,0.2) inset,-12px -12px 20px rgba(255,255,255,1) inset;margin-bottom:2px;"><span style="font-size:20px;">${title.charAt(0).toUpperCase()}</span></div><span style="display:${showShortcutNames ? 'block' : 'none'};">${title}</span><div class="drag-handle" onmousedown="event.preventDefault();"></div>`; 
-    shortcutContainer.appendChild(newItem); 
-    newItem.ondragstart = (event) => { event.dataTransfer.setData('text/plain', JSON.stringify({ title, url, image })); }; 
-    newItem.oncontextmenu = (event) => { event.preventDefault(); showControlPanel(event, title, url); }; 
-    newItem.ondragover = (event) => { event.preventDefault(); } 
-}
-function showControlPanel(event, title, url) { 
-    const controlPanel = document.getElementById('control-panel'); 
-    controlPanel.style.display = 'block'; 
-    const updateControlPanelPosition = (event) => { 
-        const shortcutRect = event.target.getBoundingClientRect(), 
-            controlPanelWidth = controlPanel.offsetWidth, 
-            controlPanelHeight = controlPanel.offsetHeight, 
-            shortcutCenterX = shortcutRect.left + shortcutRect.width / 2, 
-            shortcutCenterY = shortcutRect.top + shortcutRect.height / 2, 
-            offset = -20; 
-        let left, top; 
-        if (shortcutCenterY < window.innerHeight / 2) { 
-            if (shortcutCenterX < window.innerWidth / 2) { 
-                left = shortcutRect.right + offset; 
-                top = shortcutRect.bottom + offset; 
-            } else { 
-                left = shortcutRect.left - controlPanelWidth - offset; 
-                top = shortcutRect.bottom + offset; 
-            } 
-        } else { 
-            if (shortcutCenterX < window.innerWidth / 2) { 
-                left = shortcutRect.right + offset; 
-                top = shortcutRect.top - controlPanelHeight - offset; 
-            } else { 
-                left = shortcutRect.left - controlPanelWidth - offset; 
-                top = shortcutRect.top - controlPanelHeight - offset; 
-            } 
-        } 
-        controlPanel.style.transform = `translate(${left}px,${top}px)`; 
-        controlPanel.style.opacity = '1'; 
-    }; 
-    updateControlPanelPosition(event); 
-    const onDragOver = (event) => { requestAnimationFrame(() => updateControlPanelPosition(event)); }; 
-    const onDragEnd = () => { 
-        controlPanel.style.opacity = '0'; 
-        controlPanel.style.display = 'none'; 
-        shortcutContainer.removeEventListener('dragover', onDragOver); 
-        document.removeEventListener('mouseup', onDragEnd); 
-    }; 
-    shortcutContainer.addEventListener('dragover', onDragOver); 
-    document.addEventListener('mouseup', onDragEnd); 
-    controlPanel.dataset.title = title; 
-    controlPanel.dataset.url = url; 
-}
-document.addEventListener('click', () => { document.getElementById('control-panel').style.display = 'none'; }); 
-function editShortcut() { 
-    const title = document.getElementById('control-panel').dataset.title, 
-        url = document.getElementById('control-panel').dataset.url, 
-        shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || []; 
-    currentEditIndex = shortcuts.findIndex(item => item.title === title); 
-    document.getElementById('icon-title').value = title; 
-    document.getElementById('icon-url').value = url; 
-    document.getElementById('icon-image').value = shortcuts[currentEditIndex].image; 
-    isEditing = true; 
-    openAddDialog(); 
-}
-function deleteShortcut() { 
-    const title = document.getElementById('control-panel').dataset.title, 
-        shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || []; 
-    localStorage.setItem('shortcuts', JSON.stringify(shortcuts.filter(item => item.title !== title))); 
-    loadShortcuts(); 
-    document.getElementById('control-panel').style.display = 'none'; 
-}
-const shortcutContainer = document.getElementById('shortcut-container'); 
-shortcutContainer.addEventListener('dragover', (event) => { event.preventDefault(); }); 
-shortcutContainer.addEventListener('drop', (event) => { 
-    event.preventDefault(); 
-    const draggedData = event.dataTransfer.getData('text/plain'), 
-        { title, url, image } = JSON.parse(draggedData), 
-        draggedElement = [...document.querySelectorAll('.grid-item')].find(item => item.querySelector('span').textContent === title), 
-        targetElement = event.target.closest('.grid-item'); 
-    if (targetElement && draggedElement !== targetElement) { 
-        const container = document.getElementById('shortcut-container'), 
-            draggedIndex = [...container.children].indexOf(draggedElement), 
-            targetIndex = [...container.children].indexOf(targetElement); 
-        if (draggedIndex < targetIndex) { 
-            container.insertBefore(draggedElement, targetElement.nextSibling); 
-        } else { 
-            container.insertBefore(draggedElement, targetElement); 
-        } 
-        saveShortcutsOrder(); 
-        document.getElementById('control-panel').style.display = 'none'; 
-    } 
-}); 
-function saveShortcutsOrder() { 
-    const shortcuts = [...document.querySelectorAll('.grid-item')].map(item => { 
-        const title = item.querySelector('span').textContent, 
-            url = item.querySelector('img').dataset.url, 
-            image = item.querySelector('img').src; 
-        return { title, url, image }; 
-    }); 
-    localStorage.setItem('shortcuts', JSON.stringify(shortcuts)); 
-}
-function openAddDialog() { document.getElementById('add-dialog').style.display = 'block'; }
-function closeAddDialog() { document.getElementById('add-dialog').style.display = 'none'; showSearch(); }
-function addShortcut() { 
-    const title = document.getElementById('icon-title').value; 
-    const url = document.getElementById('icon-url').value; 
-    const image = document.getElementById('icon-image').value; 
-    if (!title || !url) { 
-        alert('请填写所有字段！'); 
-        return; 
-    } 
-    if (!image) { 
-        const faviconUrl = getFaviconUrl(url); 
-        document.getElementById('icon-image').value = faviconUrl; 
-    } 
-    if (isEditing) { 
-        const shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || []; 
-        shortcuts[currentEditIndex] = { title, url, image }; 
-        localStorage.setItem('shortcuts', JSON.stringify(shortcuts)); 
+
+    let isSearchFocused = false, searchQuery = sessionStorage.getItem('searchQuery') || ''; 
+    document.getElementById('search-input').value = searchQuery; 
+    let isEditing = false, currentEditIndex = -1; 
+    window.onload = function () { 
         loadShortcuts(); 
-        isEditing = false; 
-    } else { 
-        saveShortcut(title, url, image); 
-    } 
-    closeAddDialog(); 
-    clearInputFields(); 
-}
-function saveShortcut(title, url, image) { 
-    const shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || []; 
-    shortcuts.push({ title, url, image }); 
-    localStorage.setItem('shortcuts', JSON.stringify(shortcuts)); 
-    createShortcutElement({ title, url, image }); 
-}
-function clearInputFields() { 
-    document.getElementById('icon-title').value = ''; 
-    document.getElementById('icon-url').value = ''; 
-    document.getElementById('icon-image').value = ''; 
-}
-function chooseImage() { 
-    const input = document.createElement('input'); 
-    input.type = 'file'; 
-    input.accept = 'image/*'; 
-    input.onchange = event => { 
-        const file = event.target.files[0], 
-            reader = new FileReader(); 
-        reader.onload = e => { 
-            document.getElementById('icon-image').value = e.target.result; 
-        }; 
-        reader.readAsDataURL(file); 
-    }; 
-    input.click(); 
-}
-function openBackgroundDialog() { 
-    document.getElementById('background-dialog').style.display = 'block'; 
-}
-function closeBackgroundDialog() { 
-    document.getElementById('background-dialog').style.display = 'none'; 
-    showSearch(); 
-}
-function setBackground() { 
-    const url = document.getElementById('background-url').value; 
-    if (url) { 
-        document.querySelector('.app').style.backgroundImage = `url('${url}')`; 
-        localStorage.setItem('userBackground', url); 
-        closeBackgroundDialog(); 
         updateTextColorBasedOnBackground(); 
-    } else { 
-        alert('请填写背景图片链接！'); 
-    } 
-}
-function chooseBackgroundImage() { 
-    const input = document.createElement('input'); 
-    input.type = 'file'; 
-    input.accept = 'image/*'; 
-    input.onchange = event => { 
-        const file = event.target.files[0], 
-            reader = new FileReader(); 
-        reader.onload = e => { 
-            document.getElementById('background-url').value = e.target.result; 
-            document.querySelector('.app').style.backgroundImage = `url('${e.target.result}')`; 
-            localStorage.setItem('userBackground', e.target.result); 
-            updateTextColorBasedOnBackground(); 
-        }; 
-        reader.readAsDataURL(file); 
-    }; 
-    input.click(); 
-}
-function openExportImportDialog() { document.getElementById('export-import-dialog').style.display = 'block'; }
-function exportData() {
-    const shortcuts = localStorage.getItem('shortcuts');
-    const dataToExport = {
-        shortcuts: shortcuts ? JSON.parse(shortcuts) : []
+        const storedVisibility = localStorage.getItem('shortcutsVisible'); 
+        if (storedVisibility !== null) { 
+            shortcutsVisible = storedVisibility === 'true'; 
+        } 
+        const shortcutContainer = document.getElementById('shortcut-container'); 
+        shortcutContainer.style.display = shortcutsVisible ? 'grid' : 'none'; 
+        
+        updateClearButton();
     };
-    const blob = new Blob([JSON.stringify(dataToExport)], { type: 'application/json' });
-    saveAs(blob, 'data.json');
-}
-function importData() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = event => {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const data = JSON.parse(e.target.result);
-            if (data.shortcuts) {
-                const existingShortcuts = JSON.parse(localStorage.getItem('shortcuts')) || [];
-                data.shortcuts.forEach(shortcut => {
-                    if (!existingShortcuts.some(existingShortcut => existingShortcut.title === shortcut.title)) {
-                        existingShortcuts.push(shortcut);
-                    }
-                });
-                localStorage.setItem('shortcuts', JSON.stringify(existingShortcuts));
-                loadShortcuts();
-            }
-            closeExportImportDialog();
-        };
-        reader.readAsText(file);
-    };
-    input.click();
-}
-function closeExportImportDialog() { document.getElementById('export-import-dialog').style.display = 'none'; showSearch(); }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
-function toggleShortcutNames() { 
-    showShortcutNames = !showShortcutNames; 
-    localStorage.setItem('showShortcutNames', showShortcutNames); 
-    const shortcutItems = document.querySelectorAll('.grid-item span'); 
-    shortcutItems.forEach(item => { 
-        item.style.display = showShortcutNames ? 'block' : 'none'; 
-    }); 
-}
-function updateTextColorBasedOnBackground() { 
-    const backgroundImageUrl = localStorage.getItem('userBackground'); 
-    if (backgroundImageUrl) { 
-        const img = new Image(); 
-        img.src = backgroundImageUrl; 
-        img.crossOrigin = 'Anonymous'; 
-        img.onload = () => { 
-            const canvas = document.createElement('canvas'), 
-                ctx = canvas.getContext('2d'); 
-            canvas.width = img.width; 
-            canvas.height = img.height; 
-            ctx.drawImage(img, 0, 0); 
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height), 
-                data = imageData.data; 
-            let r = 0, g = 0, b = 0, pixelCount = data.length / 4; 
-            for (let i = 0; i < pixelCount; i++) { 
-                r += data[i * 4]; 
-                g += data[i * 4 + 1]; 
-                b += data[i * 4 + 2]; 
-            } 
-            r = Math.floor(r / pixelCount); 
-            g = Math.floor(g / pixelCount); 
-            b = Math.floor(b / pixelCount); 
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000, 
-                textColor = brightness > 128 ? '#000' : '#FFF'; 
-            document.querySelectorAll('.grid-item span').forEach(item => { 
-                item.style.color = textColor; 
-            }); 
-            const sidebarButtons = document.querySelectorAll('#sidebar img,.toggle-button'); 
-            sidebarButtons.forEach(button => { 
-                button.style.filter = brightness > 128 ? 'invert(1)' : 'invert(0)'; 
-            }); 
-            const mdiLeaf = document.querySelector('img[alt="切换快捷访问"]'); 
-            const cdIcon = document.querySelector('img[alt="唤醒侧边栏"]'); 
-            if (mdiLeaf) { 
-                mdiLeaf.style.filter = brightness > 128 ? 'invert(1)' : 'invert(0)'; 
-            } 
-            if (cdIcon) { 
-                cdIcon.style.filter = brightness > 128 ? 'invert(1)' : 'invert(0)'; 
+
+    class SearchHint {
+        constructor() { this.searchInput = document.getElementById('search-input'); this.suggestionsBox = document.getElementById('suggestions-box'); this.init(); }
+        init() { this.watchInput(); this.searchInput.onblur = () => { setTimeout(() => { this.suggestionsBox.style.display = 'none'; }, 200); setSearchFocus(false); }; }
+        watchInput() { 
+            this.searchInput.onkeyup = () => { 
+                if (this.searchInput.value.length === 0) { 
+                    this.clearSuggestions(); 
+                    return; 
+                } 
+                this.fetchSuggestions(); 
             }; 
+            this.searchInput.onfocus = () => { 
+                setSearchFocus(true); 
+                if (this.searchInput.value.length > 0) { 
+                    this.suggestionsBox.style.display = 'block'; 
+                } 
+            }; 
+        }
+        fetchSuggestions() { 
+            const script = document.createElement('script'); 
+            script.src = `https://www.baidu.com/su?wd=${encodeURIComponent(this.searchInput.value)}&cb=showSuggestions`; 
+            document.body.appendChild(script); 
+            document.body.removeChild(script); 
+        }
+        clearSuggestions() { 
+            this.suggestionsBox.innerHTML = ''; 
+            this.suggestionsBox.style.display = 'none'; 
+        }
+        showMsg(msg) { 
+            if (!this.suggestionsBox) return;
+            
+            let str = msg.s.map(suggestion => 
+                `<div class="suggestion-item">
+                    <img src="img/ss.png" alt="搜索" class="suggestion-icon" onmousedown="performSearchWithSuggestion('${suggestion}'); event.stopPropagation();">
+                    <span onmousedown="performSearchWithSuggestion('${suggestion}'); event.stopPropagation();">${suggestion}</span>
+                    <img src="img/lt.png" alt="替换" class="suggestion-icon" onmousedown="replaceSearchInput('${suggestion}', event);">
+                </div>`
+            ).join(''); 
+            this.suggestionsBox.innerHTML = str; 
+            this.suggestionsBox.style.display = str ? 'block' : 'none'; 
+        }
+    }
+
+    function showSuggestions(msg) { new SearchHint().showMsg(msg); }
+    function performSearchWithSuggestion(suggestion) { 
+        const searchInput = document.getElementById('search-input'); 
+        searchInput.value = suggestion; 
+        performSearch(); // 直接使用当前搜索引擎进行搜索
+    }
+    function replaceSearchInput(suggestion, event) { 
+        event.preventDefault(); 
+        const searchInput = document.getElementById('search-input'); 
+        searchInput.value = suggestion; 
+        
+        // 尝试直接调用 fetchSuggestions
+        if (window.SearchHint) {
+            new SearchHint().fetchSuggestions();
+        } 
+        // 如果仍然无效，手动发送百度建议请求
+        else if (searchInput.value.length > 0) {
+            const script = document.createElement('script'); 
+            script.src = `https://www.baidu.com/su?wd=${encodeURIComponent(searchInput.value)}&cb=showSuggestions`; 
+            document.body.appendChild(script); 
+            document.body.removeChild(script); 
+        } else {
+            document.getElementById('suggestions-box').style.display = 'none';
+        }
+        
+        searchInput.focus();
+    }
+
+    function setSearchEngine(engine, button) { 
+        searchEngine = engine; 
+        document.querySelectorAll('.engine-button').forEach(btn => btn.classList.remove('selected')); 
+        button.classList.add('selected'); 
+        const query = document.getElementById('search-input').value; 
+        if (query) { 
+            performSearch(); 
+        } 
+    }
+
+    function performSearch() {
+        const query = document.getElementById('search-input').value;
+        sessionStorage.setItem('searchQuery', query);
+        if (!query) return;
+
+        const urlPattern = /^(https?:\/\/)?([a-z0-9-]+(\.[a-z0-9-]+)+)(:\d+)?(\/[^\s]*)?$/i;
+        if (urlPattern.test(query)) {
+            window.open(query.startsWith('http') ? query : 'http://' + query, '_self');
+            resetSearchInput();
+            return;
+        }
+
+        const searchUrls = {
+            bing: `https://cn.bing.com/search?q=${encodeURIComponent(query)}`,
+            baidu: `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`,
+            google: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+            yandex: `https://www.yandex.com/search/touch/?text=${encodeURIComponent(query)}`,
+            bita: `https://metaso.cn/?q=${encodeURIComponent(query)}`,
+            zhihu: `https://www.zhihu.com/search?type=content&q=${encodeURIComponent(query)}`,
+            imageSearch: `https://quark.sm.cn/s?q=` + encodeURIComponent(query),
+            apkpure: `https://apkpure.com/search?q=${encodeURIComponent(query)}`,
+            backdata: `https://backdata.net/search.html?q=${encodeURIComponent(query)}`
+        };
+
+        window.open(searchUrls[searchEngine], '_self');
+        resetSearchInput();
+    }
+
+    function resetSearchInput() { 
+        const searchInput = document.getElementById('search-input'); 
+        searchInput.value = ''; 
+        searchInput.blur(); 
+        setSearchFocus(false); 
+        updateClearButton();
+    }
+
+    function clearSearchInput() {
+        const searchInput = document.getElementById('search-input');
+        searchInput.value = '';
+        searchInput.focus();
+        document.getElementById('suggestions-box').style.display = 'none';
+        updateClearButton();
+    }
+
+    function setSearchFocus(focused) {
+        isSearchFocused = focused;
+        sessionStorage.setItem('isSearchFocused', focused);
+        const engineContainer = document.getElementById('engine-container');
+        engineContainer.style.display = focused ? 'flex' : 'none';
+        updateClearButton();
+    }
+
+    function updateClearButton() {
+        const clearButton = document.getElementById('clear-button');
+        const searchInput = document.getElementById('search-input');
+        
+        if (searchInput.value.length > 0) {
+            clearButton.style.display = 'block';
+        } else {
+            clearButton.style.display = 'none';
+        }
+    }
+
+    document.getElementById('search-input').addEventListener('input', function () {
+        updateClearButton();
+        showSuggestions(); // 触发建议更新
+    });
+
+    document.getElementById('clear-button').addEventListener('click', function (event) {
+        event.stopPropagation();
+        clearSearchInput();
+    });
+
+    document.getElementById('clear-button').addEventListener('mousedown', function (event) {
+        event.preventDefault();
+    });
+
+    function loadShortcuts() { 
+        const shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || [], 
+            shortcutContainer = document.getElementById('shortcut-container'); 
+        shortcutContainer.innerHTML = ''; 
+        if (shortcuts.length === 0) { 
+            const defaultShortcuts = [
+                { title: '小霸王', url: 'https://www.yikm.net/', image: 'img/yx.png' }, 
+                { title: 'Github', url: 'https://github.com/', image: 'img/github.png' }, 
+                { title: 'AGE动漫', url: 'https://m.agedm.org/#/update', image: 'img/age.png' }, 
+                { title: '哔哩哔哩', url: 'https://m.bilibili.com/', image: 'img/bilibili.png' }, 
+                { title: '格式转换', url: 'https://qq5855144.github.io/-/', image: 'img/my.png' }
+            ]; 
+            localStorage.setItem('shortcuts', JSON.stringify(defaultShortcuts)); 
+            defaultShortcuts.forEach(shortcut => createShortcutElement(shortcut)); 
+        } else { 
+            shortcuts.forEach(createShortcutElement); 
+        } 
+    }
+
+    function createShortcutElement({ title, url, image }) { 
+        const shortcutContainer = document.getElementById('shortcut-container'); 
+        const newItem = document.createElement('div'); 
+        newItem.className = 'grid-item'; 
+        newItem.setAttribute('draggable', 'true'); 
+        newItem.onclick = () => window.open(url, '_self'); 
+        newItem.innerHTML = image ? 
+            `<img src="${image}" alt="${title}" data-url="${url}"><span style="display:${showShortcutNames ? 'block' : 'none'};">${title}</span><div class="drag-handle" onmousedown="event.preventDefault();"></div>` : 
+            `<div style="width:40px;height:40px;border-radius:20%;display:flex;align-items:center;justify-content:center;color:#ffffff;box-shadow:0px 0px 0px rgba(0,0,0,0.2),0px 0px 0px rgba(255,255,255,1),12px 12px 20px rgba(0,0,0,0.2) inset,-12px -12px 20px rgba(255,255,255,1) inset;margin-bottom:2px;"><span style="font-size:20px;">${title.charAt(0).toUpperCase()}</span></div><span style="display:${showShortcutNames ? 'block' : 'none'};">${title}</span><div class="drag-handle" onmousedown="event.preventDefault();"></div>`; 
+        shortcutContainer.appendChild(newItem); 
+        newItem.ondragstart = (event) => { event.dataTransfer.setData('text/plain', JSON.stringify({ title, url, image })); }; 
+        newItem.oncontextmenu = (event) => { event.preventDefault(); showControlPanel(event, title, url); }; 
+        newItem.ondragover = (event) => { event.preventDefault(); } 
+    }
+
+    function showControlPanel(event, title, url) { 
+        const controlPanel = document.getElementById('control-panel'); 
+        controlPanel.style.display = 'block'; 
+        const updateControlPanelPosition = (event) => { 
+            const shortcutRect = event.target.getBoundingClientRect(), 
+                controlPanelWidth = controlPanel.offsetWidth, 
+                controlPanelHeight = controlPanel.offsetHeight, 
+                shortcutCenterX = shortcutRect.left + shortcutRect.width / 2, 
+                shortcutCenterY = shortcutRect.top + shortcutRect.height / 2, 
+                offset = -20; 
+            let left, top; 
+            if (shortcutCenterY < window.innerHeight / 2) { 
+                if (shortcutCenterX < window.innerWidth / 2) { 
+                    left = shortcutRect.right + offset; 
+                    top = shortcutRect.bottom + offset; 
+                } else { 
+                    left = shortcutRect.left - controlPanelWidth - offset; 
+                    top = shortcutRect.bottom + offset; 
+                } 
+            } else { 
+                if (shortcutCenterX < window.innerWidth / 2) { 
+                    left = shortcutRect.right + offset; 
+                    top = shortcutRect.top - controlPanelHeight - offset; 
+                } else { 
+                    left = shortcutRect.left - controlPanelWidth - offset; 
+                    top = shortcutRect.top - controlPanelHeight - offset; 
+                } 
+            } 
+            controlPanel.style.transform = `translate(${left}px,${top}px)`; 
+            controlPanel.style.opacity = '1'; 
         }; 
-    } 
-}
-function openBlurDialog() { document.getElementById('blur-dialog').style.display = 'block'; }
-function closeBlurDialog() { document.getElementById('blur-dialog').style.display = 'none'; showSearch(); }
-function updateBlurValue(value) { mask.style.backdropFilter = `blur(${value}px)`; }
-function updateMaskValue(value) { mask.style.backgroundColor = `rgba(0,0,0,${value / 100})`; }
-function setBlur() { 
-    const blurValue = document.getElementById('blur-range').value, 
-        maskValue = document.getElementById('mask-range').value; 
-    mask.style.backdropFilter = `blur(${blurValue}px)`; 
-    mask.style.backgroundColor = `rgba(0,0,0,${maskValue / 100})`; 
-    localStorage.setItem('blurValue', blurValue); 
-    localStorage.setItem('maskValue', maskValue); 
-    closeBlurDialog(); 
-}
-function getFaviconUrl(url) { 
-    try {
-        const link = new URL(url); 
-        return `${link.protocol}//${link.hostname}/favicon.ico`; 
-    } catch (e) {
-        console.error("Invalid URL", url);
-        return "";
+        updateControlPanelPosition(event); 
+        const onDragOver = (event) => { requestAnimationFrame(() => updateControlPanelPosition(event)); }; 
+        const onDragEnd = () => { 
+            controlPanel.style.opacity = '0'; 
+            controlPanel.style.display = 'none'; 
+            shortcutContainer.removeEventListener('dragover', onDragOver); 
+            document.removeEventListener('mouseup', onDragEnd); 
+        }; 
+        shortcutContainer.addEventListener('dragover', onDragOver); 
+        document.addEventListener('mouseup', onDragEnd); 
+        controlPanel.dataset.title = title; 
+        controlPanel.dataset.url = url; 
     }
-}
-function fetchFavicon(url) { 
-    const faviconUrl = getFaviconUrl(url); 
-    if (faviconUrl) {
-        document.getElementById('icon-image').value = faviconUrl; 
+
+    document.addEventListener('click', () => { document.getElementById('control-panel').style.display = 'none'; }); 
+
+    function editShortcut() { 
+        const title = document.getElementById('control-panel').dataset.title, 
+            url = document.getElementById('control-panel').dataset.url, 
+            shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || []; 
+        currentEditIndex = shortcuts.findIndex(item => item.title === title); 
+        document.getElementById('icon-title').value = title; 
+        document.getElementById('icon-url').value = url; 
+        document.getElementById('icon-image').value = shortcuts[currentEditIndex].image; 
+        isEditing = true; 
+        openAddDialog(); 
     }
-}
-function toggleShortcutVisibility() { 
+
+    function deleteShortcut() { 
+        const title = document.getElementById('control-panel').dataset.title, 
+            shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || []; 
+        localStorage.setItem('shortcuts', JSON.stringify(shortcuts.filter(item => item.title !== title))); 
+        loadShortcuts(); 
+        document.getElementById('control-panel').style.display = 'none'; 
+    }
+
     const shortcutContainer = document.getElementById('shortcut-container'); 
-    shortcutsVisible = !shortcutsVisible; 
-    shortcutContainer.style.display = shortcutsVisible ? 'grid' : 'none'; 
-} 
-let shortcutsVisible = true; 
-window.onclick = function (event) { 
-    const sidebar = document.getElementById('sidebar'); 
-    const toggleButton = document.querySelector('.toggle-button'); 
-    if (mask.contains(event.target)) { 
-        closeSidebar(); 
-    } 
-    if (!sidebar.contains(event.target) && !toggleButton.contains(event.target)) { 
-        closeSidebar(); 
-    } 
-    const controlPanel = document.getElementById('control-panel'); 
-    if (!controlPanel.contains(event.target)) { 
-        controlPanel.style.display = 'none'; 
-    } 
-    if (document.getElementById('shortcut-container').contains(event.target)) { 
-        closeSidebar(); 
-    }; 
-}; 
-document.getElementById('shortcut-container').onclick = function (event) { closeSidebar(); }; 
-function hideSearch() { document.querySelector('.search-container').style.display = 'none'; } 
-function showSearch() { document.querySelector('.search-container').style.display = 'block'; }
-const searchInput = document.querySelector('.search-input-style'); 
-const gridContainer = document.querySelector('.grid-container'); 
-const neumorphicText = document.querySelector('.neumorphic-text'); 
-searchInput.addEventListener('focus', () => { 
-    gridContainer.style.visibility = 'hidden'; 
-    neumorphicText.style.visibility = 'hidden'; 
-}); 
-searchInput.addEventListener('blur', () => { 
-    gridContainer.style.visibility = 'visible'; 
-    neumorphicText.style.visibility = 'visible'; 
-});
-function applyNightMode() {
-    const body = document.body;
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    if (darkModeMediaQuery.matches) {
-        body.classList.add('night-mode');
-    } else {
-        body.classList.remove('night-mode');
+    shortcutContainer.addEventListener('dragover', (event) => { event.preventDefault(); }); 
+    shortcutContainer.addEventListener('drop', (event) => { 
+        event.preventDefault(); 
+        const draggedData = event.dataTransfer.getData('text/plain'), 
+            { title, url, image } = JSON.parse(draggedData), 
+            draggedElement = [...document.querySelectorAll('.grid-item')].find(item => item.querySelector('span').textContent === title), 
+            targetElement = event.target.closest('.grid-item'); 
+        if (targetElement && draggedElement !== targetElement) { 
+            const container = document.getElementById('shortcut-container'), 
+                draggedIndex = [...container.children].indexOf(draggedElement), 
+                targetIndex = [...container.children].indexOf(targetElement); 
+            if (draggedIndex < targetIndex) { 
+                container.insertBefore(draggedElement, targetElement.nextSibling); 
+            } else { 
+                container.insertBefore(draggedElement, targetElement); 
+            } 
+            saveShortcutsOrder(); 
+            document.getElementById('control-panel').style.display = 'none'; 
+        } 
+    }); 
+
+    function saveShortcutsOrder() { 
+        const shortcuts = [...document.querySelectorAll('.grid-item')].map(item => { 
+            const title = item.querySelector('span').textContent, 
+                url = item.querySelector('img').dataset.url, 
+                image = item.querySelector('img').src; 
+            return { title, url, image }; 
+        }); 
+        localStorage.setItem('shortcuts', JSON.stringify(shortcuts)); 
     }
-}
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyNightMode);
-applyNightMode();
+
+    function openAddDialog() { document.getElementById('add-dialog').style.display = 'block'; }
+    function closeAddDialog() { document.getElementById('add-dialog').style.display = 'none'; showSearch(); }
+
+    function addShortcut() { 
+        const title = document.getElementById('icon-title').value; 
+        const url = document.getElementById('icon-url').value; 
+        const image = document.getElementById('icon-image').value; 
+        if (!title || !url) { 
+            alert('请填写所有字段！'); 
+            return; 
+        } 
+        if (!image) { 
+            const faviconUrl = getFaviconUrl(url); 
+            document.getElementById('icon-image').value = faviconUrl; 
+        } 
+        if (isEditing) { 
+            const shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || []; 
+            shortcuts[currentEditIndex] = { title, url, image }; 
+            localStorage.setItem('shortcuts', JSON.stringify(shortcuts)); 
+            loadShortcuts(); 
+            isEditing = false; 
+        } else { 
+            saveShortcut(title, url, image); 
+        } 
+        closeAddDialog(); 
+        clearInputFields(); 
+    }
+
+    function saveShortcut(title, url, image) { 
+        const shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || []; 
+        shortcuts.push({ title, url, image }); 
+        localStorage.setItem('shortcuts', JSON.stringify(shortcuts)); 
+        createShortcutElement({ title, url, image }); 
+    }
+
+    function clearInputFields() { 
+        document.getElementById('icon-title').value = ''; 
+        document.getElementById('icon-url').value = ''; 
+        document.getElementById('icon-image').value = ''; 
+    }
+
+    function chooseImage() { 
+        const input = document.createElement('input'); 
+        input.type = 'file'; 
+        input.accept = 'image/*'; 
+        input.onchange = event => { 
+            const file = event.target.files[0], 
+                reader = new FileReader(); 
+            reader.onload = e => { 
+                document.getElementById('icon-image').value = e.target.result; 
+            }; 
+            reader.readAsDataURL(file); 
+        }; 
+        input.click(); 
+    }
+
+    function openBackgroundDialog() { 
+        document.getElementById('background-dialog').style.display = 'block'; 
+    }
+
+    function closeBackgroundDialog() { 
+        document.getElementById('background-dialog').style.display = 'none'; 
+        showSearch(); 
+    }
+
+    function setBackground() { 
+        const url = document.getElementById('background-url').value; 
+        if (url) { 
+            document.querySelector('.app').style.backgroundImage = `url('${url}')`; 
+            localStorage.setItem('userBackground', url); 
+            closeBackgroundDialog(); 
+            updateTextColorBasedOnBackground(); 
+        } else { 
+            alert('请填写背景图片链接！'); 
+        } 
+    }
+
+    function chooseBackgroundImage() { 
+        const input = document.createElement('input'); 
+        input.type = 'file'; 
+        input.accept = 'image/*'; 
+        input.onchange = event => { 
+            const file = event.target.files[0], 
+                reader = new FileReader(); 
+            reader.onload = e => { 
+                document.getElementById('background-url').value = e.target.result; 
+                document.querySelector('.app').style.backgroundImage = `url('${e.target.result}')`; 
+                localStorage.setItem('userBackground', e.target.result); 
+                updateTextColorBasedOnBackground(); 
+            }; 
+            reader.readAsDataURL(file); 
+        }; 
+        input.click(); 
+    }
+
+    function openExportImportDialog() { document.getElementById('export-import-dialog').style.display = 'block'; }
+
+    function exportData() {
+        const shortcuts = localStorage.getItem('shortcuts');
+        const dataToExport = {
+            shortcuts: shortcuts ? JSON.parse(shortcuts) : []
+        };
+        const blob = new Blob([JSON.stringify(dataToExport)], { type: 'application/json' });
+        saveAs(blob, 'data.json');
+    }
+
+    function importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = event => {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = JSON.parse(e.target.result);
+                if (data.shortcuts) {
+                    const existingShortcuts = JSON.parse(localStorage.getItem('shortcuts')) || [];
+                    data.shortcuts.forEach(shortcut => {
+                        if (!existingShortcuts.some(existingShortcut => existingShortcut.title === shortcut.title)) {
+                            existingShortcuts.push(shortcut);
+                        }
+                    });
+                    localStorage.setItem('shortcuts', JSON.stringify(existingShortcuts));
+                    loadShortcuts();
+                }
+                closeExportImportDialog();
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+
+    function closeExportImportDialog() { document.getElementById('export-import-dialog').style.display = 'none'; showSearch(); }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+    function toggleShortcutNames() { 
+        showShortcutNames = !showShortcutNames; 
+        localStorage.setItem('showShortcutNames', showShortcutNames); 
+        const shortcutItems = document.querySelectorAll('.grid-item span'); 
+        shortcutItems.forEach(item => { 
+            item.style.display = showShortcutNames ? 'block' : 'none'; 
+        }); 
+    }
+
+    function updateTextColorBasedOnBackground() { 
+        const backgroundImageUrl = localStorage.getItem('userBackground'); 
+        if (backgroundImageUrl) { 
+            const img = new Image(); 
+            img.src = backgroundImageUrl; 
+            img.crossOrigin = 'Anonymous'; 
+            img.onload = () => { 
+                const canvas = document.createElement('canvas'), 
+                    ctx = canvas.getContext('2d'); 
+                canvas.width = img.width; 
+                canvas.height = img.height; 
+                ctx.drawImage(img, 0, 0); 
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height), 
+                    data = imageData.data; 
+                let r = 0, g = 0, b = 0, pixelCount = data.length / 4; 
+                for (let i = 0; i < pixelCount; i++) { 
+                    r += data[i * 4]; 
+                    g += data[i * 4 + 1]; 
+                    b += data[i * 4 + 2]; 
+                } 
+                r = Math.floor(r / pixelCount); 
+                g = Math.floor(g / pixelCount); 
+                b = Math.floor(b / pixelCount); 
+                const brightness = (r * 299 + g * 587 + b * 114) / 1000, 
+                    textColor = brightness > 128 ? '#000' : '#FFF'; 
+                document.querySelectorAll('.grid-item span').forEach(item => { 
+                    item.style.color = textColor; 
+                }); 
+                const sidebarButtons = document.querySelectorAll('#sidebar img,.toggle-button'); 
+                sidebarButtons.forEach(button => { 
+                    button.style.filter = brightness > 128 ? 'invert(1)' : 'invert(0)'; 
+                }); 
+                const mdiLeaf = document.querySelector('img[alt="切换快捷访问"]'); 
+                const cdIcon = document.querySelector('img[alt="唤醒侧边栏"]'); 
+                if (mdiLeaf) { 
+                    mdiLeaf.style.filter = brightness > 128 ? 'invert(1)' : 'invert(0)'; 
+                } 
+                if (cdIcon) { 
+                    cdIcon.style.filter = brightness > 128 ? 'invert(1)' : 'invert(0)'; 
+                }; 
+            }; 
+        } 
+    }
+
+    function openBlurDialog() { document.getElementById('blur-dialog').style.display = 'block'; }
+    function closeBlurDialog() { document.getElementById('blur-dialog').style.display = 'none'; showSearch(); }
+    function updateBlurValue(value) { mask.style.backdropFilter = `blur(${value}px)`; }
+    function updateMaskValue(value) { mask.style.backgroundColor = `rgba(0,0,0,${value / 100})`; }
+
+    function setBlur() { 
+        const blurValue = document.getElementById('blur-range').value, 
+            maskValue = document.getElementById('mask-range').value; 
+        mask.style.backdropFilter = `blur(${blurValue}px)`; 
+        mask.style.backgroundColor = `rgba(0,0,0,${maskValue / 100})`; 
+        localStorage.setItem('blurValue', blurValue); 
+        localStorage.setItem('maskValue', maskValue); 
+        closeBlurDialog(); 
+    }
+
+    function getFaviconUrl(url) { 
+        try {
+            const link = new URL(url); 
+            return `${link.protocol}//${link.hostname}/favicon.ico`; 
+        } catch (e) {
+            console.error("Invalid URL", url);
+            return "";
+        }
+    }
+
+    function fetchFavicon(url) { 
+        const faviconUrl = getFaviconUrl(url); 
+        if (faviconUrl) {
+            document.getElementById('icon-image').value = faviconUrl; 
+        }
+    }
+
+    function toggleShortcutVisibility() { 
+        const shortcutContainer = document.getElementById('shortcut-container'); 
+        shortcutsVisible = !shortcutsVisible; 
+        shortcutContainer.style.display = shortcutsVisible ? 'grid' : 'none'; 
+    } 
+
+    let shortcutsVisible = true; 
+    window.onclick = function (event) { 
+        const sidebar = document.getElementById('sidebar'); 
+        const toggleButton = document.querySelector('.toggle-button'); 
+        if (mask.contains(event.target)) { 
+            closeSidebar(); 
+        } 
+        if (!sidebar.contains(event.target) && !toggleButton.contains(event.target)) { 
+            closeSidebar(); 
+        } 
+        const controlPanel = document.getElementById('control-panel'); 
+        if (!controlPanel.contains(event.target)) { 
+            controlPanel.style.display = 'none'; 
+        } 
+        if (document.getElementById('shortcut-container').contains(event.target)) { 
+            closeSidebar(); 
+        }; 
+    }; 
+
+    document.getElementById('shortcut-container').onclick = function (event) { closeSidebar(); }; 
+
+    function hideSearch() { document.querySelector('.search-container').style.display = 'none'; } 
+    function showSearch() { document.querySelector('.search-container').style.display = 'block'; }
+
+    const searchInput = document.querySelector('.search-input-style'); 
+    const gridContainer = document.querySelector('.grid-container'); 
+    const clockContainer = document.querySelector('.clock-container'); 
+    searchInput.addEventListener('focus', () => { 
+        gridContainer.style.visibility = 'hidden'; 
+        clockContainer.style.visibility = 'hidden'; 
+    }); 
+    searchInput.addEventListener('blur', () => { 
+        gridContainer.style.visibility = 'visible'; 
+        clockContainer.style.visibility = 'visible'; 
+    });
+
+    function applyNightMode() {
+        const body = document.body;
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (darkModeMediaQuery.matches) {
+            body.classList.add('night-mode');
+        } else {
+            body.classList.remove('night-mode');
+        }
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyNightMode);
+    applyNightMode();
     </script>
 </body>
+
 </html>
