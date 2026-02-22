@@ -771,27 +771,22 @@
                 applyBackground(type, url, blur);
             }
             function loadBackground() {
-                try {
-                    const stored = localStorage.getItem(BG_STORAGE_KEY);
-                    if (stored) {
-                        const settings = JSON.parse(stored);
-                        bgType = settings.type || 'image';
-                        bgUrl = settings.url || '';
-                        blurAmount = settings.blur !== undefined ? settings.blur : 0;
-                        applyBackground(bgType, bgUrl, blurAmount);
-                    } else {           
-                        saveBackground('image', 'https://icdn.binmt.cc/2602/699a570336d59.jpg', 10);
-                    }
-                } catch (e) {
-                    saveBackground('image', 'https://icdn.binmt.cc/2602/699a570336d59.jpg', 10);
-                }
-            }
-            function removeBackground() {
-                localStorage.removeItem(BG_STORAGE_KEY);
-                dom.bgLayer.innerHTML = '';
-                bgType = 'image'; bgUrl = ''; blurAmount = 0;
-                setBlur(0);
-            }
+    try {
+        const stored = localStorage.getItem(BG_STORAGE_KEY);
+        if (stored) {
+            const settings = JSON.parse(stored);
+            bgType = settings.type || 'image';
+            bgUrl = settings.url || '';
+            blurAmount = settings.blur !== undefined ? settings.blur : 0;
+            applyBackground(bgType, bgUrl, blurAmount);
+        } else {           
+            
+            saveBackground('image', 'https://gd-hbimg.huaban.com/9fb780883f25c749c063e02e6544f90215b6cf791b74be-PQNx89_fw658', 15);
+        }
+    } catch (e) {
+        saveBackground('image', 'https://gd-hbimg.huaban.com/9fb780883f25c749c063e02e6544f90215b6cf791b74be-PQNx89_fw658', 15);
+    }
+}
 
             // 背景模态框操作
             let currentBgType = 'image';
