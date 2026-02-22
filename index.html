@@ -770,6 +770,7 @@
                 localStorage.setItem(BG_STORAGE_KEY, JSON.stringify({ type, url, blur }));
                 applyBackground(type, url, blur);
             }
+            
             function loadBackground() {
     try {
         const stored = localStorage.getItem(BG_STORAGE_KEY);
@@ -779,12 +780,16 @@
             bgUrl = settings.url || '';
             blurAmount = settings.blur !== undefined ? settings.blur : 0;
             applyBackground(bgType, bgUrl, blurAmount);
-        } else {           
-            
-            saveBackground('image', 'https://bing.biturl.top/?resolution=1920&format=image&index=random', 15);
+        } else {
+            // 加载同目录下 img 文件夹中的 bj.jpg
+            const localImageUrl = 'img/bj.jpg';
+            console.log('加载本地默认背景:', localImageUrl);
+            saveBackground('image', localImageUrl, 5);
         }
     } catch (e) {
-        saveBackground('image', 'https://bing.biturl.top/?resolution=1920&format=image&index=random', 15);
+        console.error('加载背景出错:', e);
+        // 出错时使用纯色背景
+        dom.bgLayer.style.background = '#2c3e50';
     }
 }
 
