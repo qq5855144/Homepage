@@ -167,6 +167,15 @@
         .tile[data-size="1x1"] .tile-icon, .tile[data-size="2x1"] .tile-icon { height: 44px; }
         .tile[data-size="1x2"] .tile-icon, .tile[data-size="2x2"] .tile-icon { height: calc(2 * 44px + 3px + 20px); }
         .tile-icon img { max-width: 90%; max-height: 90%; object-fit: contain; display: block; position: relative; z-index: 2; border-radius: 8px; pointer-events: none; }
+        /* 1x1 磁贴图片铺满容器 */
+        .tile[data-size="1x1"] .tile-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            max-width: none;
+            max-height: none;
+            border-radius: 12px;
+        }
         .tile.add-tile .tile-icon { background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); }
         .tile-name {
             max-width: 100%; overflow: hidden; white-space: nowrap; padding: 0 4px; font-weight: 500;
@@ -242,7 +251,7 @@
         /* 导入导出按钮行 */
         .modal-import-export { display: flex; gap: 12px; margin-top: 16px; justify-content: center; }
         .modal-import-export .modal-btn { flex: 1; background: #f0f2f5; }
-        /* 暗色模式 */
+        /* 暗色模式 - 移除默认背景，避免覆盖动态设置 */
         @media (prefers-color-scheme: dark) {
             body, #bg-layer { background-color: #121212; color: #eee; }
             .search-form { background-color: rgba(40,40,40,0.9) !important; }
@@ -252,7 +261,8 @@
             .context-menu, .modal-content { background-color: #2a2a2a; border-color: #444; color: #eee; }
             .modal-content input { background-color: #3a3a3a; color: #eee; border-color: #555; }
             .bg-modal-content { background: rgba(30,30,30,0.8); border-color: rgba(255,255,255,0.15); color: #eee; }
-            .tile-icon { background: rgba(0,0,0,0.3) !important; box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important; }
+            /* 重要：将磁贴图标默认背景设为透明，避免覆盖内联样式 */
+            .tile-icon { background: transparent !important; box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important; }
             .sortable-drag { background: rgba(40,40,40,0.85) !important; }
             .sortable-drag .tile-icon { background: rgba(60,60,60,0.9) !important; }
             .modal-import-export .modal-btn { background: #3a3a3a; color: #ddd; }
@@ -537,45 +547,145 @@
                 extractEdgeColors();
             }
 
-            // 取色函数 
+            // ----- 改进后的取色函数：9x9网格，取最外围一圈区域中心点，统计出现频率最高的颜色 -----
             function extractEdgeColors() {
                 const images = document.querySelectorAll('.tile:not(.add-tile) .tile-icon img.tile-icon-img');
                 images.forEach(img => {
+                    const tile = img.closest('.tile');
+                    // 如果是1x1磁贴，跳过取色逻辑，让CSS处理填充
+                    if (tile && tile.dataset.size === '1x1') {
+                        return;
+                    }
                     const iconContainer = img.closest('.tile-icon');
                     if (!iconContainer) return;
-                    if (img.complete) setBackgroundFromImage(img, iconContainer);
-                    else {
-                        img.addEventListener('load', () => setBackgroundFromImage(img, iconContainer), { once: true });
-                        img.addEventListener('error', () => {
-                           
-                            iconContainer.style.removeProperty('background-color');
-                            iconContainer.style.removeProperty('backdrop-filter');
-                        });
-                    }
+
+                    // 先设置一个占位背景色（灰色），防止暗色模式下透出黑色
+                    iconContainer.style.setProperty('background-color', '#cccccc', 'important');
+                    iconContainer.style.backdropFilter = 'none';
+                    iconContainer.style.webkitBackdropFilter = 'none';
+
+                    // 使用 decode() 确保图片解码完成后再取色
+                    const applyColor = () => {
+                        if (img.complete) {
+                            img.decode().then(() => {
+                                setBackgroundFromImage(img, iconContainer);
+                            }).catch(() => {
+                                // 解码失败，保留灰色
+                                iconContainer.style.setProperty('background-color', '#cccccc', 'important');
+                            });
+                        } else {
+                            img.addEventListener('load', () => {
+                                img.decode().then(() => {
+                                    setBackgroundFromImage(img, iconContainer);
+                                }).catch(() => {
+                                    iconContainer.style.setProperty('background-color', '#cccccc', 'important');
+                                });
+                            }, { once: true });
+                            img.addEventListener('error', () => {
+                                iconContainer.style.setProperty('background-color', '#cccccc', 'important');
+                            });
+                        }
+                    };
+
+                    applyColor();
                 });
             }
+
             function setBackgroundFromImage(img, container) {
+                // 再次检查是否为1x1磁贴，防止意外调用
+                const tile = img.closest('.tile');
+                if (tile && tile.dataset.size === '1x1') return;
                 try {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     canvas.width = img.naturalWidth;
                     canvas.height = img.naturalHeight;
                     ctx.drawImage(img, 0, 0);
-                    const pixelData = ctx.getImageData(0, 0, 1, 1).data;
-                    let r = pixelData[0], g = pixelData[1], b = pixelData[2], a = pixelData[3] / 255;
-                    if (a === 0) {
-                     
-                        container.style.removeProperty('background-color');
-                        container.style.removeProperty('backdrop-filter');
-                        return;
+                    
+                    const w = img.naturalWidth;
+                    const h = img.naturalHeight;
+                    
+                    // 划分 9x9 网格，记录最外围一圈的区域中心点颜色
+                    const samples = []; // 存储颜色 {r,g,b,a}
+                    
+                    // 遍历所有网格的行列索引 (0..8)
+                    for (let row = 0; row < 9; row++) {
+                        for (let col = 0; col < 9; col++) {
+                            // 只取最外围一圈：row==0 || row==8 || col==0 || col==8
+                            if (row === 0 || row === 8 || col === 0 || col === 8) {
+                                // 计算该网格的中心点坐标
+                                // 每个网格的宽度和高度
+                                const cellWidth = w / 9;
+                                const cellHeight = h / 9;
+                                // 中心点偏移：半个单元格
+                                const centerX = Math.floor(col * cellWidth + cellWidth / 2);
+                                const centerY = Math.floor(row * cellHeight + cellHeight / 2);
+                                // 边界保护
+                                const x = Math.min(w - 1, Math.max(0, centerX));
+                                const y = Math.min(h - 1, Math.max(0, centerY));
+                                
+                                const pixel = ctx.getImageData(x, y, 1, 1).data;
+                                const a = pixel[3] / 255;
+                                if (a > 0) { // 只取不透明的像素
+                                    samples.push({ r: pixel[0], g: pixel[1], b: pixel[2], a: a });
+                                }
+                            }
+                        }
                     }
-                   
-                    container.style.setProperty('background-color', `rgba(${r}, ${g}, ${b}, ${a})`, 'important');
+                    
+                    let finalR, finalG, finalB, finalA;
+                    
+                    if (samples.length === 0) {
+                        // 所有采样点都透明，使用灰色
+                        finalR = 220; finalG = 220; finalB = 220; finalA = 1;
+                    } else {
+                        // 颜色量化：将RGB空间划分为 8x8x8 的桶（每个分量步长 32）
+                        const binSize = 32;
+                        const bins = {}; // 键 "r_idx,g_idx,b_idx" -> 颜色累加器 {count, sumR, sumG, sumB}
+                        
+                        samples.forEach(s => {
+                            const rIdx = Math.floor(s.r / binSize);
+                            const gIdx = Math.floor(s.g / binSize);
+                            const bIdx = Math.floor(s.b / binSize);
+                            const key = `${rIdx},${gIdx},${bIdx}`;
+                            if (!bins[key]) {
+                                bins[key] = { count: 0, sumR: 0, sumG: 0, sumB: 0 };
+                            }
+                            bins[key].count++;
+                            bins[key].sumR += s.r;
+                            bins[key].sumG += s.g;
+                            bins[key].sumB += s.b;
+                        });
+                        
+                        // 找到出现次数最多的桶
+                        let maxCount = 0;
+                        let bestKey = null;
+                        for (const key in bins) {
+                            if (bins[key].count > maxCount) {
+                                maxCount = bins[key].count;
+                                bestKey = key;
+                            }
+                        }
+                        
+                        // 取该桶中颜色的平均值作为最终颜色
+                        const bestBin = bins[bestKey];
+                        finalR = Math.round(bestBin.sumR / bestBin.count);
+                        finalG = Math.round(bestBin.sumG / bestBin.count);
+                        finalB = Math.round(bestBin.sumB / bestBin.count);
+                        // 透明度取所有采样点的平均（或者直接设为1，因为已过滤透明）
+                        finalA = 1;
+                    }
+                    
+                    // 注意：不再过滤纯黑色，保留原始颜色
+                    
+                    container.style.setProperty('background-color', `rgba(${finalR}, ${finalG}, ${finalB}, ${finalA})`, 'important');
                     container.style.backdropFilter = 'none';
+                    container.style.webkitBackdropFilter = 'none';
                 } catch (e) {
-                   
-                    container.style.removeProperty('background-color');
-                    container.style.removeProperty('backdrop-filter');
+                    // 取色失败时保持灰色
+                    container.style.setProperty('background-color', '#cccccc', 'important');
+                    container.style.backdropFilter = 'none';
+                    container.style.webkitBackdropFilter = 'none';
                 }
             }
 
@@ -770,7 +880,6 @@
                 localStorage.setItem(BG_STORAGE_KEY, JSON.stringify({ type, url, blur }));
                 applyBackground(type, url, blur);
             }
-            
             function loadBackground() {
     try {
         const stored = localStorage.getItem(BG_STORAGE_KEY);
@@ -1007,14 +1116,14 @@
                     if (tile) { e.preventDefault(); showContextMenu(e, tile, 'tile'); }
                 });
 
-                // 添加磁贴按钮
-                const addBtn = document.getElementById('addTileBtn');
-                if (addBtn) {
-                    addBtn.addEventListener('click', (e) => {
+                // 新增：点击添加磁贴按钮（使用事件委托）
+                dom.tileGrid.addEventListener('click', (e) => {
+                    const addBtn = e.target.closest('.add-tile');
+                    if (addBtn) {
                         e.stopPropagation();
                         openTileModal('add');
-                    });
-                }
+                    }
+                });
 
                 // 搜索相关
                 dom.searchSubmitBtn.addEventListener('click', performSearch);
