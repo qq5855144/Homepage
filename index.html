@@ -170,7 +170,7 @@
         .tile[data-size="1x2"] { grid-row: span 2; }
         .tile[data-size="2x2"] { grid-column: span 2; grid-row: span 2; }
         .tile-icon {
-            width: 100%; border-radius: 12px; background: rgba(255,255,255,0.75);
+            width: 100%; border-radius: 12px; background: rgba(255,255,255,0.95);
             backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             box-shadow: 0 6px 14px rgba(0,0,0,0.08); display: flex; align-items: center;
             justify-content: center; font-size: 24px; margin-bottom: 3px; flex-shrink: 0;
@@ -623,7 +623,7 @@
                     
                     let finalR, finalG, finalB, finalA;
                     if (samples.length === 0) {
-                        finalR = 220; finalG = 220; finalB = 220; finalA = 1;
+                        finalR = 255; finalG = 255; finalB = 255; finalA = 1;
                     } else {
                         const binSize = 32;
                         const bins = {};
@@ -863,6 +863,12 @@
         saveBackground('image', 'img/bj.jpg', 10);    
     }
 };
+const removeBackground = () => {
+                localStorage.removeItem(BG_STORAGE_KEY);
+                dom.bgLayer.innerHTML = '';
+                bgType = 'image'; bgUrl = ''; blurAmount = 0;
+                setBlur(0);
+            };
 
             let currentBgType = 'image';
             const openBgModal = () => {
