@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>主页</title>
+    <title>简·起始页</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <style>
+        <style>
         /* ---------- 全局重置 ---------- */
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
         body {
@@ -153,6 +153,29 @@
             color: #f56c6c; cursor: pointer; z-index: 5; pointer-events: auto;
         }
         .search-engine .item:hover .delete-icon { opacity: 1; }
+
+        /* ===== 搜索引擎图标图片与图标显示 ===== */
+        .search-engine .item .engine-icon img,
+        .search-engine .add-engine-item .engine-icon img,
+        .search-select .engine-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .search-engine .item .engine-icon iconify-icon,
+        .search-engine .add-engine-item .engine-icon iconify-icon,
+        .search-select .engine-icon iconify-icon {
+            font-size: 22px;           
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        
+
         /* ---------- 磁贴网格 ---------- */
         .tile-grid {
             display: grid; grid-template-columns: repeat(5, 44px); row-gap: 1px; column-gap: 22px;
@@ -848,7 +871,7 @@
                 applyBackground(type, url, blur);
             };
             const loadBackground = () => {
-    try {
+                try {
         const stored = localStorage.getItem(BG_STORAGE_KEY);
         if (stored) {
             const settings = JSON.parse(stored);
@@ -863,7 +886,7 @@
         saveBackground('image', 'img/bj.jpg', 10);    
     }
 };
-const removeBackground = () => {
+            const removeBackground = () => {
                 localStorage.removeItem(BG_STORAGE_KEY);
                 dom.bgLayer.innerHTML = '';
                 bgType = 'image'; bgUrl = ''; blurAmount = 0;
