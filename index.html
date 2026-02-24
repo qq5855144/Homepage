@@ -518,10 +518,18 @@
             let sortableInstance = null;
             let currentModalMode = 'tile';
             let editTileId = null;
+            
+            // 长按相关变量 (提升至顶层，便于统一清理)
             let longPressTimer = null;
+            let tilePressTimer = null;
+            let enginePressTimer = null;
             let currentLongPressedTile = null;
             let currentLongPressedEngine = null;
-            let bgType = 'image', bgUrl = '', blurAmount = 0;
+            let pressedTile = null;      // 当前按下的磁贴（用于移动判断）
+            let pressedEngine = null;     // 当前按下的引擎
+
+            // 取色缓存
+            const colorCache = new Map();
 
             // ==================== 辅助函数 ====================
             const getAllEngines = () => [...presetEngines, ...customEngines];
@@ -537,6 +545,18 @@
             const clearLongPressTimer = () => {
                 if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
                 currentLongPressedTile = null; currentLongPressedEngine = null;
+            };
+
+            // 清除磁贴长按计时器
+            const clearTilePress = () => {
+                if (tilePressTimer) { clearTimeout(tilePressTimer); tilePressTimer = null; }
+                pressedTile = null;
+            };
+
+            // 清除引擎长按计时器
+            const clearEnginePress = () => {
+                if (enginePressTimer) { clearTimeout(enginePressTimer); enginePressTimer = null; }
+                pressedEngine = null;
             };
 
             // ==================== 引擎列表渲染 ====================
@@ -586,7 +606,7 @@
                 extractEdgeColors();
             };
 
-            // ==================== 磁贴背景色提取（基于边缘颜色） ====================
+            // ==================== 磁贴背景色提取（基于边缘颜色，带缓存） ====================
             const extractEdgeColors = () => {
                 const images = document.querySelectorAll('.tile:not(.add-tile) .tile-icon img.tile-icon-img');
                 images.forEach(img => {
@@ -602,24 +622,45 @@
                     const applyColor = () => {
                         if (img.complete) {
                             img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => {
-                                iconContainer.style.setProperty('background-color', '#cccccc', 'important');
+                                setBackgroundFallback(img, iconContainer);
                             });
                         } else {
                             img.addEventListener('load', () => {
                                 img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => {
-                                    iconContainer.style.setProperty('background-color', '#cccccc', 'important');
+                                    setBackgroundFallback(img, iconContainer);
                                 });
                             }, { once: true });
-                            img.addEventListener('error', () => iconContainer.style.setProperty('background-color', '#cccccc', 'important'));
+                            img.addEventListener('error', () => setBackgroundFallback(img, iconContainer));
                         }
                     };
                     applyColor();
                 });
             };
 
+            const setBackgroundFallback = (img, container) => {
+                const src = img.src;
+                if (!colorCache.has(src)) {
+                    colorCache.set(src, '#cccccc');
+                }
+                container.style.setProperty('background-color', '#cccccc', 'important');
+                container.style.backdropFilter = 'none';
+                container.style.webkitBackdropFilter = 'none';
+            };
+
             const setBackgroundFromImage = (img, container) => {
                 const tile = img.closest('.tile');
                 if (tile && tile.dataset.size === '1x1') return;
+                const src = img.src;
+
+                // 缓存命中
+                if (colorCache.has(src)) {
+                    const color = colorCache.get(src);
+                    container.style.setProperty('background-color', color, 'important');
+                    container.style.backdropFilter = 'none';
+                    container.style.webkitBackdropFilter = 'none';
+                    return;
+                }
+
                 try {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
@@ -671,13 +712,13 @@
                         finalB = Math.round(bestBin.sumB / bestBin.count);
                         finalA = 1;
                     }
-                    container.style.setProperty('background-color', `rgba(${finalR}, ${finalG}, ${finalB}, ${finalA})`, 'important');
+                    const colorStr = `rgba(${finalR}, ${finalG}, ${finalB}, ${finalA})`;
+                    colorCache.set(src, colorStr);
+                    container.style.setProperty('background-color', colorStr, 'important');
                     container.style.backdropFilter = 'none';
                     container.style.webkitBackdropFilter = 'none';
                 } catch {
-                    container.style.setProperty('background-color', '#cccccc', 'important');
-                    container.style.backdropFilter = 'none';
-                    container.style.webkitBackdropFilter = 'none';
+                    setBackgroundFallback(img, container);
                 }
             };
 
@@ -685,10 +726,11 @@
                 if (sortableInstance) sortableInstance.destroy();
                 sortableInstance = new Sortable(dom.tileGrid, {
                     animation: 200, filter: '.add-tile', draggable: '.tile:not(.add-tile)',
-                    delay: 100, delayOnTouchOnly: true, touchStartThreshold: 3, forceFallback: true,
+                    delay: 100, delayOnTouchOnly: true, touchStartThreshold: 5, // 调高阈值，减少误触
+                    forceFallback: true,
                     fallbackClass: 'sortable-drag', ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                     chosenClass: 'sortable-chosen', scroll: true, scrollSensitivity: 30,
-                    onStart: clearLongPressTimer,
+                    onStart: clearLongPressTimer, // 拖拽开始时清除长按菜单计时器
                     onEnd: (evt) => {
                         const newOrder = [];
                         dom.tileGrid.querySelectorAll('.tile:not(.add-tile)').forEach(el => {
@@ -872,7 +914,7 @@
             };
             const loadBackground = () => {
                 try {
-        const stored = localStorage.getItem(BG_STORAGE_KEY);
+                    const stored = localStorage.getItem(BG_STORAGE_KEY);
         if (stored) {
             const settings = JSON.parse(stored);
             bgType = settings.type || 'image';
@@ -970,8 +1012,6 @@
                 });
 
                 // 引擎列表长按（触发编辑）
-                let enginePressTimer = null, pressedEngine = null;
-                const clearEnginePress = () => { clearTimeout(enginePressTimer); enginePressTimer = null; pressedEngine = null; };
                 dom.engineList.addEventListener('touchstart', (e) => {
                     const item = e.target.closest('.item');
                     if (!item) return;
@@ -1004,8 +1044,6 @@
                 });
 
                 // 磁贴点击/长按
-                let tilePressTimer = null, pressedTile = null;
-                const clearTilePress = () => { if (tilePressTimer) { clearTimeout(tilePressTimer); tilePressTimer = null; } pressedTile = null; };
                 dom.tileGrid.addEventListener('touchstart', (e) => {
                     const tile = e.target.closest('.tile:not(.add-tile)');
                     if (!tile) { clearTilePress(); return; }
@@ -1169,6 +1207,13 @@
             bindEvents();
             updateDateTime();
             setInterval(updateDateTime, 1000);
+
+            // 页面卸载前清理所有长按计时器
+            window.addEventListener('beforeunload', function() {
+                if (longPressTimer) clearTimeout(longPressTimer);
+                if (tilePressTimer) clearTimeout(tilePressTimer);
+                if (enginePressTimer) clearTimeout(enginePressTimer);
+            });
         })();
 
         // 阻止全局右键（输入框除外）
