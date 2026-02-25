@@ -812,7 +812,7 @@
     <div id="contextMenu" class="context-menu">
         <div class="menu-item" id="menuEdit"><iconify-icon icon="mdi:pencil"></iconify-icon> 编辑</div>
         <div class="menu-item" id="menuDelete"><iconify-icon icon="mdi:trash-can-outline"></iconify-icon> 删除</div>
-        <div class="menu-item" id="menuBg"><iconify-icon icon="mdi:wallpaper"></iconify-icon> 设置背景</div>
+        <div class="menu-item" id="menuBg"><iconify-icon icon="mdi:wallpaper"></iconify-icon> 主页背景</div>
         <div class="menu-item" style="justify-content: space-between;" id="menuSizeToggle">
             <span><iconify-icon icon="mdi:arrow-expand-all"></iconify-icon> 尺寸</span>
             <iconify-icon icon="mdi:chevron-right" style="color:#888;"></iconify-icon>
@@ -830,7 +830,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span id="modalTitle">添加快捷方式</span>
-                <span class="modal-close" id="modalCloseBtn">&times;</span>
+                <span class="modal-close" id="modalCloseBtn"><iconify-icon icon="mdi:close"></iconify-icon></span>
             </div>
             <div class="modal-field">
                 <label id="modalNameLabel">网站名称</label>
@@ -864,7 +864,7 @@
         <div class="modal-content bg-modal-content">
             <div class="modal-header">
                 <iconify-icon icon="mdi:palette"></iconify-icon> 动态背景
-                <span class="modal-close" id="bgModalClose">&times;</span>
+                <span class="modal-close" id="bgModalClose"><iconify-icon icon="mdi:close"></iconify-icon></span>
             </div>
             <div class="bg-tabs">
                 <div class="bg-tab active" data-bg-type="image"><iconify-icon icon="mdi:image"></iconify-icon> 图片/GIF</div>
@@ -1295,7 +1295,7 @@
                 } else {
                     dom.modalName.value = '';
                     dom.modalUrl.value = '';
-                    dom.modalImage.value = '🌐';
+                    dom.modalImage.value = '';
                 }
                 dom.tileModal.classList.add('show');
             };
