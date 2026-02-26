@@ -3,20 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>主页</title>
-    <!-- 外部库 -->
+    <title>灵动起始页</title>
+    <!-- 外部库：文件保存、图标、拖拽排序 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        /* ========== 全局重置 & 基础 ========== */
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+        /* === 全局重置 & 基础 === */
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
         body {
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             background-color: #f5f7fa;
@@ -30,9 +24,7 @@
             -webkit-user-select: none !important;
             -webkit-touch-callout: none !important;
         }
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { -webkit-tap-highlight-color: transparent; }
         input, textarea, [contenteditable="true"] {
             user-select: auto !important;
             -webkit-user-select: auto !important;
@@ -45,17 +37,16 @@
         }
         .app {
             width: 100%;
-            max-width: 360px;
+            max-width: 400px;
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 12px 16px 16px;
+            padding: 12px 12px 8px;
             box-sizing: border-box;
             position: relative;
             z-index: 2;
             pointer-events: auto;
         }
-        /* ========== 背景层 ========== */
         #bg-layer {
             position: fixed;
             top: 0;
@@ -68,8 +59,7 @@
             background-color: #e9e9e9;
             transition: filter 0.2s;
         }
-        #bg-layer img,
-        #bg-layer video {
+        #bg-layer img, #bg-layer video {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -81,14 +71,13 @@
             transition: opacity 0.3s, filter 0.2s;
             will-change: transform;
         }
-        /* ========== 时间栏 ========== */
         .datetime-bar {
             width: 100%;
             background: transparent !important;
             backdrop-filter: none !important;
             border: none !important;
-            margin-bottom: 20px;
-            padding: 18px 12px;
+            margin-bottom: 12px;
+            padding: 12px 8px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -114,11 +103,10 @@
             color: rgba(255,255,255,0.8);
             text-shadow: none;
         }
-        /* ========== 搜索区域 ========== */
         .search-wrap {
             width: 100%;
             max-width: 860px;
-            margin: 0 auto 16px;
+            margin: 0 auto 12px;
             position: relative;
             z-index: 50;
         }
@@ -193,7 +181,6 @@
             font-weight: 500;
             gap: 6px;
         }
-        /* 搜索建议框 */
         .suggestions-box {
             position: absolute;
             left: 0;
@@ -218,12 +205,8 @@
             border-bottom: 1px solid rgba(0,0,0,0.05);
             transition: background 0.1s;
         }
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-        .suggestion-item:hover {
-            background: rgba(200,200,200,0.2);
-        }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:hover { background: rgba(200,200,200,0.2); }
         .suggestion-search-icon, .suggestion-fill-icon {
             width: 32px;
             height: 32px;
@@ -234,9 +217,7 @@
             color: #1e88e5;
             border-radius: 50%;
         }
-        .suggestion-search-icon {
-            font-size: 18px;
-        }
+        .suggestion-search-icon { font-size: 18px; }
         .suggestion-fill-icon {
             font-size: 20px;
             color: #5f6368;
@@ -250,7 +231,6 @@
             text-overflow: ellipsis;
             color: #202124;
         }
-        /* ========== 引擎面板 ========== */
         .panel-wrap {
             position: absolute;
             left: 0;
@@ -282,8 +262,7 @@
             flex-wrap: wrap;
             gap: 4px;
         }
-        .search-engine .item,
-        .search-engine .add-engine-item {
+        .search-engine .item, .search-engine .add-engine-item {
             width: 70px;
             padding: 10px 0;
             display: inline-flex;
@@ -294,8 +273,7 @@
             border-radius: 12px;
             background-color: transparent;
         }
-        .search-engine .item .engine-icon,
-        .search-engine .add-engine-item .engine-icon {
+        .search-engine .item .engine-icon, .search-engine .add-engine-item .engine-icon {
             margin: 0 auto;
             height: 32px;
             width: 32px;
@@ -307,17 +285,13 @@
             font-size: 18px;
             pointer-events: none;
         }
-        .search-engine .item .engine-icon img,
-        .search-engine .add-engine-item .engine-icon img,
-        .search-select .engine-icon img {
+        .search-engine .item .engine-icon img, .search-engine .add-engine-item .engine-icon img, .search-select .engine-icon img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
         }
-        .search-engine .item .engine-icon iconify-icon,
-        .search-engine .add-engine-item .engine-icon iconify-icon,
-        .search-select .engine-icon iconify-icon {
+        .search-engine .item .engine-icon iconify-icon, .search-engine .add-engine-item .engine-icon iconify-icon, .search-select .engine-icon iconify-icon {
             font-size: 22px;
             display: flex;
             align-items: center;
@@ -325,8 +299,7 @@
             width: 100%;
             height: 100%;
         }
-        .search-engine .item .name,
-        .search-engine .add-engine-item .name {
+        .search-engine .item .name, .search-engine .add-engine-item .name {
             margin-top: 6px;
             font-size: 12px;
             max-width: 70px;
@@ -352,10 +325,7 @@
             z-index: 5;
             pointer-events: auto;
         }
-        .search-engine .item:hover .delete-icon {
-            opacity: 1;
-        }
-        /* ========== 磁贴网格 ========== */
+        .search-engine .item:hover .delete-icon { opacity: 1; }
         .tile-grid {
             display: grid;
             grid-template-columns: repeat(5, 44px);
@@ -365,17 +335,13 @@
             justify-content: center;
             flex: 1;
             overflow-y: auto;
-            padding-bottom: 0px;
+            padding-bottom: 4px;
             align-content: start;
             margin: 0;
             background: transparent !important;
-            backdrop-filter: none !important;
-            border: none !important;
         }
         .tile {
             background: transparent !important;
-            backdrop-filter: none !important;
-            border: none !important;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -408,12 +374,9 @@
             color: inherit;
             overflow: hidden;
             position: relative;
-            transition: background-color 0.2s;
         }
-        .tile[data-size="1x1"] .tile-icon,
-        .tile[data-size="2x1"] .tile-icon { height: 44px; }
-        .tile[data-size="1x2"] .tile-icon,
-        .tile[data-size="2x2"] .tile-icon { height: calc(2 * 44px + 3px + 20px); }
+        .tile[data-size="1x1"] .tile-icon, .tile[data-size="2x1"] .tile-icon { height: 44px; }
+        .tile[data-size="1x2"] .tile-icon, .tile[data-size="2x2"] .tile-icon { height: calc(2 * 44px + 3px + 20px); }
         .tile-icon img {
             max-width: 90%;
             max-height: 90%;
@@ -450,7 +413,6 @@
             font-size: 12px;
             box-sizing: border-box;
         }
-        /* 拖拽样式 */
         .sortable-ghost {
             opacity: 0 !important;
             background: transparent !important;
@@ -473,7 +435,6 @@
             background: rgba(255,255,255,0.9) !important;
             box-shadow: none !important;
         }
-        /* 右键菜单 */
         .context-menu {
             position: fixed;
             background-color: white;
@@ -509,7 +470,6 @@
             cursor: pointer;
             border: 1px solid #ccc;
         }
-        /* 模态框 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -723,7 +683,7 @@
             white-space: nowrap;
             color: #333;
         }
-        #modalFileUpload, #bgFileInput { display: none; }
+        #modalFileUpload, #bgFileInput, #catFileUpload { display: none; }
         .modal-buttons {
             display: flex;
             justify-content: flex-end;
@@ -754,37 +714,141 @@
             flex: 1;
             background: #f0f2f5;
         }
-        /* 暗色模式 */
+        .category-toolbar {
+            display: flex;
+            align-items: stretch;
+            justify-content: flex-start;
+            gap: 4px;
+            padding: 2px 4px;
+            margin-top: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: none;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;
+            scrollbar-width: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: background 0.2s;
+            min-height: 44px;
+        }
+        .category-toolbar::-webkit-scrollbar { display: none; }
+        .toolbar-home, .category-chip, .toolbar-add-cat {
+            flex-shrink: 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 4px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 8px;
+            color: #1e1e1e;
+            transition: 0.1s;
+            min-width: 40px;
+            line-height: 1.2;
+            position: relative;
+        }
+        .toolbar-home { width: 40px; height: auto; }
+        .category-chip { max-width: 60px; }
+        .toolbar-add-cat { width: 40px; }
+        .toolbar-home .home-icon, .category-chip .chip-icon, .toolbar-add-cat .add-icon {
+            font-size: 16px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2px;
+        }
+        .toolbar-home .home-text, .category-chip .chip-name, .toolbar-add-cat .add-text {
+            font-size: 8px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 50px;
+            color: inherit;
+        }
+        .category-chip .delete-cat-icon {
+            position: absolute;
+            right: -2px;
+            top: -2px;
+            background-color: #f56c6c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.1s;
+            pointer-events: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .category-chip.show-delete .delete-cat-icon {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .category-chip .delete-cat-icon:hover { background-color: #e53935; }
         @media (prefers-color-scheme: dark) {
             body, #bg-layer { background-color: #121212; color: #eee; }
             .search-form { background-color: rgba(40,40,40,0.9) !important; }
             .search-input { color: #eee; }
             .search-engine-wrap { background-color: #2a2a2ae0 !important; color: #eee; }
-            .search-engine .item:hover, .search-engine .add-engine-item:hover { background-color: #3d3d3d; }
             .context-menu, .modal-content { background-color: #2a2a2a; border-color: #444; color: #eee; }
             .modal-content input { background-color: #3a3a3a; color: #eee; border-color: #555; }
             .bg-modal-content { background: rgba(30,30,30,0.8); border-color: rgba(255,255,255,0.15); color: #eee; }
             .tile-icon { background: rgba(60,60,60,0.9) !important; box-shadow: none !important; }
             .sortable-drag { background: transparent !important; box-shadow: none !important; }
             .sortable-drag .tile-icon { background: rgba(80,80,80,0.95) !important; }
-            .modal-import-export .modal-btn { background: #3a3a3a; color: #ddd; }
             .suggestions-box { background: rgba(40,40,40,0.95); border-color: #444; }
-            .suggestion-item { border-bottom-color: #333; }
-            .suggestion-text { color: #eee; }
-            .suggestion-fill-icon { color: #aaa; }
-            .suggestion-item:hover { background: #3a3a3a; }
         }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 4px;
+            border-radius: 12px;
+            background: #f5f5f5;
+            cursor: pointer;
+            transition: all 0.1s;
+            border: 2px solid transparent;
+        }
+        .icon-item iconify-icon { font-size: 32px; }
+        .icon-item.selected { border-color: #1e88e5; background: #e3f2fd; }
+        .dark .icon-item { background: #333; color: #eee; }
     </style>
 </head>
 <body>
+    <!-- 背景层 -->
     <div id="bg-layer"></div>
+
     <div class="app">
-        <!-- 时间显示区域 -->
+        <!-- 日期时间栏 -->
         <div class="datetime-bar" id="datetimeBar">
             <div class="time" id="currentTime">--:--:--</div>
             <div class="date" id="currentDate">----</div>
         </div>
-        <!-- 搜索区域：包含搜索引擎选择、输入框、建议 -->
+
+        <!-- 搜索区域 -->
         <div class="search-wrap">
             <div class="search-form">
                 <div class="search-select" id="searchEngineSelect">
@@ -804,11 +868,24 @@
                 </div>
             </div>
         </div>
+
         <!-- 磁贴网格 -->
         <div id="tileGrid" class="tile-grid"></div>
+
+        <!-- 底部分类栏 -->
+        <div class="category-toolbar" id="categoryToolbar">
+            <div class="toolbar-home" id="homeToolbarBtn" title="主页">
+                <span class="home-icon"><iconify-icon icon="mdi:home"></iconify-icon></span>
+                <span class="home-text">主页</span>
+            </div>
+            <div class="toolbar-add-cat" id="addCategoryBtn" title="新建分类">
+                <span class="add-icon"><iconify-icon icon="mdi:plus"></iconify-icon></span>
+                <span class="add-text">新建</span>
+            </div>
+        </div>
     </div>
 
-    <!-- 右键菜单（长按菜单） -->
+    <!-- 右键/长按菜单 -->
     <div id="contextMenu" class="context-menu">
         <div class="menu-item" id="menuEdit"><iconify-icon icon="mdi:pencil"></iconify-icon> 编辑</div>
         <div class="menu-item" id="menuDelete"><iconify-icon icon="mdi:trash-can-outline"></iconify-icon> 删除</div>
@@ -825,12 +902,12 @@
         </div>
     </div>
 
-    <!-- 磁贴/引擎编辑模态框 -->
+    <!-- 磁贴/搜索引擎编辑模态框 -->
     <div class="modal-overlay" id="tileModal">
         <div class="modal-content">
             <div class="modal-header">
                 <span id="modalTitle">添加快捷方式</span>
-                <span class="modal-close" id="modalCloseBtn"><iconify-icon icon="mdi:close"></iconify-icon></span>
+                <span class="modal-close" id="modalCloseBtn">&times;</span>
             </div>
             <div class="modal-field">
                 <label id="modalNameLabel">网站名称</label>
@@ -864,7 +941,7 @@
         <div class="modal-content bg-modal-content">
             <div class="modal-header">
                 <iconify-icon icon="mdi:palette"></iconify-icon> 动态背景
-                <span class="modal-close" id="bgModalClose"><iconify-icon icon="mdi:close"></iconify-icon></span>
+                <span class="modal-close" id="bgModalClose">&times;</span>
             </div>
             <div class="bg-tabs">
                 <div class="bg-tab active" data-bg-type="image"><iconify-icon icon="mdi:image"></iconify-icon> 图片/GIF</div>
@@ -897,28 +974,52 @@
         </div>
     </div>
 
+    <!-- 新建分类模态框 -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal-content bg-modal-content" style="max-width: 360px;">
+            <div class="modal-header">
+                <span><iconify-icon icon="mdi:folder-plus"></iconify-icon> 新建分类</span>
+                <span class="modal-close" id="catModalClose">&times;</span>
+            </div>
+            <div class="modal-field">
+                <label>分类名称</label>
+                <input type="text" id="catNameInput" placeholder="例如：工作、娱乐" maxlength="20">
+            </div>
+            <div class="modal-field">
+                <label>分类图标 (Iconify 图标名 / Emoji / 图片URL)</label>
+                <div class="modal-upload-area">
+                    <input type="text" id="catIconInput" placeholder="mdi:work 或 🎮 或 图片URL" value="mdi:folder">
+                    <button class="modal-upload-btn" id="catIconUploadBtn"><iconify-icon icon="mdi:image"></iconify-icon> 选择图标</button>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" id="catCancelBtn">取消</button>
+                <button class="modal-btn modal-btn-primary" id="catSaveBtn">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图标选择器（纯图标网格） -->
+    <div class="modal-overlay" id="iconPickerModal">
+        <div class="modal-content bg-modal-content" style="max-width: 380px;">
+            <div class="modal-header">
+                <span><iconify-icon icon="mdi:image"></iconify-icon> 选择图标</span>
+                <span class="modal-close" id="iconPickerClose">&times;</span>
+            </div>
+            <div class="icon-grid" id="iconGrid"></div>
+            <div class="modal-buttons" style="justify-content: space-between;">
+                <button class="modal-btn" id="iconPickerCancel">取消</button>
+                <button class="modal-btn modal-btn-primary" id="iconPickerConfirm">确认</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function() {
-            // ==================== 工具函数 ====================
-            /**
-             * 根据图标标识生成 HTML
-             * @param {string} icon - 图标标识（url、iconify名或emoji）
-             * @param {string} className - 附加的CSS类名
-             * @returns {string} 图标HTML
-             */
-            function renderIconHtml(icon, className = '') {
-                if (!icon) icon = '🌐';
-                if (/^(https?:\/\/|data:image\/|blob:)/i.test(icon)) {
-                    const crossOriginAttr = icon.startsWith('http') && !icon.startsWith('data:') ? ' crossorigin="anonymous"' : '';
-                    return `<img src="${icon}" class="tile-icon-img" draggable="false"${crossOriginAttr} data-icon-url="${icon}">`;
-                }
-                if (icon.includes(':')) {
-                    return `<iconify-icon icon="${icon}"${className ? ' class="'+className+'"' : ''}></iconify-icon>`;
-                }
-                return `<span${className ? ' class="'+className+'"' : ''}>${icon}</span>`;
-            }
+            'use strict';
 
-            // ==================== DOM 元素缓存 ====================
+            // ==================== 全局变量定义 (仅保留必要的) ====================
+            /** @type {Object} DOM 元素快捷映射 */
             const dom = {
                 bgLayer: document.getElementById('bg-layer'),
                 searchInput: document.getElementById('searchInput'),
@@ -960,15 +1061,25 @@
                 menuBg: document.getElementById('menuBg'),
                 menuSizeToggle: document.getElementById('menuSizeToggle'),
                 sizeSubmenu: document.getElementById('sizeSubmenu'),
-                sizeOptions: document.querySelectorAll('#sizeSubmenu .size-option')
+                sizeOptions: document.querySelectorAll('#sizeSubmenu .size-option'),
+                categoryToolbar: document.getElementById('categoryToolbar'),
+                homeToolbarBtn: document.getElementById('homeToolbarBtn'),
+                addCategoryBtn: document.getElementById('addCategoryBtn'),
+                categoryModal: document.getElementById('categoryModal'),
+                catNameInput: document.getElementById('catNameInput'),
+                catIconInput: document.getElementById('catIconInput'),
+                catIconUploadBtn: document.getElementById('catIconUploadBtn'),
+                catCancelBtn: document.getElementById('catCancelBtn'),
+                catSaveBtn: document.getElementById('catSaveBtn'),
+                catModalClose: document.getElementById('catModalClose'),
+                iconPickerModal: document.getElementById('iconPickerModal'),
+                iconGrid: document.getElementById('iconGrid'),
+                iconPickerClose: document.getElementById('iconPickerClose'),
+                iconPickerCancel: document.getElementById('iconPickerCancel'),
+                iconPickerConfirm: document.getElementById('iconPickerConfirm')
             };
 
-            // ==================== 状态变量 ====================
-            const STORAGE_KEY = 'enhanced_tiles_data';
-            const CUSTOM_ENGINES_KEY = 'custom_engines';
-            const SELECTED_ENGINE_ID_KEY = 'selected_engine_id';
-            const BG_STORAGE_KEY = 'background_settings';
-
+            // 搜索引擎相关
             const presetEngines = [
                 { id: 'preset-0', name: 'Google', icon: 'devicon:google', url: 'https://www.google.com/search?q=%s' },
                 { id: 'preset-1', name: 'Bing', icon: 'logos:bing', url: 'https://www.bing.com/search?q=%s' },
@@ -976,164 +1087,275 @@
                 { id: 'preset-3', name: 'DuckDuckGo', icon: 'logos:duckduckgo', url: 'https://duckduckgo.com/?q=%s' },
                 { id: 'preset-4', name: 'Yandex', icon: 'vscode-icons:file-type-yandex', url: 'https://yandex.com/search/?text=%s' }
             ];
+            let customEngines = [];          // 用户自定义引擎
+            try { 
+                const stored = localStorage.getItem('custom_engines'); 
+                if (stored) customEngines = JSON.parse(stored); 
+            } catch (e) { /* 忽略 */ }
+            let selectedEngineId = localStorage.getItem('selected_engine_id') || 'preset-0';
 
-            let customEngines = [];
-            try { const stored = localStorage.getItem(CUSTOM_ENGINES_KEY); if (stored) customEngines = JSON.parse(stored); } catch (e) {}
-            let selectedEngineId = localStorage.getItem(SELECTED_ENGINE_ID_KEY) || 'preset-0';
-            let tilesData = [];
-            let sortableInstance = null;
-            let currentModalMode = 'tile';
-            let editTileId = null;
-            
-            // 长按相关变量 (提升至顶层，便于统一清理)
-            let longPressTimer = null;
-            let tilePressTimer = null;
-            let enginePressTimer = null;
-            let currentLongPressedTile = null;
-            let currentLongPressedEngine = null;
-            let pressedTile = null;      // 当前按下的磁贴（用于移动判断）
-            let pressedEngine = null;     // 当前按下的引擎
+            // 分类与磁贴数据
+            let categories = [];              // 所有分类 { id, name, icon, tiles[] }
+            let currentCategoryId = null;      // 当前分类ID
+            let tilesData = [];                // 当前分类的磁贴（快捷方式）
+            let sortableInstance = null;        // Sortable 实例
 
-            // 取色缓存
+            // 模态框状态
+            let currentModalMode = 'tile';      // 'tile' 或 'engine'
+            let editTileId = null;              // 正在编辑的磁贴/引擎ID
+
+            // 长按计时器 & 状态 (磁贴/搜索引擎)
+            let tilePressTimer = null, enginePressTimer = null, categoryPressTimer = null;
+            let pressedTile = null, pressedEngine = null;   // 当前按下的元素
+
+            // 背景设置
+            let bgType = 'image', bgUrl = '', blurAmount = 0;
+            let currentBgType = 'image';         // 当前模态框中的背景类型
+
+            // 图标缓存 (用于磁贴背景色提取)
             const colorCache = new Map();
 
-            // ==================== 辅助函数 ====================
+            // 预设图标列表 (用于图标选择器)
+            const iconList = [
+                'hugeicons:game-controller-03', 'mingcute:tool-line', 'mynaui:box', 'ix:ai',
+                'hugeicons:chat-gpt', 'ri:deepseek-fill', 'ri:movie-2-line', 'mdi-light:music',
+                'streamline-plump:ai-edit-robot', 'entypo:aircraft-take-off', 'arcticons:airbrush',
+                'ph:bandaids-fill', 'mdi:heart-outline', 'f7:paperplane', 'streamline-pixel:food-drink-coffee'
+            ];
+
+            // ==================== 工具函数 ====================
+            /** 根据图标值生成HTML (支持图片/iconify/emoji) */
+            function renderIconHtml(icon, className = '') {
+                if (!icon) icon = '🌐';
+                if (/^(https?:\/\/|data:image\/|blob:)/i.test(icon)) {
+                    const crossOriginAttr = icon.startsWith('http') && !icon.startsWith('data:') ? ' crossorigin="anonymous"' : '';
+                    return `<img src="${icon}" class="tile-icon-img" draggable="false"${crossOriginAttr} data-icon-url="${icon}">`;
+                }
+                if (icon.includes(':')) {
+                    return `<iconify-icon icon="${icon}"${className ? ' class="'+className+'"' : ''}></iconify-icon>`;
+                }
+                return `<span${className ? ' class="'+className+'"' : ''}>${icon}</span>`;
+            }
+
+            /** 获取所有搜索引擎 (预设+自定义) */
             const getAllEngines = () => [...presetEngines, ...customEngines];
             const getEngineById = (id) => getAllEngines().find(e => e.id === id) || presetEngines[0];
-            const saveCustomEngines = () => localStorage.setItem(CUSTOM_ENGINES_KEY, JSON.stringify(customEngines));
-            const setSelectedEngine = (id) => { selectedEngineId = id; localStorage.setItem(SELECTED_ENGINE_ID_KEY, id); updateCurrentEngineIcon(); };
 
+            /** 保存自定义引擎到localStorage */
+            const saveCustomEngines = () => localStorage.setItem('custom_engines', JSON.stringify(customEngines));
+
+            /** 设置当前搜索引擎并更新图标 */
+            const setSelectedEngine = (id) => { 
+                selectedEngineId = id; 
+                localStorage.setItem('selected_engine_id', id); 
+                updateCurrentEngineIcon(); 
+            };
+
+            /** 更新搜索框左侧图标 */
             const updateCurrentEngineIcon = () => {
                 const engine = getEngineById(selectedEngineId);
                 if (engine) dom.currentEngineIcon.innerHTML = renderIconHtml(engine.icon);
             };
 
-            const clearLongPressTimer = () => {
-                if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-                currentLongPressedTile = null; currentLongPressedEngine = null;
-            };
+            /** 隐藏所有分类上的删除图标 (长按取消) */
+            function hideAllDeleteIcons() {
+                document.querySelectorAll('.category-chip.show-delete').forEach(chip => {
+                    chip.classList.remove('show-delete');
+                });
+            }
 
-            // 清除磁贴长按计时器
-            const clearTilePress = () => {
+            /** 清除所有长按计时器 (用于拖拽开始) */
+            const clearAllLongPressTimers = () => {
                 if (tilePressTimer) { clearTimeout(tilePressTimer); tilePressTimer = null; }
-                pressedTile = null;
-            };
-
-            // 清除引擎长按计时器
-            const clearEnginePress = () => {
                 if (enginePressTimer) { clearTimeout(enginePressTimer); enginePressTimer = null; }
-                pressedEngine = null;
+                if (categoryPressTimer) { clearTimeout(categoryPressTimer); categoryPressTimer = null; }
+                pressedTile = null; pressedEngine = null;
             };
 
-            // ==================== 引擎列表渲染 ====================
-            const renderEngineList = () => {
+            // ==================== 数据持久化 (分类与磁贴) ====================
+            const MULTI_PAGE_KEY = 'multipage_tiles_data';
+
+            /** 加载多分类数据，兼容旧版单页数据 */
+            function loadMultipageData() {
+                const stored = localStorage.getItem(MULTI_PAGE_KEY);
+                if (stored) {
+                    try {
+                        const data = JSON.parse(stored);
+                        if (data.categories && Array.isArray(data.categories) && data.currentCategoryId) {
+                            categories = data.categories;
+                            currentCategoryId = data.currentCategoryId;
+                            categories.forEach(c => { if (!c.tiles) c.tiles = []; });
+                            return;
+                        }
+                    } catch (e) {}
+                }
+                // 无多页数据时，从旧版单页迁移
+                let oldTiles = [];
+                try {
+                    const old = localStorage.getItem('enhanced_tiles_data');
+                    if (old) oldTiles = JSON.parse(old);
+                } catch {}
+                if (!oldTiles.length) {
+                    oldTiles = [
+                        { id: 'g2', name: 'YouTube', url: 'https://youtube.com', icon: 'logos:youtube-icon', size: '2x1' },
+                        { id: 'g5', name: 'GitHub', url: 'https://github.com', icon: 'icon-park:github', size: '1x1' },
+                        { id: 'g6', name: 'Iconify', url: 'https://yesicon.app/', icon: 'ph:hand-fist', size: '2x1' }
+                    ];
+                }
+                categories = [ { id: 'cat0', name: '主页', icon: 'mdi:home', tiles: oldTiles } ];
+                currentCategoryId = 'cat0';
+                saveMultipageData();
+            }
+
+            function saveMultipageData() {
+                localStorage.setItem(MULTI_PAGE_KEY, JSON.stringify({ categories, currentCategoryId }));
+            }
+
+            /** 获取当前分类的磁贴数组 */
+            function getCurrentTiles() {
+                const cat = categories.find(c => c.id === currentCategoryId);
+                return cat ? cat.tiles : [];
+            }
+
+            /** 设置当前分类的磁贴数组并保存 */
+            function setCurrentTiles(newTiles) {
+                const cat = categories.find(c => c.id === currentCategoryId);
+                if (cat) {
+                    cat.tiles = newTiles;
+                    tilesData = newTiles;
+                    saveMultipageData();
+                }
+            }
+
+            /** 切换到指定分类 */
+            function switchCategory(catId) {
+                if (catId === currentCategoryId) return;
+                currentCategoryId = catId;
+                tilesData = getCurrentTiles();
+                renderCategoryBar();
+                renderTiles();
+                saveMultipageData();
+            }
+
+            /** 删除分类 (不能删除主页) */
+            function deleteCategory(catId) {
+                if (catId === 'cat0') { alert('主页不能删除'); return; }
+                if (!confirm('确定删除此分类？分类下的磁贴将一并删除')) return;
+                const index = categories.findIndex(c => c.id === catId);
+                if (index !== -1) {
+                    categories.splice(index, 1);
+                    if (currentCategoryId === catId) {
+                        currentCategoryId = 'cat0';
+                        tilesData = getCurrentTiles();
+                    }
+                    saveMultipageData();
+                    renderCategoryBar();
+                    renderTiles();
+                }
+            }
+
+            // ==================== 渲染函数 ====================
+            /** 渲染搜索引擎列表 (带删除按钮) */
+            function renderEngineList() {
                 const all = getAllEngines();
                 let html = '';
                 all.forEach(engine => {
                     const isPreset = engine.id.startsWith('preset-');
-                    html += `<div class="item" data-engine-id="${engine.id}">
-                        <span class="engine-icon">${renderIconHtml(engine.icon)}</span>
-                        <span class="name">${engine.name}</span>
-                        ${!isPreset ? '<span class="delete-icon" data-delete-id="'+engine.id+'"><iconify-icon icon="mdi:close"></iconify-icon></span>' : ''}
-                    </div>`;
+                    html += `<div class="item" data-engine-id="${engine.id}"><span class="engine-icon">${renderIconHtml(engine.icon)}</span><span class="name">${engine.name}</span>${!isPreset ? '<span class="delete-icon" data-delete-id="'+engine.id+'"><iconify-icon icon="mdi:close"></iconify-icon></span>' : ''}</div>`;
                 });
                 html += `<div class="add-engine-item" id="addEngineBtn"><span class="engine-icon"><iconify-icon icon="material-symbols:add-2"></iconify-icon></span><span class="name">添加</span></div>`;
                 dom.engineList.innerHTML = html;
-            };
+            }
 
-            // ==================== 磁贴数据处理 ====================
-            const DEFAULT_TILES = [                
-                { id: 'g2', name: 'YouTube', url: 'https://youtube.com', icon: 'logos:youtube-icon', size: '2x1' },
-                { id: 'g5', name: 'GitHub', url: 'https://github.com', icon: 'icon-park:github', size: '1x1' },
-                { id: 'g6', name: 'ChatGPT', url: 'https://chat.openai.com', icon: 'simple-icons:openai', size: '2x1' }
-            ];
-
-            const loadTileData = () => {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) { try { tilesData = JSON.parse(stored); } catch { tilesData = [...DEFAULT_TILES]; } } 
-                else { tilesData = [...DEFAULT_TILES]; }
-                tilesData = tilesData.map(t => ({ ...t, size: t.size || '1x1' }));
-            };
-            const saveData = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(tilesData));
-
-            const renderTiles = () => {
+            /** 渲染磁贴网格 (当前分类) */
+            function renderTiles() {
                 let html = '';
                 tilesData.forEach(tile => {
                     let displayName = tile.name;
                     const hasChinese = /[\u4e00-\u9fff]/.test(displayName);
                     const maxLen = hasChinese ? 5 : 8;
                     if (displayName.length > maxLen) displayName = displayName.slice(0, maxLen);
-                    html += `<div class="tile" data-id="${tile.id}" data-url="${tile.url}" data-size="${tile.size}" data-name="${tile.name.toLowerCase()}"><span class="tile-icon">${renderIconHtml(tile.icon)}</span><span class="tile-name">${displayName}</span></div>`;
+                    html += `<div class="tile" data-id="${tile.id}" data-url="${tile.url}" data-size="${tile.size || '1x1'}" data-name="${tile.name.toLowerCase()}"><span class="tile-icon">${renderIconHtml(tile.icon)}</span><span class="tile-name">${displayName}</span></div>`;
                 });
                 html += `<div class="tile add-tile" id="addTileBtn" data-size="1x1"><span class="tile-icon"><iconify-icon icon="material-symbols:add-2"></iconify-icon></span><span class="tile-name">添加</span></div>`;
                 dom.tileGrid.innerHTML = html;
                 dom.tileGrid.querySelectorAll('.tile:not(.add-tile) .tile-icon img').forEach(img => img.style.pointerEvents = 'none');
-                initDragAndDrop();
-                extractEdgeColors();
-            };
+                initDragAndDrop();               // 重新初始化拖拽
+                extractEdgeColors();              // 提取非1x1磁贴的背景色
+            }
 
-            // ==================== 磁贴背景色提取（基于边缘颜色，带缓存） ====================
-            const extractEdgeColors = () => {
+            /** 初始化拖拽排序 (使用Sortable) */
+            function initDragAndDrop() {
+                if (sortableInstance) sortableInstance.destroy();
+                sortableInstance = new Sortable(dom.tileGrid, {
+                    animation: 200, filter: '.add-tile', draggable: '.tile:not(.add-tile)',
+                    delay: 100, delayOnTouchOnly: true, touchStartThreshold: 5,
+                    forceFallback: true,
+                    fallbackClass: 'sortable-drag', ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+                    chosenClass: 'sortable-chosen', scroll: true, scrollSensitivity: 30,
+                    onStart: clearAllLongPressTimers,   // 开始拖拽时取消所有长按
+                    onEnd: (evt) => {
+                        const newOrder = [];
+                        dom.tileGrid.querySelectorAll('.tile:not(.add-tile)').forEach(el => {
+                            const id = el.dataset.id;
+                            const tile = tilesData.find(t => t.id === id);
+                            if (tile) newOrder.push(tile);
+                        });
+                        if (newOrder.length === tilesData.length) setCurrentTiles(newOrder);
+                        else renderTiles();   // 容错
+                    }
+                });
+            }
+
+            /** 提取图片边缘主色 (用于大尺寸磁贴背景) */
+            function extractEdgeColors() {
                 const images = document.querySelectorAll('.tile:not(.add-tile) .tile-icon img.tile-icon-img');
                 images.forEach(img => {
                     const tile = img.closest('.tile');
-                    if (tile && tile.dataset.size === '1x1') return;
+                    if (tile && tile.dataset.size === '1x1') return; // 1x1 不处理
                     const iconContainer = img.closest('.tile-icon');
                     if (!iconContainer) return;
-
                     iconContainer.style.setProperty('background-color', '#cccccc', 'important');
                     iconContainer.style.backdropFilter = 'none';
                     iconContainer.style.webkitBackdropFilter = 'none';
-
                     const applyColor = () => {
                         if (img.complete) {
-                            img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => {
-                                setBackgroundFallback(img, iconContainer);
-                            });
+                            img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => setBackgroundFallback(img, iconContainer));
                         } else {
                             img.addEventListener('load', () => {
-                                img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => {
-                                    setBackgroundFallback(img, iconContainer);
-                                });
+                                img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => setBackgroundFallback(img, iconContainer));
                             }, { once: true });
                             img.addEventListener('error', () => setBackgroundFallback(img, iconContainer));
                         }
                     };
                     applyColor();
                 });
-            };
+            }
 
-            const setBackgroundFallback = (img, container) => {
+            function setBackgroundFallback(img, container) {
                 const src = img.src;
-                if (!colorCache.has(src)) {
-                    colorCache.set(src, '#cccccc');
-                }
+                if (!colorCache.has(src)) colorCache.set(src, '#cccccc');
                 container.style.setProperty('background-color', '#cccccc', 'important');
                 container.style.backdropFilter = 'none';
                 container.style.webkitBackdropFilter = 'none';
-            };
+            }
 
-            const setBackgroundFromImage = (img, container) => {
+            function setBackgroundFromImage(img, container) {
                 const tile = img.closest('.tile');
                 if (tile && tile.dataset.size === '1x1') return;
                 const src = img.src;
-
-                // 缓存命中
                 if (colorCache.has(src)) {
-                    const color = colorCache.get(src);
-                    container.style.setProperty('background-color', color, 'important');
+                    container.style.setProperty('background-color', colorCache.get(src), 'important');
                     container.style.backdropFilter = 'none';
                     container.style.webkitBackdropFilter = 'none';
                     return;
                 }
-
                 try {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     canvas.width = img.naturalWidth;
                     canvas.height = img.naturalHeight;
                     ctx.drawImage(img, 0, 0);
-                    
                     const w = img.naturalWidth, h = img.naturalHeight;
                     const samples = [];
                     for (let row = 0; row < 9; row++) {
@@ -1150,7 +1372,6 @@
                             }
                         }
                     }
-                    
                     let finalR, finalG, finalB, finalA;
                     if (samples.length === 0) {
                         finalR = 255; finalG = 255; finalB = 255; finalA = 1;
@@ -1183,87 +1404,55 @@
                     container.style.setProperty('background-color', colorStr, 'important');
                     container.style.backdropFilter = 'none';
                     container.style.webkitBackdropFilter = 'none';
-                } catch {
-                    setBackgroundFallback(img, container);
-                }
-            };
+                } catch { setBackgroundFallback(img, container); }
+            }
 
-            const initDragAndDrop = () => {
-                if (sortableInstance) sortableInstance.destroy();
-                sortableInstance = new Sortable(dom.tileGrid, {
-                    animation: 200, filter: '.add-tile', draggable: '.tile:not(.add-tile)',
-                    delay: 100, delayOnTouchOnly: true, touchStartThreshold: 5, // 调高阈值，减少误触
-                    forceFallback: true,
-                    fallbackClass: 'sortable-drag', ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
-                    chosenClass: 'sortable-chosen', scroll: true, scrollSensitivity: 30,
-                    onStart: clearLongPressTimer, // 拖拽开始时清除长按菜单计时器
-                    onEnd: (evt) => {
-                        const newOrder = [];
-                        dom.tileGrid.querySelectorAll('.tile:not(.add-tile)').forEach(el => {
-                            const id = el.dataset.id;
-                            const tile = tilesData.find(t => t.id === id);
-                            if (tile) newOrder.push(tile);
-                        });
-                        if (newOrder.length === tilesData.length) { tilesData = newOrder; saveData(); } 
-                        else renderTiles();
-                    }
+            /** 渲染分类栏 (主页+动态分类) */
+            function renderCategoryBar() {
+                const toolbar = dom.categoryToolbar;
+                const homeBtn = dom.homeToolbarBtn;
+                const addBtn = dom.addCategoryBtn;
+                // 移除除主页和新建外的所有子元素
+                while (toolbar.children.length > 2) {
+                    toolbar.removeChild(toolbar.children[1]);
+                }
+                categories.forEach(cat => {
+                    if (cat.id === 'cat0') return;
+                    const chip = document.createElement('div');
+                    chip.className = 'category-chip' + (cat.id === currentCategoryId ? ' active' : '');
+                    chip.dataset.catId = cat.id;
+                    chip.innerHTML = `
+                        <span class="chip-icon">${renderIconHtml(cat.icon)}</span>
+                        <span class="chip-name">${cat.name}</span>
+                        <span class="delete-cat-icon" data-cat-id="${cat.id}"><iconify-icon icon="mdi:close"></iconify-icon></span>
+                    `;
+                    toolbar.insertBefore(chip, addBtn);
                 });
-            };
-
-            // ==================== 上下文菜单 ====================
-            const hideContextMenu = () => dom.contextMenu.classList.remove('show');
-            const showContextMenu = (event, element, type = 'tile') => {
-                let clientX, clientY;
-                if (event.touches) { clientX = event.touches[0].clientX; clientY = event.touches[0].clientY; } 
-                else { clientX = event.clientX; clientY = event.clientY; }
-                const menu = dom.contextMenu;
-                menu.style.visibility = 'hidden';
-                menu.classList.add('show');
-                menu.style.opacity = '0';
-                menu.style.pointerEvents = 'none';
-
-                const menuBg = document.getElementById('menuBg');
-                const menuSizeToggle = document.getElementById('menuSizeToggle');
-                const sizeSubmenu = document.getElementById('sizeSubmenu');
-                if (type === 'engine') {
-                    menuBg.style.display = 'none';
-                    menuSizeToggle.style.display = 'none';
-                    sizeSubmenu.style.display = 'none';
-                } else {
-                    menuBg.style.display = 'flex';
-                    menuSizeToggle.style.display = 'flex';
-                }
-
-                menu.dataset.contextType = type;
-                menu.dataset.targetId = element.dataset.engineId || element.dataset.id;
-
-                const menuRect = menu.getBoundingClientRect();
-                let left = clientX, top = clientY;
-                if (left + menuRect.width > window.innerWidth) left = window.innerWidth - menuRect.width - 8;
-                if (left < 8) left = 8;
-                if (top + menuRect.height > window.innerHeight) top = window.innerHeight - menuRect.height - 8;
-                if (top < 8) top = 8;
-                menu.style.left = left + 'px';
-                menu.style.top = top + 'px';
-
-                menu.style.visibility = '';
-                menu.style.opacity = '';
-                menu.style.pointerEvents = '';
-                document.getElementById('sizeSubmenu').style.display = 'none';
-
-                setTimeout(() => { document.addEventListener('click', hideContextMenuOnClickOutside, { once: true }); }, 100);
-            };
-            const hideContextMenuOnClickOutside = (e) => { if (!dom.contextMenu.contains(e.target)) hideContextMenu(); };
+                // 高亮主页
+                dom.homeToolbarBtn.classList.toggle('active-home', currentCategoryId === 'cat0');
+                // 删除图标事件
+                document.querySelectorAll('.category-chip .delete-cat-icon').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const catId = btn.dataset.catId;
+                        if (catId) {
+                            if (catId === 'cat0') { alert('主页不能删除'); hideAllDeleteIcons(); return; }
+                            deleteCategory(catId);
+                        }
+                    });
+                });
+            }
 
             // ==================== 搜索功能 ====================
-            const isLikelyURL = (str) => {
+            function isLikelyURL(str) {
                 if (/\s/.test(str)) return false;
                 if (/^https?:\/\//i.test(str)) return true;
                 if (/^[^\s:]+\.[^\s:]+/.test(str)) return true;
                 if (/^[a-zA-Z0-9-]+:\d+(\/|$)/.test(str)) return true;
                 return false;
-            };
-            const performSearch = () => {
+            }
+
+            function performSearch() {
                 const query = dom.searchInput.value.trim();
                 if (!query) return;
                 if (isLikelyURL(query)) {
@@ -1278,11 +1467,16 @@
                 if (searchUrl.includes('%s')) searchUrl = searchUrl.replace('%s', encodeURIComponent(query));
                 else searchUrl += encodeURIComponent(query);
                 window.location.href = searchUrl;
-            };
+            }
 
             // ==================== 模态框操作 ====================
-            const closeModal = () => { dom.tileModal.classList.remove('show'); currentModalMode = 'tile'; editTileId = null; };
-            const openTileModal = (mode, tile = null) => {
+            function closeModal() { 
+                dom.tileModal.classList.remove('show'); 
+                currentModalMode = 'tile'; 
+                editTileId = null; 
+            }
+
+            function openTileModal(mode, tile = null) {
                 currentModalMode = 'tile';
                 editTileId = mode === 'edit' ? tile.id : null;
                 dom.modalTitle.textContent = mode === 'edit' ? '编辑快捷方式' : '添加快捷方式';
@@ -1298,35 +1492,25 @@
                     dom.modalImage.value = '';
                 }
                 dom.tileModal.classList.add('show');
-            };
-            const openModalForEngine = () => {
+            }
+
+            function openModalForEngine(engine = null) {
                 currentModalMode = 'engine';
-                editTileId = null;
-                dom.modalTitle.textContent = '添加搜索引擎';
+                editTileId = engine ? engine.id : null;
+                dom.modalTitle.textContent = engine ? '编辑搜索引擎' : '添加搜索引擎';
                 dom.modalNameLabel.textContent = '搜索引擎名称';
                 dom.modalUrlLabel.textContent = '搜索URL (使用 %s 代表查询词)';
-                dom.modalName.value = '';
-                dom.modalUrl.value = '';
-                dom.modalImage.value = 'simple-icons:google';
+                dom.modalName.value = engine ? engine.name : '';
+                dom.modalUrl.value = engine ? engine.url : '';
+                dom.modalImage.value = engine ? engine.icon : 'simple-icons:google';
                 dom.tileModal.classList.add('show');
-            };
-            const openModalForEngineEdit = (engine) => {
-                currentModalMode = 'engine';
-                editTileId = engine.id;
-                dom.modalTitle.textContent = '编辑搜索引擎';
-                dom.modalNameLabel.textContent = '搜索引擎名称';
-                dom.modalUrlLabel.textContent = '搜索URL (使用 %s 代表查询词)';
-                dom.modalName.value = engine.name || '';
-                dom.modalUrl.value = engine.url || '';
-                dom.modalImage.value = engine.icon || 'simple-icons:google';
-                dom.tileModal.classList.add('show');
-            };
-            const handleModalSave = () => {
+            }
+
+            function handleModalSave() {
                 const name = dom.modalName.value.trim();
                 const url = dom.modalUrl.value.trim();
                 let icon = dom.modalImage.value.trim() || '🌐';
                 if (!name || !url) { alert('名称和链接不能为空'); return; }
-                
                 if (currentModalMode === 'tile') {
                     if (editTileId) {
                         const tile = tilesData.find(t => t.id === editTileId);
@@ -1335,74 +1519,76 @@
                         const newTile = { id: 't' + Date.now() + Math.random().toString(36).substr(2, 4), name, url, icon, size: '1x1' };
                         tilesData.push(newTile);
                     }
-                    saveData();
+                    setCurrentTiles(tilesData);
                     renderTiles();
-                } else if (currentModalMode === 'engine') {
+                } else { // engine
                     if (!url.includes('%s')) { alert('请在URL中包含 %s 作为查询词占位符'); return; }
                     if (editTileId) {
-                        const engineIndex = customEngines.findIndex(e => e.id === editTileId);
-                        if (engineIndex !== -1) {
-                            customEngines[engineIndex] = { ...customEngines[engineIndex], name, url, icon };
+                        const index = customEngines.findIndex(e => e.id === editTileId);
+                        if (index !== -1) {
+                            customEngines[index] = { ...customEngines[index], name, url, icon };
                             saveCustomEngines();
                             if (selectedEngineId === editTileId) updateCurrentEngineIcon();
                         }
                     } else {
                         const newId = 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
-                        const newEngine = { id: newId, name, icon, url };
-                        customEngines.push(newEngine);
+                        customEngines.push({ id: newId, name, icon, url });
                         saveCustomEngines();
                         setSelectedEngine(newId);
                     }
                     renderEngineList();
                 }
                 closeModal();
-            };
+            }
 
-            // ==================== 背景功能 ====================
-            const setBlur = (blur) => {
+            // ==================== 背景设置 ====================
+            function setBlur(blur) {
                 blurAmount = blur;
                 const bgEl = dom.bgLayer.querySelector('img, video');
                 if (bgEl) bgEl.style.filter = `blur(${blur}px)`;
                 if (dom.blurValue) dom.blurValue.textContent = blur + 'px';
                 if (dom.blurSlider) dom.blurSlider.value = blur;
-            };
-            const applyBackground = (type, url, blur = blurAmount) => {
+            }
+
+            function applyBackground(type, url, blur = blurAmount) {
                 dom.bgLayer.innerHTML = '';
                 if (!url || url.trim() === '') return;
                 if (type === 'image') dom.bgLayer.innerHTML = `<img src="${url}" alt="bg" crossorigin="anonymous">`;
                 else if (type === 'video') dom.bgLayer.innerHTML = `<video muted autoplay loop playsinline><source src="${url}">您的浏览器不支持视频背景</video>`;
                 setBlur(blur);
-            };
-            const saveBackground = (type, url, blur = blurAmount) => {
+            }
+
+            function saveBackground(type, url, blur = blurAmount) {
                 bgType = type; bgUrl = url; blurAmount = blur;
-                localStorage.setItem(BG_STORAGE_KEY, JSON.stringify({ type, url, blur }));
+                localStorage.setItem('background_settings', JSON.stringify({ type, url, blur }));
                 applyBackground(type, url, blur);
-            };
-            const loadBackground = () => {
+            }
+
+            function loadBackground() {
                 try {
-                    const stored = localStorage.getItem(BG_STORAGE_KEY);
-        if (stored) {
-            const settings = JSON.parse(stored);
-            bgType = settings.type || 'image';
-            bgUrl = settings.url || '';
-            blurAmount = settings.blur !== undefined ? settings.blur : 0;
-            applyBackground(bgType, bgUrl, blurAmount);
-        } else {           
-            saveBackground('video', 'img/bj.mp4', 0); 
+                    const stored = localStorage.getItem('background_settings');
+                    if (stored) {
+                        const settings = JSON.parse(stored);
+                        bgType = settings.type || 'image';
+                        bgUrl = settings.url || '';
+                        blurAmount = settings.blur !== undefined ? settings.blur : 0;
+                        applyBackground(bgType, bgUrl, blurAmount);
+                    } else {           
+                        saveBackground('video', 'img/bj.mp4', 0); 
         }
     } catch {
         saveBackground('video', 'img/bj.mp4', 0);    
     }
-};
-            const removeBackground = () => {
-                localStorage.removeItem(BG_STORAGE_KEY);
+            }
+
+            function removeBackground() {
+                localStorage.removeItem('background_settings');
                 dom.bgLayer.innerHTML = '';
                 bgType = 'image'; bgUrl = ''; blurAmount = 0;
                 setBlur(0);
-            };
+            }
 
-            let currentBgType = 'image';
-            const openBgModal = () => {
+            function openBgModal() {
                 currentBgType = bgType;
                 dom.bgUrlInput.value = bgUrl || '';
                 dom.blurSlider.value = blurAmount;
@@ -1410,15 +1596,15 @@
                 updateBgTabUI();
                 updateBgFieldByType();
                 dom.bgModal.classList.add('show');
-            };
-            const closeBgModal = () => dom.bgModal.classList.remove('show');
-            const updateBgTabUI = () => {
+            }
+
+            function closeBgModal() { dom.bgModal.classList.remove('show'); }
+            function updateBgTabUI() {
                 dom.bgTabs.forEach(tab => {
-                    if (tab.dataset.bgType === currentBgType) tab.classList.add('active');
-                    else tab.classList.remove('active');
+                    tab.classList.toggle('active', tab.dataset.bgType === currentBgType);
                 });
-            };
-            const updateBgFieldByType = () => {
+            }
+            function updateBgFieldByType() {
                 if (currentBgType === 'image') {
                     dom.bgFieldLabel.innerHTML = '<iconify-icon icon="mdi:link"></iconify-icon> 图片/GIF URL 或 上传文件';
                     dom.bgFileInput.accept = 'image/*';
@@ -1428,8 +1614,8 @@
                     dom.bgFileInput.accept = 'video/*';
                     dom.bgHint.innerHTML = '<iconify-icon icon="mdi:information"></iconify-icon> 视频仅支持在线URL，本地视频过大无法存储。';
                 }
-            };
-            const handleBgFile = (e) => {
+            }
+            function handleBgFile(e) {
                 const file = e.target.files[0];
                 if (!file) return;
                 const maxSize = 5 * 1024 * 1024;
@@ -1437,24 +1623,91 @@
                 const reader = new FileReader();
                 reader.onload = (ev) => { dom.bgUrlInput.value = ev.target.result; };
                 reader.readAsDataURL(file);
-            };
-            const applyBgSettings = () => {
+            }
+            function applyBgSettings() {
                 const url = dom.bgUrlInput.value.trim();
                 if (!url) { alert('请输入URL或上传文件'); return; }
                 saveBackground(currentBgType, url, parseInt(dom.blurSlider.value, 10));
-                dom.bgModal.classList.remove('show');
-            };
-            const removeBgAndClose = () => {
+                closeBgModal();
+            }
+            function removeBgAndClose() {
                 removeBackground();
                 dom.bgUrlInput.value = '';
                 dom.blurSlider.value = 0;
                 dom.blurValue.textContent = '0px';
-                dom.bgModal.classList.remove('show');
-            };
+                closeBgModal();
+            }
+
+            // ==================== 分类管理 ====================
+            function openCategoryModal() {
+                dom.catNameInput.value = '';
+                dom.catIconInput.value = 'mdi:folder';
+                dom.categoryModal.classList.add('show');
+            }
+            function closeCategoryModal() { dom.categoryModal.classList.remove('show'); }
+            function createNewCategory() {
+                const name = dom.catNameInput.value.trim();
+                let icon = dom.catIconInput.value.trim() || 'mdi:folder';
+                if (!name) { alert('请输入分类名称'); return; }
+                const newId = 'cat' + Date.now() + Math.random().toString(36).substr(2, 4);
+                categories.push({ id: newId, name: name, icon: icon, tiles: [] });
+                saveMultipageData();
+                switchCategory(newId);
+                closeCategoryModal();
+            }
+
+            // ==================== 图标选择器 ====================
+            let selectedIcon = null;
+            function renderIconGrid() {
+                let html = '';
+                iconList.forEach(icon => {
+                    html += `<div class="icon-item" data-icon="${icon}"><iconify-icon icon="${icon}"></iconify-icon></div>`;
+                });
+                dom.iconGrid.innerHTML = html;
+            }
+            function openIconPicker() {
+                renderIconGrid();
+                dom.iconPickerModal.classList.add('show');
+                selectedIcon = null;
+                document.querySelectorAll('.icon-item').forEach(item => item.classList.remove('selected'));
+            }
+            function closeIconPicker() { dom.iconPickerModal.classList.remove('show'); }
+
+            // ==================== 右键/长按菜单 ====================
+            function hideContextMenu() { dom.contextMenu.classList.remove('show'); }
+            function showContextMenu(event, element, type = 'tile') {
+                let clientX, clientY;
+                if (event.touches) { clientX = event.touches[0].clientX; clientY = event.touches[0].clientY; } 
+                else { clientX = event.clientX; clientY = event.clientY; }
+                const menu = dom.contextMenu;
+                menu.style.visibility = 'hidden';
+                menu.classList.add('show');
+                menu.style.opacity = '0';
+                menu.style.pointerEvents = 'none';
+                // 引擎菜单没有背景和尺寸选项
+                document.getElementById('menuBg').style.display = type === 'engine' ? 'none' : 'flex';
+                document.getElementById('menuSizeToggle').style.display = type === 'engine' ? 'none' : 'flex';
+                menu.dataset.contextType = type;
+                menu.dataset.targetId = element.dataset.engineId || element.dataset.id;
+                const menuRect = menu.getBoundingClientRect();
+                let left = clientX, top = clientY;
+                if (left + menuRect.width > window.innerWidth) left = window.innerWidth - menuRect.width - 8;
+                if (left < 8) left = 8;
+                if (top + menuRect.height > window.innerHeight) top = window.innerHeight - menuRect.height - 8;
+                if (top < 8) top = 8;
+                menu.style.left = left + 'px';
+                menu.style.top = top + 'px';
+                menu.style.visibility = '';
+                menu.style.opacity = '';
+                menu.style.pointerEvents = '';
+                document.getElementById('sizeSubmenu').style.display = 'none';
+                setTimeout(() => { document.addEventListener('click', hideContextMenuOnClickOutside, { once: true }); }, 100);
+            }
+            function hideContextMenuOnClickOutside(e) { if (!dom.contextMenu.contains(e.target)) hideContextMenu(); }
 
             // ==================== 事件绑定 ====================
-            const bindEvents = () => {
-                // 引擎面板点击
+            function bindEvents() {
+                // 搜索引擎面板
                 dom.engineList.addEventListener('click', (e) => {
                     const deleteBtn = e.target.closest('.delete-icon');
                     if (deleteBtn) {
@@ -1477,75 +1730,59 @@
                     if (e.target.closest('#addEngineBtn')) openModalForEngine();
                 });
 
-                // 引擎列表长按（触发编辑）
-                dom.engineList.addEventListener('touchstart', (e) => {
+                // 搜索引擎长按 (显示菜单)
+                const startEngineLongPress = (e) => {
                     const item = e.target.closest('.item');
                     if (!item) return;
-                    clearEnginePress();
+                    clearAllLongPressTimers();
                     pressedEngine = item;
                     enginePressTimer = setTimeout(() => {
                         if (navigator.vibrate) navigator.vibrate(20);
                         showContextMenu(e, item, 'engine');
                         pressedEngine = null; enginePressTimer = null;
                     }, 500);
-                }, { passive: true });
-                dom.engineList.addEventListener('mousedown', (e) => {
-                    const item = e.target.closest('.item');
-                    if (!item) return;
-                    clearEnginePress();
-                    pressedEngine = item;
-                    enginePressTimer = setTimeout(() => {
-                        showContextMenu(e, item, 'engine');
-                        pressedEngine = null; enginePressTimer = null;
-                    }, 500);
-                });
-                dom.engineList.addEventListener('touchmove', clearEnginePress, { passive: true });
+                };
+                dom.engineList.addEventListener('touchstart', startEngineLongPress, { passive: true });
+                dom.engineList.addEventListener('mousedown', startEngineLongPress);
+                dom.engineList.addEventListener('touchmove', clearAllLongPressTimers, { passive: true });
                 dom.engineList.addEventListener('touchend', () => { if (enginePressTimer) clearTimeout(enginePressTimer); enginePressTimer = null; pressedEngine = null; });
-                dom.engineList.addEventListener('touchcancel', clearEnginePress);
+                dom.engineList.addEventListener('touchcancel', clearAllLongPressTimers);
                 dom.engineList.addEventListener('mouseup', () => { if (enginePressTimer) clearTimeout(enginePressTimer); enginePressTimer = null; pressedEngine = null; });
-                dom.engineList.addEventListener('mouseleave', clearEnginePress);
+                dom.engineList.addEventListener('mouseleave', clearAllLongPressTimers);
                 dom.engineList.addEventListener('contextmenu', (e) => {
                     const item = e.target.closest('.item');
                     if (item) { e.preventDefault(); showContextMenu(e, item, 'engine'); }
                 });
 
-                // 磁贴点击/长按
-                dom.tileGrid.addEventListener('touchstart', (e) => {
+                // 磁贴点击、长按
+                const startTileLongPress = (e) => {
                     const tile = e.target.closest('.tile:not(.add-tile)');
-                    if (!tile) { clearTilePress(); return; }
-                    clearTilePress();
+                    if (!tile) { clearAllLongPressTimers(); return; }
+                    clearAllLongPressTimers();
                     pressedTile = tile;
                     tilePressTimer = setTimeout(() => {
                         if (navigator.vibrate) navigator.vibrate(20);
                         showContextMenu(e, tile, 'tile');
                         pressedTile = null; tilePressTimer = null;
                     }, 500);
-                }, { passive: true });
-                dom.tileGrid.addEventListener('mousedown', (e) => {
-                    const tile = e.target.closest('.tile:not(.add-tile)');
-                    if (!tile) return;
-                    clearTilePress();
-                    pressedTile = tile;
-                    tilePressTimer = setTimeout(() => {
-                        showContextMenu(e, tile, 'tile');
-                        pressedTile = null; tilePressTimer = null;
-                    }, 500);
-                });
-                dom.tileGrid.addEventListener('touchmove', clearTilePress, { passive: true });
+                };
+                dom.tileGrid.addEventListener('touchstart', startTileLongPress, { passive: true });
+                dom.tileGrid.addEventListener('mousedown', startTileLongPress);
+                dom.tileGrid.addEventListener('touchmove', clearAllLongPressTimers, { passive: true });
                 dom.tileGrid.addEventListener('touchend', (e) => {
                     const tile = e.target.closest('.tile:not(.add-tile)');
-                    if (!tile) { clearTilePress(); return; }
+                    if (!tile) { clearAllLongPressTimers(); return; }
                     if (tilePressTimer) {
                         clearTimeout(tilePressTimer);
                         tilePressTimer = null;
-                        if (tile.dataset.url) window.location.href = tile.dataset.url;
+                        if (tile.dataset.url) window.location.href = tile.dataset.url;  // 短按跳转
                     }
                     pressedTile = null;
                 });
-                dom.tileGrid.addEventListener('touchcancel', clearTilePress);
+                dom.tileGrid.addEventListener('touchcancel', clearAllLongPressTimers);
                 dom.tileGrid.addEventListener('mouseup', (e) => {
                     const tile = e.target.closest('.tile:not(.add-tile)');
-                    if (!tile) { clearTilePress(); return; }
+                    if (!tile) { clearAllLongPressTimers(); return; }
                     if (tilePressTimer) {
                         clearTimeout(tilePressTimer);
                         tilePressTimer = null;
@@ -1553,7 +1790,7 @@
                     }
                     pressedTile = null;
                 });
-                dom.tileGrid.addEventListener('mouseleave', clearTilePress);
+                dom.tileGrid.addEventListener('mouseleave', clearAllLongPressTimers);
                 dom.tileGrid.addEventListener('contextmenu', (e) => {
                     const tile = e.target.closest('.tile:not(.add-tile)');
                     if (tile) { e.preventDefault(); showContextMenu(e, tile, 'tile'); }
@@ -1563,14 +1800,91 @@
                     if (addBtn) openTileModal('add');
                 });
 
-                // 搜索相关
+                // 分类栏长按显示删除图标
+                let categoryLongPressed = false, categoryStartX = 0, categoryStartY = 0;
+                function onCategoryPointerDown(e) {
+                    const chip = e.target.closest('.category-chip');
+                    if (!chip || e.target.closest('.delete-cat-icon')) return;
+                    e.preventDefault();
+                    hideAllDeleteIcons();
+                    clearAllLongPressTimers();
+                    pressedEngine = chip;   // 复用 pressedEngine 作为当前分类标记（内部使用）
+                    categoryLongPressed = false;
+                    categoryStartX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+                    categoryStartY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
+                    categoryPressTimer = setTimeout(() => {
+                        if (pressedEngine === chip) {
+                            if (navigator.vibrate) navigator.vibrate(20);
+                            chip.classList.add('show-delete');
+                            categoryLongPressed = true;
+                            categoryPressTimer = null;
+                        }
+                    }, 400);
+                }
+                function onCategoryPointerUp(e) {
+                    if (!pressedEngine) return;
+                    const targetChip = e.target.closest('.category-chip');
+                    if (targetChip && targetChip === pressedEngine && !categoryLongPressed) {
+                        const catId = targetChip.dataset.catId;
+                        if (catId) { hideAllDeleteIcons(); switchCategory(catId); }
+                    }
+                    clearAllLongPressTimers();
+                    pressedEngine = null;
+                }
+                function onCategoryPointerMove(e) {
+                    if (!pressedEngine) return;
+                    const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+                    const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
+                    if (Math.abs(clientX - categoryStartX) > 10 || Math.abs(clientY - categoryStartY) > 10) {
+                        clearAllLongPressTimers();
+                    }
+                }
+                dom.categoryToolbar.addEventListener('mousedown', onCategoryPointerDown);
+                dom.categoryToolbar.addEventListener('touchstart', onCategoryPointerDown, { passive: false });
+                document.addEventListener('mouseup', onCategoryPointerUp);
+                document.addEventListener('touchend', onCategoryPointerUp);
+                document.addEventListener('mousemove', onCategoryPointerMove);
+                document.addEventListener('touchmove', onCategoryPointerMove, { passive: true });
+                document.addEventListener('touchcancel', clearAllLongPressTimers);
+                document.addEventListener('mouseleave', clearAllLongPressTimers);
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.delete-cat-icon') && !e.target.closest('.category-chip')) {
+                        hideAllDeleteIcons();
+                    }
+                });
+
+                dom.homeToolbarBtn.addEventListener('click', () => switchCategory('cat0'));
+                dom.addCategoryBtn.addEventListener('click', openCategoryModal);
+                dom.catCancelBtn.addEventListener('click', closeCategoryModal);
+                dom.catModalClose.addEventListener('click', closeCategoryModal);
+                dom.catSaveBtn.addEventListener('click', createNewCategory);
+                dom.catIconUploadBtn.addEventListener('click', openIconPicker);
+                dom.categoryModal.addEventListener('click', (e) => { if (e.target === dom.categoryModal) closeCategoryModal(); });
+
+                // 图标选择器
+                dom.iconPickerClose.addEventListener('click', closeIconPicker);
+                dom.iconPickerCancel.addEventListener('click', closeIconPicker);
+                dom.iconGrid.addEventListener('click', (e) => {
+                    const item = e.target.closest('.icon-item');
+                    if (!item) return;
+                    document.querySelectorAll('.icon-item').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                    selectedIcon = item.dataset.icon;
+                });
+                dom.iconPickerConfirm.addEventListener('click', () => {
+                    if (selectedIcon) dom.catIconInput.value = selectedIcon;
+                    closeIconPicker();
+                });
+                dom.iconPickerModal.addEventListener('click', (e) => { if (e.target === dom.iconPickerModal) closeIconPicker(); });
+
+                // 搜索功能
                 dom.searchSubmitBtn.addEventListener('click', performSearch);
                 dom.searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
                 dom.clearSearchBtn.addEventListener('click', () => { dom.searchInput.value = ''; dom.searchInput.focus(); });
                 dom.searchEngineSelect.addEventListener('click', (e) => { e.stopPropagation(); dom.enginePanel.classList.toggle('active'); });
                 document.addEventListener('click', (e) => { if (!dom.searchEngineSelect.contains(e.target) && !dom.enginePanel.contains(e.target)) dom.enginePanel.classList.remove('active'); });
 
-                // 模态框按钮
+                // 模态框
                 dom.modalCloseBtn.addEventListener('click', closeModal);
                 dom.modalCancelBtn.addEventListener('click', closeModal);
                 dom.modalSaveBtn.addEventListener('click', handleModalSave);
@@ -1584,13 +1898,13 @@
                 });
                 dom.tileModal.addEventListener('click', (e) => { if (e.target === dom.tileModal) closeModal(); });
 
-                // 上下文菜单项
+                // 上下文菜单操作
                 dom.menuEdit.addEventListener('click', () => {
                     const menu = dom.contextMenu, type = menu.dataset.contextType, id = menu.dataset.targetId;
                     if (!id) return;
                     if (type === 'engine') {
                         const engine = getAllEngines().find(e => e.id === id);
-                        if (engine && !engine.id.startsWith('preset-')) openModalForEngineEdit(engine);
+                        if (engine && !engine.id.startsWith('preset-')) openModalForEngine(engine);
                         else alert('预设引擎不能编辑');
                     } else {
                         const tile = tilesData.find(t => t.id === id);
@@ -1613,8 +1927,7 @@
                         } else alert('预设引擎不能删除');
                     } else {
                         if (confirm('确定删除此快捷方式？')) {
-                            tilesData = tilesData.filter(t => t.id !== id);
-                            saveData();
+                            setCurrentTiles(tilesData.filter(t => t.id !== id));
                             renderTiles();
                         }
                     }
@@ -1628,7 +1941,7 @@
                         const newSize = e.target.dataset.size, id = dom.contextMenu.dataset.targetId;
                         if (id && newSize) {
                             const tile = tilesData.find(t => t.id === id);
-                            if (tile) { tile.size = newSize; saveData(); renderTiles(); }
+                            if (tile) { tile.size = newSize; setCurrentTiles(tilesData); renderTiles(); }
                         }
                         hideContextMenu();
                     });
@@ -1655,34 +1968,40 @@
                 dom.bgModalClose.addEventListener('click', closeBgModal);
                 dom.bgCancelBtn.addEventListener('click', closeBgModal);
                 dom.bgModal.addEventListener('click', (e) => { if (e.target === dom.bgModal) closeBgModal(); });
-            };
+            }
 
-            // ==================== 时间更新 ====================
-            const updateDateTime = () => {
+            // ==================== 初始化 ====================
+            function init() {
+                renderEngineList();
+                loadMultipageData();
+                tilesData = getCurrentTiles();
+                renderCategoryBar();
+                renderTiles();
+                updateCurrentEngineIcon();
+                loadBackground();
+                bindEvents();
+                updateDateTime();
+                setInterval(updateDateTime, 1000);
+            }
+
+            // 日期时间更新
+            function updateDateTime() {
                 const now = new Date();
                 document.getElementById('currentTime').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
                 document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
-            };
+            }
 
-            // ==================== 初始化 ====================
-            renderEngineList();
-            loadTileData();
-            renderTiles();
-            updateCurrentEngineIcon();
-            loadBackground();
-            bindEvents();
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
+            init();
 
-            // 页面卸载前清理所有长按计时器
+            // 页面关闭前清理计时器
             window.addEventListener('beforeunload', function() {
-                if (longPressTimer) clearTimeout(longPressTimer);
                 if (tilePressTimer) clearTimeout(tilePressTimer);
                 if (enginePressTimer) clearTimeout(enginePressTimer);
+                if (categoryPressTimer) clearTimeout(categoryPressTimer);
             });
         })();
 
-        // 阻止全局右键（输入框除外）
+        // 全局阻止默认右键/选择（不影响输入框）
         document.addEventListener('contextmenu', (e) => {
             if (e.defaultPrevented) return;
             if (e.target.matches('input, textarea, [contenteditable="true"]')) return;
@@ -1692,16 +2011,12 @@
             if (e.target.matches('input, textarea, [contenteditable="true"]')) return;
             e.preventDefault();
         });
-    </script>
 
-    <script>
-        // ==================== 搜索建议 & 导入导出 ====================
+        // 百度搜索建议 (保留原样)
         (function() {
             const searchInput = document.getElementById('searchInput');
             const suggestionsBox = document.getElementById('suggestionsBox');
             if (!searchInput || !suggestionsBox) return;
-
-            // 百度搜索建议回调函数
             window.showSuggestions = function(data) {
                 if (!data || !data.s || !suggestionsBox) return;
                 const suggestions = data.s;
@@ -1712,59 +2027,41 @@
                 let html = '';
                 suggestions.forEach(s => {
                     const safeS = s.replace(/[&<>"]/g, function(m) {
-                        if (m === '&') return '&amp;';
-                        if (m === '<') return '&lt;';
-                        if (m === '>') return '&gt;';
-                        if (m === '"') return '&quot;';
-                        return m;
+                        return m === '&' ? '&amp;' : m === '<' ? '&lt;' : m === '>' ? '&gt;' : '&quot;';
                     });
-                    html += `
-                        <div class="suggestion-item" data-suggestion="${safeS}">
-                            <span class="suggestion-search-icon" data-action="search" data-suggestion="${safeS}"><iconify-icon icon="mdi:magnify"></iconify-icon></span>
-                            <span class="suggestion-text" data-action="search" data-suggestion="${safeS}">${safeS}</span>
-                            <span class="suggestion-fill-icon" data-action="fill" data-suggestion="${safeS}"><iconify-icon icon="mdi:arrow-top-left"></iconify-icon></span>
-                        </div>
-                    `;
+                    html += `<div class="suggestion-item" data-suggestion="${safeS}"><span class="suggestion-search-icon" data-action="search" data-suggestion="${safeS}"><iconify-icon icon="mdi:magnify"></iconify-icon></span><span class="suggestion-text" data-action="search" data-suggestion="${safeS}">${safeS}</span><span class="suggestion-fill-icon" data-action="fill" data-suggestion="${safeS}"><iconify-icon icon="mdi:arrow-top-left"></iconify-icon></span></div>`;
                 });
                 suggestionsBox.innerHTML = html;
                 suggestionsBox.style.display = 'block';
             };
-
             const performSearchWithSuggestion = (suggestion) => {
                 if (!suggestion) return;
                 searchInput.value = suggestion;
                 document.getElementById('searchSubmitBtn').click();
             };
-
             const fillSearchInput = (suggestion) => {
                 if (!suggestion) return;
                 searchInput.value = suggestion;
                 searchInput.focus();
-                const ev = new Event('keyup', {bubbles: true});
-                searchInput.dispatchEvent(ev);
+                searchInput.dispatchEvent(new Event('keyup', {bubbles: true}));
             };
-
             suggestionsBox.addEventListener('click', (e) => {
                 const target = e.target.closest('[data-action]');
                 if (!target) return;
                 const action = target.dataset.action;
                 const suggestion = target.dataset.suggestion;
                 if (!suggestion) return;
-
                 if (action === 'search') {
                     performSearchWithSuggestion(suggestion);
                     suggestionsBox.style.display = 'none';
                 } else if (action === 'fill') {
                     fillSearchInput(suggestion);
                 }
-                e.preventDefault();
-                e.stopPropagation();
+                e.preventDefault(); e.stopPropagation();
             });
-
             suggestionsBox.addEventListener('mousedown', (e) => {
                 if (e.target.closest('[data-action]')) e.preventDefault();
             });
-
             let timer;
             searchInput.addEventListener('keyup', () => {
                 const val = searchInput.value.trim();
@@ -1781,13 +2078,11 @@
                     document.body.removeChild(script);
                 }, 150);
             });
-
             searchInput.addEventListener('focus', () => {
                 if (searchInput.value.trim().length > 0 && suggestionsBox.children.length > 0) {
                     suggestionsBox.style.display = 'block';
                 }
             });
-
             searchInput.addEventListener('blur', () => {
                 setTimeout(() => {
                     if (!suggestionsBox.contains(document.activeElement)) {
@@ -1796,25 +2091,22 @@
                 }, 200);
             });
 
-            // 导入导出功能
+            // 数据导入导出 (保留原功能)
             const exportBtn = document.getElementById('exportDataBtn');
             const importBtn = document.getElementById('importDataBtn');
-
+            const MULTI_PAGE_KEY = 'multipage_tiles_data';
             const exportBackup = () => {
                 try {
-                    const keys = ['enhanced_tiles_data', 'custom_engines', 'selected_engine_id', 'background_settings'];
-                    const backup = {};
-                    keys.forEach(k => {
-                        const val = localStorage.getItem(k);
-                        if (val) {
-                            try { backup[k] = JSON.parse(val); } catch { backup[k] = val; }
-                        } else backup[k] = null;
-                    });
+                    const backup = {
+                        multipage: JSON.parse(localStorage.getItem(MULTI_PAGE_KEY) || 'null'),
+                        customEngines: localStorage.getItem('custom_engines'),
+                        selectedEngineId: localStorage.getItem('selected_engine_id'),
+                        background: localStorage.getItem('background_settings')
+                    };
                     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-                    saveAs(blob, `startpage_backup_${new Date().toISOString().slice(0, 10)}.json`);
+                    saveAs(blob, `startpage_backup_${new Date().toISOString().slice(0,10)}.json`);
                 } catch (err) { alert('导出失败：' + err.message); }
             };
-
             const importBackup = () => {
                 const fileInput = document.createElement('input');
                 fileInput.type = 'file';
@@ -1826,14 +2118,11 @@
                     reader.onload = (ev) => {
                         try {
                             const data = JSON.parse(ev.target.result);
-                            if (confirm('导入将覆盖所有现有数据（磁贴、搜索引擎、背景设置）。确定继续？')) {
-                                const keys = ['enhanced_tiles_data', 'custom_engines', 'selected_engine_id', 'background_settings'];
-                                keys.forEach(k => {
-                                    if (data[k] !== undefined) {
-                                        if (k === 'selected_engine_id') localStorage.setItem(k, data[k]);
-                                        else localStorage.setItem(k, JSON.stringify(data[k]));
-                                    }
-                                });
+                            if (confirm('导入将覆盖所有现有数据（分类、磁贴、搜索引擎、背景设置）。确定继续？')) {
+                                if (data.multipage) localStorage.setItem(MULTI_PAGE_KEY, JSON.stringify(data.multipage));
+                                if (data.customEngines) localStorage.setItem('custom_engines', data.customEngines);
+                                if (data.selectedEngineId) localStorage.setItem('selected_engine_id', data.selectedEngineId);
+                                if (data.background) localStorage.setItem('background_settings', data.background);
                                 alert('导入成功，页面即将刷新');
                                 location.reload();
                             }
@@ -1843,7 +2132,6 @@
                 };
                 fileInput.click();
             };
-
             if (exportBtn) exportBtn.addEventListener('click', exportBackup);
             if (importBtn) importBtn.addEventListener('click', importBackup);
         })();
