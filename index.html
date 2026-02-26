@@ -22,9 +22,11 @@
             box-sizing: border-box;
             user-select: none !important;
             -webkit-user-select: none !important;
-            -webkit-touch-callout: none !important;
+            -webkit-touch-callout: none !important;  
         }
         * { -webkit-tap-highlight-color: transparent; }
+
+        /* 输入区域允许选择 */
         input, textarea, [contenteditable="true"] {
             user-select: auto !important;
             -webkit-user-select: auto !important;
@@ -35,6 +37,7 @@
             -webkit-user-select: none !important;
             -webkit-touch-callout: none !important;
         }
+
         .app {
             width: 100%;
             max-width: 400px;
@@ -326,6 +329,8 @@
             pointer-events: auto;
         }
         .search-engine .item:hover .delete-icon { opacity: 1; }
+
+        /* ========= 磁贴网格 ========= */
         .tile-grid {
             display: grid;
             grid-template-columns: repeat(5, 44px);
@@ -354,6 +359,9 @@
             font-size: 12px;
             text-align: center;
             box-sizing: border-box;
+            -webkit-touch-callout: none !important;
+            touch-action: manipulation;  
+            -webkit-user-drag: none;
         }
         .tile[data-size="2x1"] { grid-column: span 2; }
         .tile[data-size="1x2"] { grid-row: span 2; }
@@ -385,7 +393,10 @@
             position: relative;
             z-index: 2;
             border-radius: 8px;
-            pointer-events: none;
+            pointer-events: none !important;     
+            -webkit-touch-callout: none !important;
+            -webkit-user-drag: none !important;
+            user-select: none !important;
         }
         .tile[data-size="1x1"] .tile-icon img {
             width: 100%;
@@ -999,7 +1010,7 @@
         </div>
     </div>
 
-    <!-- 图标选择器（纯图标网格） -->
+    <!-- 图标选择器 -->
     <div class="modal-overlay" id="iconPickerModal">
         <div class="modal-content bg-modal-content" style="max-width: 380px;">
             <div class="modal-header">
@@ -1018,8 +1029,7 @@
         (function() {
             'use strict';
 
-            // ==================== 全局变量定义 (仅保留必要的) ====================
-            /** @type {Object} DOM 元素快捷映射 */
+            // ==================== 全局变量定义 ====================
             const dom = {
                 bgLayer: document.getElementById('bg-layer'),
                 searchInput: document.getElementById('searchInput'),
@@ -1087,35 +1097,27 @@
                 { id: 'preset-3', name: 'DuckDuckGo', icon: 'logos:duckduckgo', url: 'https://duckduckgo.com/?q=%s' },
                 { id: 'preset-4', name: 'Yandex', icon: 'vscode-icons:file-type-yandex', url: 'https://yandex.com/search/?text=%s' }
             ];
-            let customEngines = [];          // 用户自定义引擎
-            try { 
-                const stored = localStorage.getItem('custom_engines'); 
-                if (stored) customEngines = JSON.parse(stored); 
-            } catch (e) { /* 忽略 */ }
+            let customEngines = [];
+            try { const stored = localStorage.getItem('custom_engines'); if (stored) customEngines = JSON.parse(stored); } catch (e) {}
             let selectedEngineId = localStorage.getItem('selected_engine_id') || 'preset-0';
 
             // 分类与磁贴数据
-            let categories = [];              // 所有分类 { id, name, icon, tiles[] }
-            let currentCategoryId = null;      // 当前分类ID
-            let tilesData = [];                // 当前分类的磁贴（快捷方式）
-            let sortableInstance = null;        // Sortable 实例
+            let categories = [];
+            let currentCategoryId = null;
+            let tilesData = [];
+            let sortableInstance = null;
+            let currentModalMode = 'tile';
+            let editTileId = null;
 
-            // 模态框状态
-            let currentModalMode = 'tile';      // 'tile' 或 'engine'
-            let editTileId = null;              // 正在编辑的磁贴/引擎ID
-
-            // 长按计时器 & 状态 (磁贴/搜索引擎)
+            // 长按计时器 & 状态
             let tilePressTimer = null, enginePressTimer = null, categoryPressTimer = null;
-            let pressedTile = null, pressedEngine = null;   // 当前按下的元素
+            let pressedTile = null, pressedEngine = null;
 
             // 背景设置
             let bgType = 'image', bgUrl = '', blurAmount = 0;
-            let currentBgType = 'image';         // 当前模态框中的背景类型
+            let currentBgType = 'image';
 
-            // 图标缓存 (用于磁贴背景色提取)
             const colorCache = new Map();
-
-            // 预设图标列表 (用于图标选择器)
             const iconList = [
                 'hugeicons:game-controller-03', 'mingcute:tool-line', 'mynaui:box', 'ix:ai',
                 'hugeicons:chat-gpt', 'ri:deepseek-fill', 'ri:movie-2-line', 'mdi-light:music',
@@ -1124,7 +1126,6 @@
             ];
 
             // ==================== 工具函数 ====================
-            /** 根据图标值生成HTML (支持图片/iconify/emoji) */
             function renderIconHtml(icon, className = '') {
                 if (!icon) icon = '🌐';
                 if (/^(https?:\/\/|data:image\/|blob:)/i.test(icon)) {
@@ -1137,34 +1138,15 @@
                 return `<span${className ? ' class="'+className+'"' : ''}>${icon}</span>`;
             }
 
-            /** 获取所有搜索引擎 (预设+自定义) */
             const getAllEngines = () => [...presetEngines, ...customEngines];
             const getEngineById = (id) => getAllEngines().find(e => e.id === id) || presetEngines[0];
-
-            /** 保存自定义引擎到localStorage */
             const saveCustomEngines = () => localStorage.setItem('custom_engines', JSON.stringify(customEngines));
+            const setSelectedEngine = (id) => { selectedEngineId = id; localStorage.setItem('selected_engine_id', id); updateCurrentEngineIcon(); };
+            const updateCurrentEngineIcon = () => { const engine = getEngineById(selectedEngineId); if (engine) dom.currentEngineIcon.innerHTML = renderIconHtml(engine.icon); };
 
-            /** 设置当前搜索引擎并更新图标 */
-            const setSelectedEngine = (id) => { 
-                selectedEngineId = id; 
-                localStorage.setItem('selected_engine_id', id); 
-                updateCurrentEngineIcon(); 
-            };
-
-            /** 更新搜索框左侧图标 */
-            const updateCurrentEngineIcon = () => {
-                const engine = getEngineById(selectedEngineId);
-                if (engine) dom.currentEngineIcon.innerHTML = renderIconHtml(engine.icon);
-            };
-
-            /** 隐藏所有分类上的删除图标 (长按取消) */
             function hideAllDeleteIcons() {
-                document.querySelectorAll('.category-chip.show-delete').forEach(chip => {
-                    chip.classList.remove('show-delete');
-                });
+                document.querySelectorAll('.category-chip.show-delete').forEach(chip => chip.classList.remove('show-delete'));
             }
-
-            /** 清除所有长按计时器 (用于拖拽开始) */
             const clearAllLongPressTimers = () => {
                 if (tilePressTimer) { clearTimeout(tilePressTimer); tilePressTimer = null; }
                 if (enginePressTimer) { clearTimeout(enginePressTimer); enginePressTimer = null; }
@@ -1172,10 +1154,8 @@
                 pressedTile = null; pressedEngine = null;
             };
 
-            // ==================== 数据持久化 (分类与磁贴) ====================
+            // ==================== 数据持久化 ====================
             const MULTI_PAGE_KEY = 'multipage_tiles_data';
-
-            /** 加载多分类数据，兼容旧版单页数据 */
             function loadMultipageData() {
                 const stored = localStorage.getItem(MULTI_PAGE_KEY);
                 if (stored) {
@@ -1189,12 +1169,9 @@
                         }
                     } catch (e) {}
                 }
-                // 无多页数据时，从旧版单页迁移
+                // 迁移旧数据
                 let oldTiles = [];
-                try {
-                    const old = localStorage.getItem('enhanced_tiles_data');
-                    if (old) oldTiles = JSON.parse(old);
-                } catch {}
+                try { const old = localStorage.getItem('enhanced_tiles_data'); if (old) oldTiles = JSON.parse(old); } catch {}
                 if (!oldTiles.length) {
                     oldTiles = [
                         { id: 'g2', name: 'YouTube', url: 'https://youtube.com', icon: 'logos:youtube-icon', size: '2x1' },
@@ -1206,28 +1183,11 @@
                 currentCategoryId = 'cat0';
                 saveMultipageData();
             }
-
             function saveMultipageData() {
                 localStorage.setItem(MULTI_PAGE_KEY, JSON.stringify({ categories, currentCategoryId }));
             }
-
-            /** 获取当前分类的磁贴数组 */
-            function getCurrentTiles() {
-                const cat = categories.find(c => c.id === currentCategoryId);
-                return cat ? cat.tiles : [];
-            }
-
-            /** 设置当前分类的磁贴数组并保存 */
-            function setCurrentTiles(newTiles) {
-                const cat = categories.find(c => c.id === currentCategoryId);
-                if (cat) {
-                    cat.tiles = newTiles;
-                    tilesData = newTiles;
-                    saveMultipageData();
-                }
-            }
-
-            /** 切换到指定分类 */
+            function getCurrentTiles() { const cat = categories.find(c => c.id === currentCategoryId); return cat ? cat.tiles : []; }
+            function setCurrentTiles(newTiles) { const cat = categories.find(c => c.id === currentCategoryId); if (cat) { cat.tiles = newTiles; tilesData = newTiles; saveMultipageData(); } }
             function switchCategory(catId) {
                 if (catId === currentCategoryId) return;
                 currentCategoryId = catId;
@@ -1236,26 +1196,20 @@
                 renderTiles();
                 saveMultipageData();
             }
-
-            /** 删除分类 (不能删除主页) */
             function deleteCategory(catId) {
                 if (catId === 'cat0') { alert('主页不能删除'); return; }
                 if (!confirm('确定删除此分类？分类下的磁贴将一并删除')) return;
                 const index = categories.findIndex(c => c.id === catId);
                 if (index !== -1) {
                     categories.splice(index, 1);
-                    if (currentCategoryId === catId) {
-                        currentCategoryId = 'cat0';
-                        tilesData = getCurrentTiles();
-                    }
+                    if (currentCategoryId === catId) { currentCategoryId = 'cat0'; tilesData = getCurrentTiles(); }
                     saveMultipageData();
                     renderCategoryBar();
                     renderTiles();
                 }
             }
 
-            // ==================== 渲染函数 ====================
-            /** 渲染搜索引擎列表 (带删除按钮) */
+            // ==================== 渲染 ====================
             function renderEngineList() {
                 const all = getAllEngines();
                 let html = '';
@@ -1267,7 +1221,6 @@
                 dom.engineList.innerHTML = html;
             }
 
-            /** 渲染磁贴网格 (当前分类) */
             function renderTiles() {
                 let html = '';
                 tilesData.forEach(tile => {
@@ -1279,12 +1232,14 @@
                 });
                 html += `<div class="tile add-tile" id="addTileBtn" data-size="1x1"><span class="tile-icon"><iconify-icon icon="material-symbols:add-2"></iconify-icon></span><span class="tile-name">添加</span></div>`;
                 dom.tileGrid.innerHTML = html;
-                dom.tileGrid.querySelectorAll('.tile:not(.add-tile) .tile-icon img').forEach(img => img.style.pointerEvents = 'none');
-                initDragAndDrop();               // 重新初始化拖拽
-                extractEdgeColors();              // 提取非1x1磁贴的背景色
+                dom.tileGrid.querySelectorAll('.tile:not(.add-tile) .tile-icon img').forEach(img => {
+                    img.style.pointerEvents = 'none';
+                    img.setAttribute('draggable', 'false');
+                });
+                initDragAndDrop();
+                extractEdgeColors();
             }
 
-            /** 初始化拖拽排序 (使用Sortable) */
             function initDragAndDrop() {
                 if (sortableInstance) sortableInstance.destroy();
                 sortableInstance = new Sortable(dom.tileGrid, {
@@ -1293,7 +1248,7 @@
                     forceFallback: true,
                     fallbackClass: 'sortable-drag', ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                     chosenClass: 'sortable-chosen', scroll: true, scrollSensitivity: 30,
-                    onStart: clearAllLongPressTimers,   // 开始拖拽时取消所有长按
+                    onStart: clearAllLongPressTimers,
                     onEnd: (evt) => {
                         const newOrder = [];
                         dom.tileGrid.querySelectorAll('.tile:not(.add-tile)').forEach(el => {
@@ -1302,17 +1257,17 @@
                             if (tile) newOrder.push(tile);
                         });
                         if (newOrder.length === tilesData.length) setCurrentTiles(newOrder);
-                        else renderTiles();   // 容错
+                        else renderTiles();
                     }
                 });
             }
 
-            /** 提取图片边缘主色 (用于大尺寸磁贴背景) */
+            // ========== 颜色提取函数 ==========
             function extractEdgeColors() {
                 const images = document.querySelectorAll('.tile:not(.add-tile) .tile-icon img.tile-icon-img');
                 images.forEach(img => {
                     const tile = img.closest('.tile');
-                    if (tile && tile.dataset.size === '1x1') return; // 1x1 不处理
+                    if (tile && tile.dataset.size === '1x1') return; 
                     const iconContainer = img.closest('.tile-icon');
                     if (!iconContainer) return;
                     iconContainer.style.setProperty('background-color', '#cccccc', 'important');
@@ -1407,15 +1362,11 @@
                 } catch { setBackgroundFallback(img, container); }
             }
 
-            /** 渲染分类栏 (主页+动态分类) */
             function renderCategoryBar() {
                 const toolbar = dom.categoryToolbar;
                 const homeBtn = dom.homeToolbarBtn;
                 const addBtn = dom.addCategoryBtn;
-                // 移除除主页和新建外的所有子元素
-                while (toolbar.children.length > 2) {
-                    toolbar.removeChild(toolbar.children[1]);
-                }
+                while (toolbar.children.length > 2) toolbar.removeChild(toolbar.children[1]);
                 categories.forEach(cat => {
                     if (cat.id === 'cat0') return;
                     const chip = document.createElement('div');
@@ -1428,17 +1379,12 @@
                     `;
                     toolbar.insertBefore(chip, addBtn);
                 });
-                // 高亮主页
                 dom.homeToolbarBtn.classList.toggle('active-home', currentCategoryId === 'cat0');
-                // 删除图标事件
                 document.querySelectorAll('.category-chip .delete-cat-icon').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const catId = btn.dataset.catId;
-                        if (catId) {
-                            if (catId === 'cat0') { alert('主页不能删除'); hideAllDeleteIcons(); return; }
-                            deleteCategory(catId);
-                        }
+                        if (catId) { if (catId === 'cat0') { alert('主页不能删除'); hideAllDeleteIcons(); return; } deleteCategory(catId); }
                     });
                 });
             }
@@ -1451,7 +1397,6 @@
                 if (/^[a-zA-Z0-9-]+:\d+(\/|$)/.test(str)) return true;
                 return false;
             }
-
             function performSearch() {
                 const query = dom.searchInput.value.trim();
                 if (!query) return;
@@ -1470,30 +1415,17 @@
             }
 
             // ==================== 模态框操作 ====================
-            function closeModal() { 
-                dom.tileModal.classList.remove('show'); 
-                currentModalMode = 'tile'; 
-                editTileId = null; 
-            }
-
+            function closeModal() { dom.tileModal.classList.remove('show'); currentModalMode = 'tile'; editTileId = null; }
             function openTileModal(mode, tile = null) {
                 currentModalMode = 'tile';
                 editTileId = mode === 'edit' ? tile.id : null;
                 dom.modalTitle.textContent = mode === 'edit' ? '编辑快捷方式' : '添加快捷方式';
                 dom.modalNameLabel.textContent = '网站名称';
                 dom.modalUrlLabel.textContent = '网站链接';
-                if (mode === 'edit' && tile) {
-                    dom.modalName.value = tile.name || '';
-                    dom.modalUrl.value = tile.url || '';
-                    dom.modalImage.value = tile.icon || '🌐';
-                } else {
-                    dom.modalName.value = '';
-                    dom.modalUrl.value = '';
-                    dom.modalImage.value = '';
-                }
+                if (mode === 'edit' && tile) { dom.modalName.value = tile.name || ''; dom.modalUrl.value = tile.url || ''; dom.modalImage.value = tile.icon || '🌐'; }
+                else { dom.modalName.value = ''; dom.modalUrl.value = ''; dom.modalImage.value = ''; }
                 dom.tileModal.classList.add('show');
             }
-
             function openModalForEngine(engine = null) {
                 currentModalMode = 'engine';
                 editTileId = engine ? engine.id : null;
@@ -1505,31 +1437,21 @@
                 dom.modalImage.value = engine ? engine.icon : 'simple-icons:google';
                 dom.tileModal.classList.add('show');
             }
-
             function handleModalSave() {
                 const name = dom.modalName.value.trim();
                 const url = dom.modalUrl.value.trim();
                 let icon = dom.modalImage.value.trim() || '🌐';
                 if (!name || !url) { alert('名称和链接不能为空'); return; }
                 if (currentModalMode === 'tile') {
-                    if (editTileId) {
-                        const tile = tilesData.find(t => t.id === editTileId);
-                        if (tile) { tile.name = name; tile.url = url; tile.icon = icon; }
-                    } else {
-                        const newTile = { id: 't' + Date.now() + Math.random().toString(36).substr(2, 4), name, url, icon, size: '1x1' };
-                        tilesData.push(newTile);
-                    }
+                    if (editTileId) { const tile = tilesData.find(t => t.id === editTileId); if (tile) { tile.name = name; tile.url = url; tile.icon = icon; } }
+                    else { tilesData.push({ id: 't' + Date.now() + Math.random().toString(36).substr(2, 4), name, url, icon, size: '1x1' }); }
                     setCurrentTiles(tilesData);
                     renderTiles();
-                } else { // engine
+                } else {
                     if (!url.includes('%s')) { alert('请在URL中包含 %s 作为查询词占位符'); return; }
                     if (editTileId) {
                         const index = customEngines.findIndex(e => e.id === editTileId);
-                        if (index !== -1) {
-                            customEngines[index] = { ...customEngines[index], name, url, icon };
-                            saveCustomEngines();
-                            if (selectedEngineId === editTileId) updateCurrentEngineIcon();
-                        }
+                        if (index !== -1) { customEngines[index] = { ...customEngines[index], name, url, icon }; saveCustomEngines(); if (selectedEngineId === editTileId) updateCurrentEngineIcon(); }
                     } else {
                         const newId = 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
                         customEngines.push({ id: newId, name, icon, url });
@@ -1549,7 +1471,6 @@
                 if (dom.blurValue) dom.blurValue.textContent = blur + 'px';
                 if (dom.blurSlider) dom.blurSlider.value = blur;
             }
-
             function applyBackground(type, url, blur = blurAmount) {
                 dom.bgLayer.innerHTML = '';
                 if (!url || url.trim() === '') return;
@@ -1557,53 +1478,31 @@
                 else if (type === 'video') dom.bgLayer.innerHTML = `<video muted autoplay loop playsinline><source src="${url}">您的浏览器不支持视频背景</video>`;
                 setBlur(blur);
             }
-
             function saveBackground(type, url, blur = blurAmount) {
                 bgType = type; bgUrl = url; blurAmount = blur;
                 localStorage.setItem('background_settings', JSON.stringify({ type, url, blur }));
                 applyBackground(type, url, blur);
             }
-
             function loadBackground() {
                 try {
                     const stored = localStorage.getItem('background_settings');
-                    if (stored) {
-                        const settings = JSON.parse(stored);
-                        bgType = settings.type || 'image';
-                        bgUrl = settings.url || '';
-                        blurAmount = settings.blur !== undefined ? settings.blur : 0;
-                        applyBackground(bgType, bgUrl, blurAmount);
-                    } else {           
-                        saveBackground('video', 'img/bj.mp4', 0); 
+                    if (stored) { const settings = JSON.parse(stored); bgType = settings.type || 'image'; bgUrl = settings.url || ''; blurAmount = settings.blur !== undefined ? settings.blur : 0; applyBackground(bgType, bgUrl, blurAmount); }
+                    else { saveBackground('video', 'img/bj.mp4', 0); 
         }
     } catch {
         saveBackground('video', 'img/bj.mp4', 0);    
     }
             }
-
-            function removeBackground() {
-                localStorage.removeItem('background_settings');
-                dom.bgLayer.innerHTML = '';
-                bgType = 'image'; bgUrl = ''; blurAmount = 0;
-                setBlur(0);
-            }
-
+            function removeBackground() { localStorage.removeItem('background_settings'); dom.bgLayer.innerHTML = ''; bgType = 'image'; bgUrl = ''; blurAmount = 0; setBlur(0); }
             function openBgModal() {
                 currentBgType = bgType;
                 dom.bgUrlInput.value = bgUrl || '';
                 dom.blurSlider.value = blurAmount;
                 dom.blurValue.textContent = blurAmount + 'px';
-                updateBgTabUI();
-                updateBgFieldByType();
-                dom.bgModal.classList.add('show');
+                updateBgTabUI(); updateBgFieldByType(); dom.bgModal.classList.add('show');
             }
-
             function closeBgModal() { dom.bgModal.classList.remove('show'); }
-            function updateBgTabUI() {
-                dom.bgTabs.forEach(tab => {
-                    tab.classList.toggle('active', tab.dataset.bgType === currentBgType);
-                });
-            }
+            function updateBgTabUI() { dom.bgTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.bgType === currentBgType)); }
             function updateBgFieldByType() {
                 if (currentBgType === 'image') {
                     dom.bgFieldLabel.innerHTML = '<iconify-icon icon="mdi:link"></iconify-icon> 图片/GIF URL 或 上传文件';
@@ -1624,26 +1523,11 @@
                 reader.onload = (ev) => { dom.bgUrlInput.value = ev.target.result; };
                 reader.readAsDataURL(file);
             }
-            function applyBgSettings() {
-                const url = dom.bgUrlInput.value.trim();
-                if (!url) { alert('请输入URL或上传文件'); return; }
-                saveBackground(currentBgType, url, parseInt(dom.blurSlider.value, 10));
-                closeBgModal();
-            }
-            function removeBgAndClose() {
-                removeBackground();
-                dom.bgUrlInput.value = '';
-                dom.blurSlider.value = 0;
-                dom.blurValue.textContent = '0px';
-                closeBgModal();
-            }
+            function applyBgSettings() { const url = dom.bgUrlInput.value.trim(); if (!url) { alert('请输入URL或上传文件'); return; } saveBackground(currentBgType, url, parseInt(dom.blurSlider.value, 10)); closeBgModal(); }
+            function removeBgAndClose() { removeBackground(); dom.bgUrlInput.value = ''; dom.blurSlider.value = 0; dom.blurValue.textContent = '0px'; closeBgModal(); }
 
             // ==================== 分类管理 ====================
-            function openCategoryModal() {
-                dom.catNameInput.value = '';
-                dom.catIconInput.value = 'mdi:folder';
-                dom.categoryModal.classList.add('show');
-            }
+            function openCategoryModal() { dom.catNameInput.value = ''; dom.catIconInput.value = 'mdi:folder'; dom.categoryModal.classList.add('show'); }
             function closeCategoryModal() { dom.categoryModal.classList.remove('show'); }
             function createNewCategory() {
                 const name = dom.catNameInput.value.trim();
@@ -1658,33 +1542,17 @@
 
             // ==================== 图标选择器 ====================
             let selectedIcon = null;
-            function renderIconGrid() {
-                let html = '';
-                iconList.forEach(icon => {
-                    html += `<div class="icon-item" data-icon="${icon}"><iconify-icon icon="${icon}"></iconify-icon></div>`;
-                });
-                dom.iconGrid.innerHTML = html;
-            }
-            function openIconPicker() {
-                renderIconGrid();
-                dom.iconPickerModal.classList.add('show');
-                selectedIcon = null;
-                document.querySelectorAll('.icon-item').forEach(item => item.classList.remove('selected'));
-            }
+            function renderIconGrid() { let html = ''; iconList.forEach(icon => { html += `<div class="icon-item" data-icon="${icon}"><iconify-icon icon="${icon}"></iconify-icon></div>`; }); dom.iconGrid.innerHTML = html; }
+            function openIconPicker() { renderIconGrid(); dom.iconPickerModal.classList.add('show'); selectedIcon = null; document.querySelectorAll('.icon-item').forEach(item => item.classList.remove('selected')); }
             function closeIconPicker() { dom.iconPickerModal.classList.remove('show'); }
 
             // ==================== 右键/长按菜单 ====================
             function hideContextMenu() { dom.contextMenu.classList.remove('show'); }
             function showContextMenu(event, element, type = 'tile') {
                 let clientX, clientY;
-                if (event.touches) { clientX = event.touches[0].clientX; clientY = event.touches[0].clientY; } 
-                else { clientX = event.clientX; clientY = event.clientY; }
+                if (event.touches) { clientX = event.touches[0].clientX; clientY = event.touches[0].clientY; } else { clientX = event.clientX; clientY = event.clientY; }
                 const menu = dom.contextMenu;
-                menu.style.visibility = 'hidden';
-                menu.classList.add('show');
-                menu.style.opacity = '0';
-                menu.style.pointerEvents = 'none';
-                // 引擎菜单没有背景和尺寸选项
+                menu.style.visibility = 'hidden'; menu.classList.add('show'); menu.style.opacity = '0'; menu.style.pointerEvents = 'none';
                 document.getElementById('menuBg').style.display = type === 'engine' ? 'none' : 'flex';
                 document.getElementById('menuSizeToggle').style.display = type === 'engine' ? 'none' : 'flex';
                 menu.dataset.contextType = type;
@@ -1695,11 +1563,8 @@
                 if (left < 8) left = 8;
                 if (top + menuRect.height > window.innerHeight) top = window.innerHeight - menuRect.height - 8;
                 if (top < 8) top = 8;
-                menu.style.left = left + 'px';
-                menu.style.top = top + 'px';
-                menu.style.visibility = '';
-                menu.style.opacity = '';
-                menu.style.pointerEvents = '';
+                menu.style.left = left + 'px'; menu.style.top = top + 'px';
+                menu.style.visibility = ''; menu.style.opacity = ''; menu.style.pointerEvents = '';
                 document.getElementById('sizeSubmenu').style.display = 'none';
                 setTimeout(() => { document.addEventListener('click', hideContextMenuOnClickOutside, { once: true }); }, 100);
             }
@@ -1707,40 +1572,27 @@
 
             // ==================== 事件绑定 ====================
             function bindEvents() {
-                // 搜索引擎面板
+                // 搜索引擎面板点击
                 dom.engineList.addEventListener('click', (e) => {
                     const deleteBtn = e.target.closest('.delete-icon');
                     if (deleteBtn) {
                         e.stopPropagation();
                         const id = deleteBtn.dataset.deleteId;
-                        if (id) {
-                            customEngines = customEngines.filter(e => e.id !== id);
-                            saveCustomEngines();
-                            if (selectedEngineId === id) setSelectedEngine('preset-0');
-                            renderEngineList();
-                        }
+                        if (id) { customEngines = customEngines.filter(e => e.id !== id); saveCustomEngines(); if (selectedEngineId === id) setSelectedEngine('preset-0'); renderEngineList(); }
                         return;
                     }
                     const item = e.target.closest('.item');
-                    if (item) {
-                        const id = item.dataset.engineId;
-                        if (id) { setSelectedEngine(id); dom.enginePanel.classList.remove('active'); }
-                        return;
-                    }
+                    if (item) { const id = item.dataset.engineId; if (id) { setSelectedEngine(id); dom.enginePanel.classList.remove('active'); } return; }
                     if (e.target.closest('#addEngineBtn')) openModalForEngine();
                 });
 
-                // 搜索引擎长按 (显示菜单)
+                // 搜索引擎长按
                 const startEngineLongPress = (e) => {
                     const item = e.target.closest('.item');
                     if (!item) return;
                     clearAllLongPressTimers();
                     pressedEngine = item;
-                    enginePressTimer = setTimeout(() => {
-                        if (navigator.vibrate) navigator.vibrate(20);
-                        showContextMenu(e, item, 'engine');
-                        pressedEngine = null; enginePressTimer = null;
-                    }, 500);
+                    enginePressTimer = setTimeout(() => { if (navigator.vibrate) navigator.vibrate(20); showContextMenu(e, item, 'engine'); pressedEngine = null; enginePressTimer = null; }, 500);
                 };
                 dom.engineList.addEventListener('touchstart', startEngineLongPress, { passive: true });
                 dom.engineList.addEventListener('mousedown', startEngineLongPress);
@@ -1749,10 +1601,7 @@
                 dom.engineList.addEventListener('touchcancel', clearAllLongPressTimers);
                 dom.engineList.addEventListener('mouseup', () => { if (enginePressTimer) clearTimeout(enginePressTimer); enginePressTimer = null; pressedEngine = null; });
                 dom.engineList.addEventListener('mouseleave', clearAllLongPressTimers);
-                dom.engineList.addEventListener('contextmenu', (e) => {
-                    const item = e.target.closest('.item');
-                    if (item) { e.preventDefault(); showContextMenu(e, item, 'engine'); }
-                });
+                dom.engineList.addEventListener('contextmenu', (e) => { const item = e.target.closest('.item'); if (item) { e.preventDefault(); showContextMenu(e, item, 'engine'); } });
 
                 // 磁贴点击、长按
                 const startTileLongPress = (e) => {
@@ -1775,7 +1624,7 @@
                     if (tilePressTimer) {
                         clearTimeout(tilePressTimer);
                         tilePressTimer = null;
-                        if (tile.dataset.url) window.location.href = tile.dataset.url;  // 短按跳转
+                        if (tile.dataset.url) window.location.href = tile.dataset.url;
                     }
                     pressedTile = null;
                 });
@@ -1795,12 +1644,9 @@
                     const tile = e.target.closest('.tile:not(.add-tile)');
                     if (tile) { e.preventDefault(); showContextMenu(e, tile, 'tile'); }
                 });
-                dom.tileGrid.addEventListener('click', (e) => {
-                    const addBtn = e.target.closest('.add-tile');
-                    if (addBtn) openTileModal('add');
-                });
+                dom.tileGrid.addEventListener('click', (e) => { if (e.target.closest('.add-tile')) openTileModal('add'); });
 
-                // 分类栏长按显示删除图标
+                // 分类栏长按显示删除
                 let categoryLongPressed = false, categoryStartX = 0, categoryStartY = 0;
                 function onCategoryPointerDown(e) {
                     const chip = e.target.closest('.category-chip');
@@ -1808,26 +1654,18 @@
                     e.preventDefault();
                     hideAllDeleteIcons();
                     clearAllLongPressTimers();
-                    pressedEngine = chip;   // 复用 pressedEngine 作为当前分类标记（内部使用）
+                    pressedEngine = chip;
                     categoryLongPressed = false;
                     categoryStartX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
                     categoryStartY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
                     categoryPressTimer = setTimeout(() => {
-                        if (pressedEngine === chip) {
-                            if (navigator.vibrate) navigator.vibrate(20);
-                            chip.classList.add('show-delete');
-                            categoryLongPressed = true;
-                            categoryPressTimer = null;
-                        }
+                        if (pressedEngine === chip) { if (navigator.vibrate) navigator.vibrate(20); chip.classList.add('show-delete'); categoryLongPressed = true; categoryPressTimer = null; }
                     }, 400);
                 }
                 function onCategoryPointerUp(e) {
                     if (!pressedEngine) return;
                     const targetChip = e.target.closest('.category-chip');
-                    if (targetChip && targetChip === pressedEngine && !categoryLongPressed) {
-                        const catId = targetChip.dataset.catId;
-                        if (catId) { hideAllDeleteIcons(); switchCategory(catId); }
-                    }
+                    if (targetChip && targetChip === pressedEngine && !categoryLongPressed) { const catId = targetChip.dataset.catId; if (catId) { hideAllDeleteIcons(); switchCategory(catId); } }
                     clearAllLongPressTimers();
                     pressedEngine = null;
                 }
@@ -1835,9 +1673,7 @@
                     if (!pressedEngine) return;
                     const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
                     const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-                    if (Math.abs(clientX - categoryStartX) > 10 || Math.abs(clientY - categoryStartY) > 10) {
-                        clearAllLongPressTimers();
-                    }
+                    if (Math.abs(clientX - categoryStartX) > 10 || Math.abs(clientY - categoryStartY) > 10) { clearAllLongPressTimers(); }
                 }
                 dom.categoryToolbar.addEventListener('mousedown', onCategoryPointerDown);
                 dom.categoryToolbar.addEventListener('touchstart', onCategoryPointerDown, { passive: false });
@@ -1847,11 +1683,7 @@
                 document.addEventListener('touchmove', onCategoryPointerMove, { passive: true });
                 document.addEventListener('touchcancel', clearAllLongPressTimers);
                 document.addEventListener('mouseleave', clearAllLongPressTimers);
-                document.addEventListener('click', function(e) {
-                    if (!e.target.closest('.delete-cat-icon') && !e.target.closest('.category-chip')) {
-                        hideAllDeleteIcons();
-                    }
-                });
+                document.addEventListener('click', function(e) { if (!e.target.closest('.delete-cat-icon') && !e.target.closest('.category-chip')) hideAllDeleteIcons(); });
 
                 dom.homeToolbarBtn.addEventListener('click', () => switchCategory('cat0'));
                 dom.addCategoryBtn.addEventListener('click', openCategoryModal);
@@ -1871,10 +1703,7 @@
                     item.classList.add('selected');
                     selectedIcon = item.dataset.icon;
                 });
-                dom.iconPickerConfirm.addEventListener('click', () => {
-                    if (selectedIcon) dom.catIconInput.value = selectedIcon;
-                    closeIconPicker();
-                });
+                dom.iconPickerConfirm.addEventListener('click', () => { if (selectedIcon) dom.catIconInput.value = selectedIcon; closeIconPicker(); });
                 dom.iconPickerModal.addEventListener('click', (e) => { if (e.target === dom.iconPickerModal) closeIconPicker(); });
 
                 // 搜索功能
@@ -1917,19 +1746,9 @@
                     if (!id) return;
                     if (type === 'engine') {
                         const engine = getAllEngines().find(e => e.id === id);
-                        if (engine && !engine.id.startsWith('preset-')) {
-                            if (confirm('确定删除此搜索引擎？')) {
-                                customEngines = customEngines.filter(e => e.id !== id);
-                                saveCustomEngines();
-                                if (selectedEngineId === id) setSelectedEngine('preset-0');
-                                renderEngineList();
-                            }
-                        } else alert('预设引擎不能删除');
+                        if (engine && !engine.id.startsWith('preset-')) { if (confirm('确定删除此搜索引擎？')) { customEngines = customEngines.filter(e => e.id !== id); saveCustomEngines(); if (selectedEngineId === id) setSelectedEngine('preset-0'); renderEngineList(); } } else alert('预设引擎不能删除');
                     } else {
-                        if (confirm('确定删除此快捷方式？')) {
-                            setCurrentTiles(tilesData.filter(t => t.id !== id));
-                            renderTiles();
-                        }
+                        if (confirm('确定删除此快捷方式？')) { setCurrentTiles(tilesData.filter(t => t.id !== id)); renderTiles(); }
                     }
                     hideContextMenu();
                 });
@@ -1939,30 +1758,16 @@
                     opt.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const newSize = e.target.dataset.size, id = dom.contextMenu.dataset.targetId;
-                        if (id && newSize) {
-                            const tile = tilesData.find(t => t.id === id);
-                            if (tile) { tile.size = newSize; setCurrentTiles(tilesData); renderTiles(); }
-                        }
+                        if (id && newSize) { const tile = tilesData.find(t => t.id === id); if (tile) { tile.size = newSize; setCurrentTiles(tilesData); renderTiles(); } }
                         hideContextMenu();
                     });
                 });
 
                 // 背景模态框
-                dom.bgTabs.forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        currentBgType = tab.dataset.bgType;
-                        updateBgTabUI();
-                        updateBgFieldByType();
-                    });
-                });
+                dom.bgTabs.forEach(tab => { tab.addEventListener('click', () => { currentBgType = tab.dataset.bgType; updateBgTabUI(); updateBgFieldByType(); }); });
                 dom.bgUploadBtn.addEventListener('click', () => dom.bgFileInput.click());
                 dom.bgFileInput.addEventListener('change', handleBgFile);
-                dom.blurSlider.addEventListener('input', (e) => {
-                    const val = parseInt(e.target.value, 10);
-                    dom.blurValue.textContent = val + 'px';
-                    if (bgUrl) { setBlur(val); saveBackground(bgType, bgUrl, val); } 
-                    else blurAmount = val;
-                });
+                dom.blurSlider.addEventListener('input', (e) => { const val = parseInt(e.target.value, 10); dom.blurValue.textContent = val + 'px'; if (bgUrl) { setBlur(val); saveBackground(bgType, bgUrl, val); } else blurAmount = val; });
                 dom.bgApplyBtn.addEventListener('click', applyBgSettings);
                 dom.bgRemoveBtn.addEventListener('click', removeBgAndClose);
                 dom.bgModalClose.addEventListener('click', closeBgModal);
@@ -1983,17 +1788,13 @@
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
             }
-
-            // 日期时间更新
             function updateDateTime() {
                 const now = new Date();
                 document.getElementById('currentTime').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
                 document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
             }
-
             init();
 
-            // 页面关闭前清理计时器
             window.addEventListener('beforeunload', function() {
                 if (tilePressTimer) clearTimeout(tilePressTimer);
                 if (enginePressTimer) clearTimeout(enginePressTimer);
@@ -2001,7 +1802,7 @@
             });
         })();
 
-        // 全局阻止默认右键/选择（不影响输入框）
+        // 全局阻止默认右键/选择
         document.addEventListener('contextmenu', (e) => {
             if (e.defaultPrevented) return;
             if (e.target.matches('input, textarea, [contenteditable="true"]')) return;
@@ -2012,7 +1813,7 @@
             e.preventDefault();
         });
 
-        // 百度搜索建议 (保留原样)
+        // 百度搜索建议
         (function() {
             const searchInput = document.getElementById('searchInput');
             const suggestionsBox = document.getElementById('suggestionsBox');
@@ -2020,56 +1821,32 @@
             window.showSuggestions = function(data) {
                 if (!data || !data.s || !suggestionsBox) return;
                 const suggestions = data.s;
-                if (!suggestions.length) {
-                    suggestionsBox.style.display = 'none';
-                    return;
-                }
+                if (!suggestions.length) { suggestionsBox.style.display = 'none'; return; }
                 let html = '';
                 suggestions.forEach(s => {
-                    const safeS = s.replace(/[&<>"]/g, function(m) {
-                        return m === '&' ? '&amp;' : m === '<' ? '&lt;' : m === '>' ? '&gt;' : '&quot;';
-                    });
+                    const safeS = s.replace(/[&<>"]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : m === '>' ? '&gt;' : '&quot;'; });
                     html += `<div class="suggestion-item" data-suggestion="${safeS}"><span class="suggestion-search-icon" data-action="search" data-suggestion="${safeS}"><iconify-icon icon="mdi:magnify"></iconify-icon></span><span class="suggestion-text" data-action="search" data-suggestion="${safeS}">${safeS}</span><span class="suggestion-fill-icon" data-action="fill" data-suggestion="${safeS}"><iconify-icon icon="mdi:arrow-top-left"></iconify-icon></span></div>`;
                 });
                 suggestionsBox.innerHTML = html;
                 suggestionsBox.style.display = 'block';
             };
-            const performSearchWithSuggestion = (suggestion) => {
-                if (!suggestion) return;
-                searchInput.value = suggestion;
-                document.getElementById('searchSubmitBtn').click();
-            };
-            const fillSearchInput = (suggestion) => {
-                if (!suggestion) return;
-                searchInput.value = suggestion;
-                searchInput.focus();
-                searchInput.dispatchEvent(new Event('keyup', {bubbles: true}));
-            };
+            const performSearchWithSuggestion = (suggestion) => { if (!suggestion) return; searchInput.value = suggestion; document.getElementById('searchSubmitBtn').click(); };
+            const fillSearchInput = (suggestion) => { if (!suggestion) return; searchInput.value = suggestion; searchInput.focus(); searchInput.dispatchEvent(new Event('keyup', {bubbles: true})); };
             suggestionsBox.addEventListener('click', (e) => {
                 const target = e.target.closest('[data-action]');
                 if (!target) return;
                 const action = target.dataset.action;
                 const suggestion = target.dataset.suggestion;
                 if (!suggestion) return;
-                if (action === 'search') {
-                    performSearchWithSuggestion(suggestion);
-                    suggestionsBox.style.display = 'none';
-                } else if (action === 'fill') {
-                    fillSearchInput(suggestion);
-                }
+                if (action === 'search') { performSearchWithSuggestion(suggestion); suggestionsBox.style.display = 'none'; }
+                else if (action === 'fill') { fillSearchInput(suggestion); }
                 e.preventDefault(); e.stopPropagation();
             });
-            suggestionsBox.addEventListener('mousedown', (e) => {
-                if (e.target.closest('[data-action]')) e.preventDefault();
-            });
+            suggestionsBox.addEventListener('mousedown', (e) => { if (e.target.closest('[data-action]')) e.preventDefault(); });
             let timer;
             searchInput.addEventListener('keyup', () => {
                 const val = searchInput.value.trim();
-                if (val.length === 0) {
-                    suggestionsBox.innerHTML = '';
-                    suggestionsBox.style.display = 'none';
-                    return;
-                }
+                if (val.length === 0) { suggestionsBox.innerHTML = ''; suggestionsBox.style.display = 'none'; return; }
                 clearTimeout(timer);
                 timer = setTimeout(() => {
                     const script = document.createElement('script');
@@ -2078,20 +1855,9 @@
                     document.body.removeChild(script);
                 }, 150);
             });
-            searchInput.addEventListener('focus', () => {
-                if (searchInput.value.trim().length > 0 && suggestionsBox.children.length > 0) {
-                    suggestionsBox.style.display = 'block';
-                }
-            });
-            searchInput.addEventListener('blur', () => {
-                setTimeout(() => {
-                    if (!suggestionsBox.contains(document.activeElement)) {
-                        suggestionsBox.style.display = 'none';
-                    }
-                }, 200);
-            });
+            searchInput.addEventListener('focus', () => { if (searchInput.value.trim().length > 0 && suggestionsBox.children.length > 0) suggestionsBox.style.display = 'block'; });
+            searchInput.addEventListener('blur', () => { setTimeout(() => { if (!suggestionsBox.contains(document.activeElement)) suggestionsBox.style.display = 'none'; }, 200); });
 
-            // 数据导入导出 (保留原功能)
             const exportBtn = document.getElementById('exportDataBtn');
             const importBtn = document.getElementById('importDataBtn');
             const MULTI_PAGE_KEY = 'multipage_tiles_data';
