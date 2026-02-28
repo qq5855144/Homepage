@@ -1487,7 +1487,7 @@
                 try {
                     const stored = localStorage.getItem('background_settings');
                     if (stored) { const settings = JSON.parse(stored); bgType = settings.type || 'image'; bgUrl = settings.url || ''; blurAmount = settings.blur !== undefined ? settings.blur : 0; applyBackground(bgType, bgUrl, blurAmount); }
-                    else { saveBackground('image', 'img/jpg.mp4', 0); 
+                    else { saveBackground('image', 'img/bj.jpg', 0); 
         }
     } catch {
         saveBackground('image', 'img/bj.jpg', 0);    
