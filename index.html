@@ -725,6 +725,21 @@
             flex: 1;
             background: #f0f2f5;
         }
+        /* ===== 底部工具栏自动隐藏 (聚焦显示/失焦隐藏) ===== */
+        .category-toolbar {
+            transition: opacity 0.2s ease;
+            /* 默认完全可见，通过 .toolbar-dimmed 控制淡隐 */
+        }
+        .category-toolbar.toolbar-dimmed {
+            opacity: 0;  /* 几乎透明，但仍可点击/触摸 */
+        }
+        /* 深色模式适配 */
+        @media (prefers-color-scheme: dark) {
+            .category-toolbar.toolbar-dimmed {
+                opacity: 0; /* 深色背景下稍微明显一点 */
+            }
+        }
+        /* 底部工具栏 */
         .category-toolbar {
             display: flex;
             align-items: stretch;
@@ -732,11 +747,11 @@
             gap: 4px;
             padding: 2px 4px;
             margin-top: 4px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.75);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.76);
             box-shadow: none;
             width: 100%;
             box-sizing: border-box;
@@ -744,7 +759,6 @@
             scrollbar-width: none;
             white-space: nowrap;
             flex-shrink: 0;
-            transition: background 0.2s;
             min-height: 44px;
         }
         .category-toolbar::-webkit-scrollbar { display: none; }
@@ -883,8 +897,8 @@
         <!-- 磁贴网格 -->
         <div id="tileGrid" class="tile-grid"></div>
 
-        <!-- 底部分类栏 -->
-        <div class="category-toolbar" id="categoryToolbar">
+        <!-- 底部分类栏 · 增加 toolbar-dimmed 类实现自动隐现 -->
+        <div class="category-toolbar toolbar-dimmed" id="categoryToolbar">
             <div class="toolbar-home" id="homeToolbarBtn" title="主页">
                 <span class="home-icon"><iconify-icon icon="mdi:home"></iconify-icon></span>
                 <span class="home-text">主页</span>
@@ -1487,11 +1501,8 @@
                 try {
                     const stored = localStorage.getItem('background_settings');
                     if (stored) { const settings = JSON.parse(stored); bgType = settings.type || 'image'; bgUrl = settings.url || ''; blurAmount = settings.blur !== undefined ? settings.blur : 0; applyBackground(bgType, bgUrl, blurAmount); }
-                    else { saveBackground('image', 'img/bj.jpg', 0); 
-        }
-    } catch {
-        saveBackground('image', 'img/bj.jpg', 0);    
-    }
+                    else { saveBackground('image', 'https://icdn.binmt.cc/2602/699a570336d59.jpg', 10); }
+                } catch { saveBackground('image', 'https://icdn.binmt.cc/2602/699a570336d59.jpg', 10); }
             }
             function removeBackground() { localStorage.removeItem('background_settings'); dom.bgLayer.innerHTML = ''; bgType = 'image'; bgUrl = ''; blurAmount = 0; setBlur(0); }
             function openBgModal() {
@@ -1773,6 +1784,24 @@
                 dom.bgModalClose.addEventListener('click', closeBgModal);
                 dom.bgCancelBtn.addEventListener('click', closeBgModal);
                 dom.bgModal.addEventListener('click', (e) => { if (e.target === dom.bgModal) closeBgModal(); });
+
+                // ---------- 底部工具栏聚焦显示----------
+                function showToolbar() { dom.categoryToolbar.classList.remove('toolbar-dimmed'); }
+                function dimToolbar() { dom.categoryToolbar.classList.add('toolbar-dimmed'); }
+
+                // 鼠标悬停/移出
+                dom.categoryToolbar.addEventListener('mouseenter', showToolbar);
+                dom.categoryToolbar.addEventListener('mouseleave', dimToolbar);
+
+                function handleDocumentClick(e) {
+                    if (e.target.closest('.category-toolbar')) {
+                        showToolbar();
+                    } else {
+                        dimToolbar();
+                    }
+                }
+                document.addEventListener('click', handleDocumentClick);          
+                document.addEventListener('touchstart', handleDocumentClick);
             }
 
             // ==================== 初始化 ====================
