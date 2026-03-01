@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- 设置 referrer 为 no-referrer，帮助绕过图片防盗链 -->
+    <meta name="referrer" content="no-referrer">
     <title>灵动起始页</title>
     <!-- 外部库：文件保存、图标、拖拽排序 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        /* === 全局重置 & 基础 === */
+        /* 全局重置及基础样式 */
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
         body {
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -26,7 +28,7 @@
         }
         * { -webkit-tap-highlight-color: transparent; }
 
-        /* 输入区域允许选择 */
+        /* 输入框允许选择文本 */
         input, textarea, [contenteditable="true"] {
             user-select: auto !important;
             -webkit-user-select: auto !important;
@@ -38,6 +40,7 @@
             -webkit-touch-callout: none !important;
         }
 
+        /* 主容器 */
         .app {
             width: 100%;
             max-width: 400px;
@@ -50,6 +53,8 @@
             z-index: 2;
             pointer-events: auto;
         }
+
+        /* 背景层 */
         #bg-layer {
             position: fixed;
             top: 0;
@@ -74,6 +79,8 @@
             transition: opacity 0.3s, filter 0.2s;
             will-change: transform;
         }
+
+        /* 日期时间栏 */
         .datetime-bar {
             width: 100%;
             background: transparent !important;
@@ -106,6 +113,8 @@
             color: rgba(255,255,255,0.8);
             text-shadow: none;
         }
+
+        /* 搜索区域 */
         .search-wrap {
             width: 100%;
             max-width: 860px;
@@ -184,6 +193,8 @@
             font-weight: 500;
             gap: 6px;
         }
+
+        /* 搜索建议框 */
         .suggestions-box {
             position: absolute;
             left: 0;
@@ -234,6 +245,8 @@
             text-overflow: ellipsis;
             color: #202124;
         }
+
+        /* 搜索引擎面板 */
         .panel-wrap {
             position: absolute;
             left: 0;
@@ -330,7 +343,7 @@
         }
         .search-engine .item:hover .delete-icon { opacity: 1; }
 
-        /* ========= 磁贴网格 ========= */
+        /* 磁贴网格 */
         .tile-grid {
             display: grid;
             grid-template-columns: repeat(5, 44px);
@@ -424,6 +437,8 @@
             font-size: 12px;
             box-sizing: border-box;
         }
+
+        /* 拖拽排序相关 */
         .sortable-ghost {
             opacity: 0 !important;
             background: transparent !important;
@@ -446,6 +461,8 @@
             background: rgba(255,255,255,0.9) !important;
             box-shadow: none !important;
         }
+
+        /* 右键菜单 */
         .context-menu {
             position: fixed;
             background-color: white;
@@ -481,6 +498,8 @@
             cursor: pointer;
             border: 1px solid #ccc;
         }
+
+        /* 模态框通用 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -519,6 +538,8 @@
             border-radius: 40px;
             color: #1e1e1e;
         }
+
+        /* 背景设置模态框 */
         .bg-tabs {
             display: flex;
             gap: 12px;
@@ -644,6 +665,8 @@
             color: white;
             border: none;
         }
+
+        /* 编辑模态框 */
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -725,7 +748,8 @@
             flex: 1;
             background: #f0f2f5;
         }
-        /* ===== 底部工具栏===== */
+
+        /* 底部工具栏 */
         .category-toolbar {
             transition: opacity 0.2s ease;
         }
@@ -733,13 +757,11 @@
             opacity: 0;  
             pointer-events: none;
         }
-        /* 深色模式适配 */
         @media (prefers-color-scheme: dark) {
             .category-toolbar.toolbar-dimmed {
                 opacity: 0; 
             }
         }
-        /* 底部工具栏 */
         .category-toolbar {
             display: flex;
             align-items: stretch;
@@ -824,6 +846,8 @@
             pointer-events: auto;
         }
         .category-chip .delete-cat-icon:hover { background-color: #e53935; }
+
+        /* 深色模式适配 */
         @media (prefers-color-scheme: dark) {
             body, #bg-layer { background-color: #121212; color: #eee; }
             .search-form { background-color: rgba(40,40,40,0.9) !important; }
@@ -837,6 +861,8 @@
             .sortable-drag .tile-icon { background: rgba(80,80,80,0.95) !important; }
             .suggestions-box { background: rgba(40,40,40,0.95); border-color: #444; }
         }
+
+        /* 图标选择器 */
         .icon-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -863,7 +889,7 @@
     </style>
 </head>
 <body>
-    <!-- 背景层 -->
+    <!-- 背景层容器 -->
     <div id="bg-layer"></div>
 
     <div class="app">
@@ -886,8 +912,10 @@
                     <iconify-icon icon="mdi:search"></iconify-icon>
                 </div>
             </div>
+            <!-- 搜索建议下拉框 -->
             <div class="suggestions-box" id="suggestionsBox"></div>
             <div class="panel-wrap">
+                <!-- 搜索引擎切换面板 -->
                 <div class="search-engine-wrap" id="enginePanel">
                     <div class="search-engine" id="engineList"></div>
                 </div>
@@ -897,7 +925,7 @@
         <!-- 磁贴网格 -->
         <div id="tileGrid" class="tile-grid"></div>
 
-        <!-- 底部分类栏 · 增加 toolbar-dimmed 类实现自动隐现 -->
+        <!-- 底部分类工具栏（默认隐藏，点击时间栏显示） -->
         <div class="category-toolbar toolbar-dimmed" id="categoryToolbar">
             <div class="toolbar-home" id="homeToolbarBtn" title="主页">
                 <span class="home-icon"><iconify-icon icon="mdi:home"></iconify-icon></span>
@@ -1024,7 +1052,7 @@
         </div>
     </div>
 
-    <!-- 图标选择器 -->
+    <!-- 图标选择器模态框 -->
     <div class="modal-overlay" id="iconPickerModal">
         <div class="modal-content bg-modal-content" style="max-width: 380px;">
             <div class="modal-header">
@@ -1103,7 +1131,7 @@
                 iconPickerConfirm: document.getElementById('iconPickerConfirm')
             };
 
-            // 搜索引擎相关
+            // 预设搜索引擎
             const presetEngines = [
                 { id: 'preset-0', name: 'Google', icon: 'devicon:google', url: 'https://www.google.com/search?q=%s' },
                 { id: 'preset-1', name: 'Bing', icon: 'logos:bing', url: 'https://www.bing.com/search?q=%s' },
@@ -1111,6 +1139,7 @@
                 { id: 'preset-3', name: 'DuckDuckGo', icon: 'logos:duckduckgo', url: 'https://duckduckgo.com/?q=%s' },
                 { id: 'preset-4', name: 'Yandex', icon: 'vscode-icons:file-type-yandex', url: 'https://yandex.com/search/?text=%s' }
             ];
+            // 自定义搜索引擎
             let customEngines = [];
             try { const stored = localStorage.getItem('custom_engines'); if (stored) customEngines = JSON.parse(stored); } catch (e) {}
             let selectedEngineId = localStorage.getItem('selected_engine_id') || 'preset-0';
@@ -1120,10 +1149,10 @@
             let currentCategoryId = null;
             let tilesData = [];
             let sortableInstance = null;
-            let currentModalMode = 'tile';
+            let currentModalMode = 'tile';      // 'tile' 或 'engine'
             let editTileId = null;
 
-            // 长按计时器 & 状态
+            // 长按计时器
             let tilePressTimer = null, enginePressTimer = null, categoryPressTimer = null;
             let pressedTile = null, pressedEngine = null;
 
@@ -1131,8 +1160,8 @@
             let bgType = 'image', bgUrl = '', blurAmount = 0;
             let currentBgType = 'image';
 
-            const colorCache = new Map();
-            const iconList = [
+            const colorCache = new Map();       // 图片取色缓存
+            const iconList = [                  // 图标选择器预设
                 'hugeicons:game-controller-03', 'mingcute:tool-line', 'mynaui:box', 'ix:ai',
                 'hugeicons:chat-gpt', 'proicons:crop', 'ri:movie-2-line', 'mdi-light:music',
                 'streamline-plump:ai-edit-robot', 'entypo:aircraft-take-off', 'arcticons:airbrush',
@@ -1140,11 +1169,11 @@
             ];
 
             // ==================== 工具函数 ====================
+            // 渲染图标 HTML，为图片添加 crossorigin 以支持跨域
             function renderIconHtml(icon, className = '') {
                 if (!icon) icon = '🌐';
                 if (/^(https?:\/\/|data:image\/|blob:)/i.test(icon)) {
-                    const crossOriginAttr = icon.startsWith('http') && !icon.startsWith('data:') ? ' crossorigin="anonymous"' : '';
-                    return `<img src="${icon}" class="tile-icon-img" draggable="false"${crossOriginAttr} data-icon-url="${icon}">`;
+                    return `<img src="${icon}" class="tile-icon-img" draggable="false" crossorigin="anonymous" data-icon-url="${icon}">`;
                 }
                 if (icon.includes(':')) {
                     return `<iconify-icon icon="${icon}"${className ? ' class="'+className+'"' : ''}></iconify-icon>`;
@@ -1158,9 +1187,12 @@
             const setSelectedEngine = (id) => { selectedEngineId = id; localStorage.setItem('selected_engine_id', id); updateCurrentEngineIcon(); };
             const updateCurrentEngineIcon = () => { const engine = getEngineById(selectedEngineId); if (engine) dom.currentEngineIcon.innerHTML = renderIconHtml(engine.icon); };
 
+            // 隐藏所有分类的删除图标
             function hideAllDeleteIcons() {
                 document.querySelectorAll('.category-chip.show-delete').forEach(chip => chip.classList.remove('show-delete'));
             }
+
+            // 清除所有长按计时器
             const clearAllLongPressTimers = () => {
                 if (tilePressTimer) { clearTimeout(tilePressTimer); tilePressTimer = null; }
                 if (enginePressTimer) { clearTimeout(enginePressTimer); enginePressTimer = null; }
@@ -1183,7 +1215,7 @@
                         }
                     } catch (e) {}
                 }
-                // 迁移旧数据
+                // 无数据或数据损坏时，初始化默认数据
                 let oldTiles = [];
                 try { const old = localStorage.getItem('enhanced_tiles_data'); if (old) oldTiles = JSON.parse(old); } catch {}
                 if (!oldTiles.length) {
@@ -1223,7 +1255,7 @@
                 }
             }
 
-            // ==================== 渲染 ====================
+            // ==================== 渲染函数 ====================
             function renderEngineList() {
                 const all = getAllEngines();
                 let html = '';
@@ -1251,9 +1283,10 @@
                     img.setAttribute('draggable', 'false');
                 });
                 initDragAndDrop();
-                extractEdgeColors();
+                extractEdgeColors();   // 提取图片边缘颜色作为背景
             }
 
+            // 初始化拖拽排序
             function initDragAndDrop() {
                 if (sortableInstance) sortableInstance.destroy();
                 sortableInstance = new Sortable(dom.tileGrid, {
@@ -1276,7 +1309,7 @@
                 });
             }
 
-            // ========== 颜色提取函数 ==========
+            // ========== 颜色提取（为大于1x1的磁贴设置背景色） ==========
             function extractEdgeColors() {
                 const images = document.querySelectorAll('.tile:not(.add-tile) .tile-icon img.tile-icon-img');
                 images.forEach(img => {
@@ -1284,17 +1317,14 @@
                     if (tile && tile.dataset.size === '1x1') return; 
                     const iconContainer = img.closest('.tile-icon');
                     if (!iconContainer) return;
-                    iconContainer.style.setProperty('background-color', '#cccccc', 'important');
-                    iconContainer.style.backdropFilter = 'none';
-                    iconContainer.style.webkitBackdropFilter = 'none';
                     const applyColor = () => {
                         if (img.complete) {
-                            img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => setBackgroundFallback(img, iconContainer));
+                            img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => {});
                         } else {
                             img.addEventListener('load', () => {
-                                img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => setBackgroundFallback(img, iconContainer));
+                                img.decode().then(() => setBackgroundFromImage(img, iconContainer)).catch(() => {});
                             }, { once: true });
-                            img.addEventListener('error', () => setBackgroundFallback(img, iconContainer));
+                            img.addEventListener('error', () => {});
                         }
                     };
                     applyColor();
@@ -1303,10 +1333,7 @@
 
             function setBackgroundFallback(img, container) {
                 const src = img.src;
-                if (!colorCache.has(src)) colorCache.set(src, '#cccccc');
-                container.style.setProperty('background-color', '#cccccc', 'important');
-                container.style.backdropFilter = 'none';
-                container.style.webkitBackdropFilter = 'none';
+                if (!colorCache.has(src)) colorCache.set(src, null);
             }
 
             function setBackgroundFromImage(img, container) {
@@ -1314,9 +1341,12 @@
                 if (tile && tile.dataset.size === '1x1') return;
                 const src = img.src;
                 if (colorCache.has(src)) {
-                    container.style.setProperty('background-color', colorCache.get(src), 'important');
-                    container.style.backdropFilter = 'none';
-                    container.style.webkitBackdropFilter = 'none';
+                    const cachedColor = colorCache.get(src);
+                    if (cachedColor) {
+                        container.style.setProperty('background-color', cachedColor, 'important');
+                        container.style.backdropFilter = 'none';
+                        container.style.webkitBackdropFilter = 'none';
+                    }
                     return;
                 }
                 try {
@@ -1373,13 +1403,16 @@
                     container.style.setProperty('background-color', colorStr, 'important');
                     container.style.backdropFilter = 'none';
                     container.style.webkitBackdropFilter = 'none';
-                } catch { setBackgroundFallback(img, container); }
+                } catch (e) {
+                    colorCache.set(src, null);
+                }
             }
 
+            // 渲染底部分类栏
             function renderCategoryBar() {
                 const toolbar = dom.categoryToolbar;
-                const homeBtn = dom.homeToolbarBtn;
                 const addBtn = dom.addCategoryBtn;
+                // 移除除了主页和添加按钮外的所有子元素
                 while (toolbar.children.length > 2) toolbar.removeChild(toolbar.children[1]);
                 categories.forEach(cat => {
                     if (cat.id === 'cat0') return;
@@ -1394,6 +1427,7 @@
                     toolbar.insertBefore(chip, addBtn);
                 });
                 dom.homeToolbarBtn.classList.toggle('active-home', currentCategoryId === 'cat0');
+                // 为每个删除图标绑定点击事件
                 document.querySelectorAll('.category-chip .delete-cat-icon').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
@@ -1501,8 +1535,8 @@
                 try {
                     const stored = localStorage.getItem('background_settings');
                     if (stored) { const settings = JSON.parse(stored); bgType = settings.type || 'image'; bgUrl = settings.url || ''; blurAmount = settings.blur !== undefined ? settings.blur : 0; applyBackground(bgType, bgUrl, blurAmount); }
-                    else { saveBackground('image', 'img/bj.jpg', 10); }
-                } catch { saveBackground('image', 'img/bj.jpg', 10); }
+                    else { saveBackground('image', 'https://icdn.binmt.cc/2602/699a570336d59.jpg', 10); }
+                } catch { saveBackground('image', 'https://icdn.binmt.cc/2602/699a570336d59.jpg', 10); }
             }
             function removeBackground() { localStorage.removeItem('background_settings'); dom.bgLayer.innerHTML = ''; bgType = 'image'; bgUrl = ''; blurAmount = 0; setBlur(0); }
             function openBgModal() {
@@ -1784,16 +1818,13 @@
                 dom.bgCancelBtn.addEventListener('click', closeBgModal);
                 dom.bgModal.addEventListener('click', (e) => { if (e.target === dom.bgModal) closeBgModal(); });
 
-                // ========== 修改点：点击时间栏切换底部工具栏显示/隐藏 ==========
-                // 原鼠标悬停/点击文档控制工具栏的逻辑已移除，改为手动点击时间栏切换
+                // 点击时间栏切换底部工具栏显示/隐藏
                 const datetimeBar = document.getElementById('datetimeBar');
                 if (datetimeBar) {
                     datetimeBar.addEventListener('click', (e) => {
-                        // 切换工具栏的隐藏类 toolbar-dimmed
                         dom.categoryToolbar.classList.toggle('toolbar-dimmed');
                     });
                 }
-                // 初始状态为隐藏（类 toolbar-dimmed 已在 HTML 中存在），通过点击时间栏显示/隐藏
             }
 
             // ==================== 初始化 ====================
@@ -1823,7 +1854,7 @@
             });
         })();
 
-        // 全局阻止默认右键/选择
+        // 全局阻止默认右键/选择（输入框除外）
         document.addEventListener('contextmenu', (e) => {
             if (e.defaultPrevented) return;
             if (e.target.matches('input, textarea, [contenteditable="true"]')) return;
