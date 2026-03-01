@@ -1662,7 +1662,6 @@
                 function onCategoryPointerDown(e) {
                     const chip = e.target.closest('.category-chip');
                     if (!chip || e.target.closest('.delete-cat-icon')) return;
-                    e.preventDefault();
                     hideAllDeleteIcons();
                     clearAllLongPressTimers();
                     pressedEngine = chip;
