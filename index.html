@@ -1012,6 +1012,7 @@
             </div>
         </div>
     </div>
+    <!-- GitHub 同步面板 (新增自动同步复选框) -->
     <div class="modal-overlay" id="githubModal">
         <div class="modal-content bg-modal-content" style="max-width: 25rem;">
             <div class="modal-header">
@@ -1019,7 +1020,7 @@
                 <span class="modal-close" id="githubModalClose">&times;</span>
             </div>
             <div class="modal-field">
-                <label>仓库 (所有者/仓库名)</label>
+                <label>仓库 (owner/repo)</label>
                 <input type="text" id="githubRepo" placeholder="例如: yourname/repo" value="">
             </div>
             <div class="modal-field">
@@ -1029,6 +1030,11 @@
             <div class="modal-field">
                 <label>GitHub Token (需要 repo 权限)</label>
                 <input type="password" id="githubToken" placeholder="ghp_xxx">
+            </div>
+            <!-- 自动同步开关 -->
+            <div class="modal-field" style="display: flex; align-items: center; justify-content: space-between;">
+                <label style="flex:1;">自动同步 (数据变动后自动上传)</label>
+                <input type="checkbox" id="autoSyncCheckbox" style="width:1.25rem; height:1.25rem;">
             </div>
             <div class="modal-buttons" style="justify-content: space-around;">
                 <button class="modal-btn" id="githubTestBtn">测试</button>
@@ -1107,7 +1113,8 @@
                 githubTestBtn: document.getElementById('githubTestBtn'),
                 githubUploadBtn: document.getElementById('githubUploadBtn'),
                 githubDownloadBtn: document.getElementById('githubDownloadBtn'),
-                githubStatus: document.getElementById('githubStatus')
+                githubStatus: document.getElementById('githubStatus'),
+                autoSyncCheckbox: document.getElementById('autoSyncCheckbox')
             };
             const presetEngines = [
                 { id: 'preset-0', name: 'Google', icon: 'devicon:google', url: 'https://www.google.com/search?q=%s' },
@@ -1136,6 +1143,47 @@
                 'streamline-plump:ai-edit-robot', 'entypo:aircraft-take-off', 'arcticons:airbrush',
                 'ph:bandaids-fill', 'mdi:heart-outline', 'f7:paperplane', 'streamline-pixel:food-drink-coffee'
             ];
+            // ================== 自动同步相关 ==================
+            const AUTO_SYNC_KEY = 'auto_sync_enabled';
+            let autoSyncEnabled = localStorage.getItem(AUTO_SYNC_KEY) === 'true';
+            // 防抖函数
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+            // 自动同步执行函数 (内部调用uploadToGitHub，但静默)
+            const queueAutoSync = debounce(function() {
+                if (!autoSyncEnabled) return;
+                const repo = dom.githubRepo.value.trim();
+                const path = dom.githubFilePath.value.trim();
+                const token = dom.githubToken.value.trim();
+                if (!repo || !path || !token) {
+                    console.log('自动同步: GitHub配置不完整，跳过');
+                    return;
+                }
+                // 调用上传，捕获错误避免影响主流程
+                uploadToGitHub().catch(err => console.error('自动同步失败', err));
+            }, 2000);
+            // 暴露给外部（导入导出等场景）
+            window.triggerAutoSync = function() {
+                queueAutoSync();
+            };
+            // 初始化自动同步UI和配置
+            function initAutoSync() {
+                if (dom.autoSyncCheckbox) {
+                    dom.autoSyncCheckbox.checked = autoSyncEnabled;
+                    dom.autoSyncCheckbox.addEventListener('change', function(e) {
+                        autoSyncEnabled = e.target.checked;
+                        localStorage.setItem(AUTO_SYNC_KEY, autoSyncEnabled);
+                    });
+                }
+                // 确保GitHub输入框有值（从localStorage加载）
+                loadGitHubConfig();
+            }
+            // ================================================
             function renderIconHtml(icon, className = '') {
                 if (!icon) icon = '🌐';
                 if (/^(https?:\/\/|data:image\/|blob:)/i.test(icon)) {
@@ -1148,7 +1196,10 @@
             }
             const getAllEngines = () => [...presetEngines, ...customEngines];
             const getEngineById = (id) => getAllEngines().find(e => e.id === id) || presetEngines[0];
-            const saveCustomEngines = () => localStorage.setItem('custom_engines', JSON.stringify(customEngines));
+            const saveCustomEngines = () => {
+                localStorage.setItem('custom_engines', JSON.stringify(customEngines));
+                queueAutoSync(); // 自动同步
+            };
             const setSelectedEngine = (id) => { selectedEngineId = id; localStorage.setItem('selected_engine_id', id); updateCurrentEngineIcon(); };
             const updateCurrentEngineIcon = () => { const engine = getEngineById(selectedEngineId); if (engine) dom.currentEngineIcon.innerHTML = renderIconHtml(engine.icon); };
             function hideAllDeleteIcons() {
@@ -1189,6 +1240,7 @@
             }
             function saveMultipageData() {
                 localStorage.setItem(MULTI_PAGE_KEY, JSON.stringify({ categories, currentCategoryId }));
+                queueAutoSync(); // 自动同步
             }
             function getCurrentTiles() { const cat = categories.find(c => c.id === currentCategoryId); return cat ? cat.tiles : []; }
             function setCurrentTiles(newTiles) { const cat = categories.find(c => c.id === currentCategoryId); if (cat) { cat.tiles = newTiles; tilesData = newTiles; saveMultipageData(); } }
@@ -1352,7 +1404,6 @@
                     colorCache.set(src, null);
                 }
             }
-            // 渲染底部分类栏
             function renderCategoryBar() {
                 const toolbar = dom.categoryToolbar;
                 const addBtn = dom.addCategoryBtn;
@@ -1466,6 +1517,7 @@
                 bgType = type; bgUrl = url; blurAmount = blur;
                 localStorage.setItem('background_settings', JSON.stringify({ type, url, blur }));
                 applyBackground(type, url, blur);
+                queueAutoSync(); // 自动同步
             }
             function loadBackground() {
                 try {
@@ -1474,7 +1526,13 @@
                     else { saveBackground('image', 'https://icdn.binmt.cc/2602/699a570336d59.jpg', 10); }
                 } catch { saveBackground('image', 'https://icdn.binmt.cc/2602/699a570336d59.jpg', 10); }
             }
-            function removeBackground() { localStorage.removeItem('background_settings'); dom.bgLayer.innerHTML = ''; bgType = 'image'; bgUrl = ''; blurAmount = 0; setBlur(0); }
+            function removeBackground() {
+                localStorage.removeItem('background_settings');
+                dom.bgLayer.innerHTML = '';
+                bgType = 'image'; bgUrl = ''; blurAmount = 0;
+                setBlur(0);
+                queueAutoSync(); // 自动同步
+            }
             function openBgModal() {
                 currentBgType = bgType;
                 dom.bgUrlInput.value = bgUrl || '';
@@ -1670,9 +1728,14 @@
                             dom.githubStatus.textContent = '保存失败: ' + e.message;
                             return;
                         }
-                        dom.githubModal.classList.remove('show');
-                        dom.tileModal.classList.remove('show');
-                        location.reload();
+                        // 触发自动同步后延迟刷新
+                        window.triggerAutoSync();
+                        setTimeout(() => {
+                            dom.githubModal.classList.remove('show');
+                            dom.tileModal.classList.remove('show');
+                            location.reload();
+                        }, 1500);
+                        dom.githubStatus.textContent = '已保存，同步中……即将刷新';
                     } else {
                         dom.githubStatus.textContent = '';
                     }
@@ -1903,6 +1966,7 @@
                 renderTiles();
                 updateCurrentEngineIcon();
                 loadBackground();
+                initAutoSync(); // 初始化自动同步
                 bindEvents();
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
@@ -2008,8 +2072,12 @@
                                     alert('保存失败：' + err.message);
                                     return;
                                 }
-                                if (tileModal) tileModal.classList.remove('show');
-                                location.reload();
+                                // 触发自动同步后延迟刷新
+                                if (window.triggerAutoSync) window.triggerAutoSync();
+                                setTimeout(() => {
+                                    if (tileModal) tileModal.classList.remove('show');
+                                    location.reload();
+                                }, 1500);
                             }
                         } catch { alert('无效的备份文件'); }
                     };
