@@ -1071,7 +1071,7 @@
         </div>
     </div>
 
-    <!-- ========== GitHub 同步========== -->
+    <!-- ========== GitHub 同步模态框（配置持久化，无写死默认值） ========== -->
     <div class="modal-overlay" id="githubModal">
         <div class="modal-content bg-modal-content" style="max-width: 25rem;">
             <div class="modal-header">
@@ -1446,13 +1446,12 @@
                 }
             }
 
-            // 渲染底部分类栏（同步按钮已移除，调整固定按钮数量）
+            // 渲染底部分类栏
             function renderCategoryBar() {
                 const toolbar = dom.categoryToolbar;
-                // 保留前两个固定按钮（主页、新建），移除后面所有动态分类
-                while (toolbar.children.length > 2) {
-                    toolbar.removeChild(toolbar.lastChild);
-                }
+                const addBtn = dom.addCategoryBtn;
+                // 移除除了主页和添加按钮外的所有子元素
+                while (toolbar.children.length > 2) toolbar.removeChild(toolbar.children[1]);
                 categories.forEach(cat => {
                     if (cat.id === 'cat0') return;
                     const chip = document.createElement('div');
@@ -1463,7 +1462,7 @@
                         <span class="chip-name">${cat.name}</span>
                         <span class="delete-cat-icon" data-cat-id="${cat.id}"><iconify-icon icon="mdi:close"></iconify-icon></span>
                     `;
-                    toolbar.appendChild(chip);
+                    toolbar.insertBefore(chip, addBtn);
                 });
                 dom.homeToolbarBtn.classList.toggle('active-home', currentCategoryId === 'cat0');
                 // 为每个删除图标绑定点击事件
