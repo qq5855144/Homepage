@@ -852,6 +852,48 @@
         .icon-item iconify-icon { font-size: 2rem; }                 
         .icon-item.selected { border-color: #1e88e5; background: #e3f2fd; }
         .dark .icon-item { background: #333; color: #eee; }
+
+        /* 滑块开关样式 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 3rem;
+            height: 1.5rem;
+            flex-shrink: 0;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .2s;
+            border-radius: 1.5rem;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 1.125rem;
+            width: 1.125rem;
+            left: 0.1875rem;
+            bottom: 0.1875rem;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #1e88e5;
+        }
+        input:checked + .slider:before {
+            transform: translateX(1.5rem);
+        }
     </style>
 </head>
 <body>
@@ -1012,7 +1054,7 @@
             </div>
         </div>
     </div>
-    <!-- GitHub 同步面板 (新增自动同步复选框) -->
+    <!-- GitHub 同步面板  -->
     <div class="modal-overlay" id="githubModal">
         <div class="modal-content bg-modal-content" style="max-width: 25rem;">
             <div class="modal-header">
@@ -1031,10 +1073,13 @@
                 <label>GitHub Token (需要 repo 权限)</label>
                 <input type="password" id="githubToken" placeholder="ghp_xxx">
             </div>
-            <!-- 自动同步开关 -->
+            <!-- 自动同步滑块开关 -->
             <div class="modal-field" style="display: flex; align-items: center; justify-content: space-between;">
                 <label style="flex:1;">自动同步 (数据变动后自动上传)</label>
-                <input type="checkbox" id="autoSyncCheckbox" style="width:1.25rem; height:1.25rem;">
+                <label class="switch">
+                    <input type="checkbox" id="autoSyncCheckbox">
+                    <span class="slider round"></span>
+                </label>
             </div>
             <div class="modal-buttons" style="justify-content: space-around;">
                 <button class="modal-btn" id="githubTestBtn">测试</button>
@@ -1154,7 +1199,7 @@
                     timeout = setTimeout(() => func.apply(this, args), wait);
                 };
             }
-            // 自动同步执行函数 (内部调用uploadToGitHub，但静默)
+            // 自动同步执行函数 
             const queueAutoSync = debounce(function() {
                 if (!autoSyncEnabled) return;
                 const repo = dom.githubRepo.value.trim();
@@ -1238,19 +1283,23 @@
                 currentCategoryId = 'cat0';
                 saveMultipageData();
             }
-            function saveMultipageData() {
+            
+            function saveMultipageData(skipAutoSync = false) {
                 localStorage.setItem(MULTI_PAGE_KEY, JSON.stringify({ categories, currentCategoryId }));
-                queueAutoSync(); // 自动同步
+                if (!skipAutoSync) {
+                    queueAutoSync(); // 自动同步
+                }
             }
             function getCurrentTiles() { const cat = categories.find(c => c.id === currentCategoryId); return cat ? cat.tiles : []; }
             function setCurrentTiles(newTiles) { const cat = categories.find(c => c.id === currentCategoryId); if (cat) { cat.tiles = newTiles; tilesData = newTiles; saveMultipageData(); } }
+          
             function switchCategory(catId) {
                 if (catId === currentCategoryId) return;
                 currentCategoryId = catId;
                 tilesData = getCurrentTiles();
                 renderCategoryBar();
                 renderTiles();
-                saveMultipageData();
+                saveMultipageData(true); // 切换分类不触发自动同步
             }
             function deleteCategory(catId) {
                 if (catId === 'cat0') { alert('主页不能删除'); return; }
@@ -1970,6 +2019,53 @@
                 bindEvents();
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
+
+                // 左右滑动切换分类（捕获阶段，优先于拖拽）
+                let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+                let swipeLock = false;
+                const SWIPE_THRESHOLD = 30;
+                const SWIPE_TIME_MAX = 200;
+                dom.tileGrid.addEventListener('touchstart', (e) => {
+                    if (e.touches.length !== 1) return;
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    touchStartTime = Date.now();
+                    swipeLock = false;
+                }, { capture: true, passive: true });
+                dom.tileGrid.addEventListener('touchmove', (e) => {
+                    if (e.touches.length !== 1) return;
+                    if (swipeLock) {
+                        e.preventDefault();
+                        return;
+                    }
+                    const dx = e.touches[0].clientX - touchStartX;
+                    const dy = e.touches[0].clientY - touchStartY;
+                    const timeDiff = Date.now() - touchStartTime;
+                    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SWIPE_THRESHOLD && timeDiff < SWIPE_TIME_MAX) {
+                        const direction = dx > 0 ? 'prev' : 'next'; // 向右滑动（dx>0）切换到上一个，向左滑动切换到下一个
+                        const catList = categories.map(c => c.id);
+                        const currentIdx = catList.indexOf(currentCategoryId);
+                        let targetIdx = -1;
+                        if (direction === 'next' && currentIdx < catList.length - 1) {
+                            targetIdx = currentIdx + 1;
+                        } else if (direction === 'prev' && currentIdx > 0) {
+                            targetIdx = currentIdx - 1;
+                        }
+                        if (targetIdx !== -1) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            swipeLock = true;
+                            clearAllLongPressTimers(); // 取消长按菜单
+                            switchCategory(catList[targetIdx]);
+                        }
+                    }
+                }, { capture: true, passive: false });
+                dom.tileGrid.addEventListener('touchend', (e) => {
+                    swipeLock = false;
+                }, { capture: true });
+                dom.tileGrid.addEventListener('touchcancel', (e) => {
+                    swipeLock = false;
+                }, { capture: true });
             }
             function updateDateTime() {
                 const now = new Date();
