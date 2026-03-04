@@ -238,9 +238,15 @@
             "size": "1x1"
           }
         ]
+      },
+      {
+        "id": "cat1772619085061pr64",
+        "name": "音乐",
+        "icon": "mdi-light:music",
+        "tiles": []
       }
     ],
-    "currentCategoryId": "cat0"
+    "currentCategoryId": "cat1772619085061pr64"
   },
   "customEngines": [
     {
