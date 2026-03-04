@@ -1,0 +1,265 @@
+{
+  "multipage": {
+    "categories": [
+      {
+        "id": "cat0",
+        "name": "主页",
+        "icon": "mdi:home",
+        "tiles": [
+          {
+            "id": "g2",
+            "name": "YouTube",
+            "url": "https://youtube.com",
+            "icon": "logos:youtube-icon",
+            "size": "1x2"
+          },
+          {
+            "id": "g5",
+            "name": "GitHub",
+            "url": "https://github.com",
+            "icon": "icon-park:github",
+            "size": "1x1"
+          },
+          {
+            "id": "g6",
+            "name": "Iconify",
+            "url": "https://yesicon.app/",
+            "icon": "ph:hand-fist",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772347987197qxba",
+            "name": "MT论坛",
+            "url": "https://bbs.binmt.cc/forum.php?mod=guide&view=newthread&index=1",
+            "icon": "https://icdn.binmt.cc/2603/69a3e22be1f47.png",
+            "size": "2x1"
+          },
+          {
+            "id": "t1772425018824pdm3",
+            "name": "格式转换",
+            "url": "https://qq5855144.github.io/ImageConverter/",
+            "icon": "streamline-plump-color:crop-selection-flat",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772347412634l7yr",
+            "name": "ScriptCat",
+            "url": "https://scriptcat.org/zh-CN/search",
+            "icon": "https://icdn.binmt.cc/2603/69a3e0aedb2cb.jpg",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772425336761knsd",
+            "name": "实用脚本",
+            "url": "https://qq5855144.github.io/ScriptSearch/",
+            "icon": "material-icon-theme:markojs",
+            "size": "1x1"
+          },
+          {
+            "id": "t17725431886191ndr",
+            "name": "OPenapk",
+            "url": "https://www.openapk.net/zh/",
+            "icon": "https://icdn.binmt.cc/2603/69a6de9e8587e.png",
+            "size": "1x1"
+          }
+        ]
+      },
+      {
+        "id": "cat17723476317598sp3",
+        "name": "工具",
+        "icon": "mynaui:box",
+        "tiles": [
+          {
+            "id": "t1772358139754kqww",
+            "name": "抖音去水印",
+            "url": "https://www.hellotik.app/zh/douyin",
+            "icon": "https://icdn.binmt.cc/2603/69a409d2b20cf.png",
+            "size": "1x2"
+          },
+          {
+            "id": "t1772454623781e73q",
+            "name": "在线脱壳",
+            "url": "https://56.al/upload.php",
+            "icon": "devicon:androidstudio",
+            "size": "1x1"
+          },
+          {
+            "id": "t17723477406315pt5",
+            "name": "mt图床",
+            "url": "https://icdn.binmt.cc/",
+            "icon": "arcticons:mt-manager",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772353921036pox9",
+            "name": "TinyWow",
+            "url": "https://tinywow.com",
+            "icon": "https://icdn.binmt.cc/2603/69a3f9a0ae7fb.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t17723544676069cw1",
+            "name": "代码工具",
+            "url": "https://www.tooleyes.com/",
+            "icon": "https://icdn.binmt.cc/2603/69a3fd57776ca.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772356512386z046",
+            "name": "在线抠图",
+            "url": "https://www.remove.bg",
+            "icon": "https://icdn.binmt.cc/2603/69a4038923a3b.png",
+            "size": "1x1"
+          }
+        ]
+      },
+      {
+        "id": "cat1772348207274afro",
+        "name": "云盘",
+        "icon": "arcticons:airbrush",
+        "tiles": [
+          {
+            "id": "t1772348420017prst",
+            "name": "蓝奏云",
+            "url": "https://pc.woozooo.com/account.php?action=login&ref=/mydisk.php",
+            "icon": "https://icdn.binmt.cc/2603/69a3e3f574694.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772348836217zaix",
+            "name": "小飞机网盘",
+            "url": "https://www.feejii.com/m/login",
+            "icon": "https://icdn.binmt.cc/2603/69a3e59a3b5e9.png",
+            "size": "2x1"
+          },
+          {
+            "id": "t17723499702033voi",
+            "name": "huang",
+            "url": "https://pan.huang1111.cn/login",
+            "icon": "https://icdn.binmt.cc/2603/69a3e9eeaca50.png",
+            "size": "2x1"
+          },
+          {
+            "id": "t1772349773185wbcx",
+            "name": "雀云网盘",
+            "url": "https://qyun.org/login",
+            "icon": "https://icdn.binmt.cc/2603/69a3e940c6aa2.png",
+            "size": "2x1"
+          },
+          {
+            "id": "t1772348674157acas",
+            "name": "123云盘",
+            "url": "https://login.123pan.com/centerlogin?redirect_url=https://www.123pan.com/?notoken=1&source_page=website",
+            "icon": "https://icdn.binmt.cc/2603/69a3e4f75a2a9.png",
+            "size": "2x1"
+          }
+        ]
+      },
+      {
+        "id": "cat1772355539600gyau",
+        "name": "摸鱼",
+        "icon": "hugeicons:game-controller-03",
+        "tiles": [
+          {
+            "id": "t177235573109122uh",
+            "name": "Poki",
+            "url": "https://poki.com/zh",
+            "icon": "https://icdn.binmt.cc/2603/69a400811da1d.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772355985904tdni",
+            "name": "games",
+            "url": "https://zh.crazygames.plus/",
+            "icon": "https://icdn.binmt.cc/2603/69a40100e9f19.jpg",
+            "size": "1x1"
+          },
+          {
+            "id": "t17723566772653c7g",
+            "name": "小霸王",
+            "url": "https://www.yikm.net/",
+            "icon": "https://icdn.binmt.cc/2603/69a4045b5bb7c.png",
+            "size": "1x1"
+          }
+        ]
+      },
+      {
+        "id": "cat1772356133263h8ji",
+        "name": "AI",
+        "icon": "hugeicons:chat-gpt",
+        "tiles": [
+          {
+            "id": "t1772357013899dwyd",
+            "name": "豆包",
+            "url": "https://www.doubao.com/chat/?enable_bottom_share_style=1&hybrid_event_param=HybridEventParams(enterMethod%3Dmessage_markdown_url%2C%20localPage%3Dchat%2C%20chatType%3Ddefault%2C%20duration%3D0%2C%20isRichMediaPictureLink%3Dfalse%2C%20mobMap%3D%7Bmessage_id%3D39393602222966530%2C%20previous_page%3Dlanding%2C%20is_immersive_background%3D0%2C%20chat_type%3Ddefault%2C%20reply_id%3D39393602222964994%2C%20enter_method%3Dlanding%2C%20conversation_id%3D48241470198018%2C%20enter_chat_method%3Dlanding%2C%20bot_id%3D7234781073513644036%2C%20current_page%3Dchat%7D%2C%20extra%3Dnull)&use_xbridge3=true&need_sec_link=1&sec_link_scene=im&is_inapp=1&api_host=api-normal.doubao.com&theme=light",
+            "icon": "https://icdn.binmt.cc/2603/69a4056f8fd8b.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772357091758lx5k",
+            "name": "DeepSeek",
+            "url": "https://www.deepseek.com",
+            "icon": "https://icdn.binmt.cc/2603/69a405dac245f.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772357161928dfm2",
+            "name": "Kimi",
+            "url": "https://kimi.moonshot.cn",
+            "icon": "https://icdn.binmt.cc/2603/69a4061f9a6ad.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772357395638lius",
+            "name": "腾讯元宝",
+            "url": "https://yuanbao.tencent.com/",
+            "icon": "https://icdn.binmt.cc/2603/69a407081a58f.png",
+            "size": "1x1"
+          }
+        ]
+      },
+      {
+        "id": "cat1772358849187ertg",
+        "name": "影视",
+        "icon": "ri:movie-2-line",
+        "tiles": [
+          {
+            "id": "t17723589334297nd1",
+            "name": "喵物次元",
+            "url": "https://www.mwcy.net/",
+            "icon": "https://icdn.binmt.cc/2603/69a40d0a74035.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772359066027w2jv",
+            "name": "网飞猫",
+            "url": "https://www.ncat21.com/",
+            "icon": "https://vf.dkhtad.com/vod_pc_static_ncat/images/p/logo.png?ver=sadjl23",
+            "size": "1x1"
+          }
+        ]
+      }
+    ],
+    "currentCategoryId": "cat0"
+  },
+  "customEngines": [
+    {
+      "id": "custom-1772459623290-me0n",
+      "name": "H漫",
+      "icon": "cryptocurrency-color:xvc",
+      "url": "https://hanime1.me/search?query=%s"
+    },
+    {
+      "id": "custom-1772459656723-gqv6",
+      "name": "AV",
+      "icon": "token-branded:avax",
+      "url": "https://www.missav365.icu/cn/search/%s"
+    }
+  ],
+  "selectedEngineId": "preset-1",
+  "background": {
+    "type": "image",
+    "url": "https://icdn.binmt.cc/2602/699a570336d59.jpg",
+    "blur": 10
+  }
+}
