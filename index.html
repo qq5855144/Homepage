@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <!-- 设置 referrer 为 no-referrer，帮助绕过图片防盗链 -->
     <meta name="referrer" content="no-referrer">
-    <title>灵动起始页 · 云同步</title>
+    <title>灵动起始页</title>
     <!-- 外部库：文件保存、图标、拖拽排序 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
@@ -743,14 +743,14 @@
             gap: 0.75rem;                                             
             margin-top: 1rem;                                        
             justify-content: center;
-            flex-wrap: wrap;       /* 允许换行，适应更多按钮 */
+            flex-wrap: wrap;       
         }
         .modal-import-export .modal-btn {
             flex: 1 1 auto;
             background: #f0f2f5;
         }
 
-        /* 底部工具栏 (同步按钮已移除) */
+        /* 底部工具栏 */
         .category-toolbar {
             transition: opacity 0.2s ease;
         }
@@ -848,7 +848,7 @@
         }
         .category-chip .delete-cat-icon:hover { background-color: #e53935; }
 
-        /* 深色模式适配 (内部无px，保持不变) */
+        /* 深色模式适配 */
         @media (prefers-color-scheme: dark) {
             body, #bg-layer { background-color: #121212; color: #eee; }
             .search-form { background-color: rgba(40,40,40,0.9) !important; }
@@ -936,7 +936,6 @@
                 <span class="add-icon"><iconify-icon icon="mdi:plus"></iconify-icon></span>
                 <span class="add-text">新建</span>
             </div>
-            <!-- 同步按钮已移除，现在入口在添加快捷方式弹窗内 -->
         </div>
     </div>
 
@@ -957,7 +956,7 @@
         </div>
     </div>
 
-    <!-- 磁贴/搜索引擎编辑模态框（同步入口已移至此） -->
+    <!-- 磁贴/搜索引擎编辑模态框 -->
     <div class="modal-overlay" id="tileModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -984,7 +983,7 @@
             <div class="modal-import-export">
                 <button class="modal-btn" id="exportDataBtn"><iconify-icon icon="mdi:export"></iconify-icon> 导出数据</button>
                 <button class="modal-btn" id="importDataBtn"><iconify-icon icon="mdi:import"></iconify-icon> 导入数据</button>
-                <button class="modal-btn" id="githubSyncBtn"><iconify-icon icon="mdi:github"></iconify-icon> GitHub同步</button>
+                <button class="modal-btn" id="githubSyncBtn"><iconify-icon icon="mdi:github"></iconify-icon> 数据同步</button>
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-secondary" id="modalCancelBtn">取消</button>
@@ -1071,7 +1070,7 @@
         </div>
     </div>
 
-    <!-- ========== GitHub 同步模态框（配置持久化，无写死默认值） ========== -->
+    <!-- ========== GitHub 同步模态框 ========== -->
     <div class="modal-overlay" id="githubModal">
         <div class="modal-content bg-modal-content" style="max-width: 25rem;">
             <div class="modal-header">
@@ -1161,7 +1160,6 @@
                 iconPickerClose: document.getElementById('iconPickerClose'),
                 iconPickerCancel: document.getElementById('iconPickerCancel'),
                 iconPickerConfirm: document.getElementById('iconPickerConfirm'),
-                // GitHub 相关元素（新增按钮在tileModal内）
                 githubSyncBtn: document.getElementById('githubSyncBtn'),
                 githubModal: document.getElementById('githubModal'),
                 githubModalClose: document.getElementById('githubModalClose'),
@@ -1192,7 +1190,7 @@
             let currentCategoryId = null;
             let tilesData = [];
             let sortableInstance = null;
-            let currentModalMode = 'tile';      // 'tile' 或 'engine'
+        
             let editTileId = null;
 
             // 长按计时器
@@ -1203,8 +1201,8 @@
             let bgType = 'image', bgUrl = '', blurAmount = 0;
             let currentBgType = 'image';
 
-            const colorCache = new Map();       // 图片取色缓存
-            const iconList = [                  // 图标选择器预设
+            const colorCache = new Map();     
+            const iconList = [             
                 'hugeicons:game-controller-03', 'mingcute:tool-line', 'mynaui:box', 'ix:ai',
                 'hugeicons:chat-gpt', 'proicons:crop', 'ri:movie-2-line', 'mdi-light:music',
                 'streamline-plump:ai-edit-robot', 'entypo:aircraft-take-off', 'arcticons:airbrush',
@@ -1653,7 +1651,7 @@
             }
             function hideContextMenuOnClickOutside(e) { if (!dom.contextMenu.contains(e.target)) hideContextMenu(); }
 
-            // ==================== GitHub 同步====================
+            // ==================== GitHub 同步函数====================
             const GITHUB_CONFIG_KEY = 'github_sync_config';
 
             function loadGitHubConfig() {
@@ -1665,7 +1663,8 @@
                         dom.githubFilePath.value = config.path || 'homepage-data.json';
                         dom.githubToken.value = config.token || '';
                     } catch (e) {}
-                } else {              
+                } else {
+                   
                     dom.githubRepo.value = '';
                     dom.githubFilePath.value = 'homepage-data.json';
                     dom.githubToken.value = '';
@@ -1698,7 +1697,7 @@
             function testGitHubConnection() {
                 const token = dom.githubToken.value.trim();
                 if (!token) { dom.githubStatus.textContent = '请输入 Token'; return; }
-                saveGitHubConfig(); 
+                saveGitHubConfig(); // 保存当前输入
                 dom.githubStatus.textContent = '测试中...';
                 fetch('https://api.github.com/user', {
                     headers: { 'Authorization': `token ${token}` }
@@ -1756,7 +1755,7 @@
                         }
                     })
                     .then(data => {
-                        const sha = data.sha; 
+                        const sha = data.sha; // 存在则有
                         const body = {
                             message: 'Update homepage data via web',
                             content: contentBase64
@@ -1814,19 +1813,20 @@
                                 if (backup.background) localStorage.setItem('background_settings', JSON.stringify(backup.background));
                             } catch (e) {
                                 dom.githubStatus.textContent = '保存失败: ' + e.message;
-                                return; 
+                                return; // 保存失败，不刷新
                             }
-                            // 关闭所有模态框并刷新
+                            // 关闭所有相关模态框
                             dom.githubModal.classList.remove('show');
-      
                             dom.tileModal.classList.remove('show');
-                            setTimeout(() => location.reload(), 50);
+                            // 立即刷新
+                            location.reload();
                         } else {
                             dom.githubStatus.textContent = '';
                         }
                     })
                     .catch(err => {
-                        dom.githubStatus.textContent = `下载失败: ${err.message}`;                  
+                        dom.githubStatus.textContent = `下载失败: ${err.message}`;
+                        // 错误时不关闭模态框，让用户看到错误信息
                     });
             }
 
@@ -2041,7 +2041,7 @@
                     });
                 }
 
-                // ===== GitHub 同步入口：在tileModal内的按钮 =====
+                // ===== GitHub 同步入口 =====
                 if (dom.githubSyncBtn) {
                     dom.githubSyncBtn.addEventListener('click', () => {
                         // 关闭 tileModal，避免两个模态框同时显示
@@ -2190,11 +2190,11 @@
                                     if (data.background) localStorage.setItem('background_settings', data.background);
                                 } catch (err) {
                                     alert('保存失败：' + err.message);
-                                    return; // 保存失败，不刷新，不关闭模态框
+                                    return; // 保存失败，不刷新
                                 }
-                                // 关闭 tileModal 并刷新
+                                // 关闭 tileModal 并立即刷新
                                 if (tileModal) tileModal.classList.remove('show');
-                                setTimeout(() => location.reload(), 50);
+                                location.reload();
                             }
                         } catch { alert('无效的备份文件'); }
                     };
