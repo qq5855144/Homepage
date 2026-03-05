@@ -140,6 +140,13 @@
             "size": "2x1"
           },
           {
+            "id": "t1772348836217zaix",
+            "name": "小飞机网盘",
+            "url": "https://www.feejii.com/m/login",
+            "icon": "https://icdn.binmt.cc/2603/69a3e59a3b5e9.png",
+            "size": "2x1"
+          },
+          {
             "id": "t1772348674157acas",
             "name": "123云盘",
             "url": "https://login.123pan.com/centerlogin?redirect_url=https://www.123pan.com/?notoken=1&source_page=website",
@@ -151,13 +158,6 @@
             "name": "huang",
             "url": "https://pan.huang1111.cn/login",
             "icon": "https://icdn.binmt.cc/2603/69a3e9eeaca50.png",
-            "size": "2x1"
-          },
-          {
-            "id": "t1772348836217zaix",
-            "name": "小飞机网盘",
-            "url": "https://www.feejii.com/m/login",
-            "icon": "https://icdn.binmt.cc/2603/69a3e59a3b5e9.png",
             "size": "2x1"
           }
         ]
