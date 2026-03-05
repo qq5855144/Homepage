@@ -852,8 +852,6 @@
         .icon-item iconify-icon { font-size: 2rem; }                 
         .icon-item.selected { border-color: #1e88e5; background: #e3f2fd; }
         .dark .icon-item { background: #333; color: #eee; }
-
-        /* 滑块开关样式 */
         .switch {
             position: relative;
             display: inline-block;
@@ -1054,7 +1052,6 @@
             </div>
         </div>
     </div>
-    <!-- GitHub 同步面板  -->
     <div class="modal-overlay" id="githubModal">
         <div class="modal-content bg-modal-content" style="max-width: 25rem;">
             <div class="modal-header">
@@ -1062,18 +1059,17 @@
                 <span class="modal-close" id="githubModalClose">&times;</span>
             </div>
             <div class="modal-field">
-                <label>仓库 (owner/repo)</label>
-                <input type="text" id="githubRepo" placeholder="例如: yourname/repo" value="">
+                <label>GitHub Token (需要 repo 权限)</label>
+                <input type="text" id="githubToken" placeholder="ghp_xxx">
+            </div>
+            <div class="modal-field">
+                <label>仓库名称</label>
+                <input type="text" id="githubRepo" placeholder="例如: myrepo" value="">
             </div>
             <div class="modal-field">
                 <label>文件路径 (保存的文件名)</label>
                 <input type="text" id="githubFilePath" placeholder="例如: homepage-data.json" value="homepage-data.json">
             </div>
-            <div class="modal-field">
-                <label>GitHub Token (需要 repo 权限)</label>
-                <input type="text" id="githubToken" placeholder="ghp_xxx">
-            </div>
-            <!-- 自动同步滑块开关 -->
             <div class="modal-field" style="display: flex; align-items: center; justify-content: space-between;">
                 <label style="flex:1;">自动同步 (数据变动后自动上传)</label>
                 <label class="switch">
@@ -1188,10 +1184,8 @@
                 'streamline-plump:ai-edit-robot', 'entypo:aircraft-take-off', 'arcticons:airbrush',
                 'ph:bandaids-fill', 'mdi:heart-outline', 'f7:paperplane', 'streamline-pixel:food-drink-coffee'
             ];
-            // ================== 自动同步相关 ==================
             const AUTO_SYNC_KEY = 'auto_sync_enabled';
             let autoSyncEnabled = localStorage.getItem(AUTO_SYNC_KEY) === 'true';
-            // 防抖函数
             function debounce(func, wait) {
                 let timeout;
                 return function(...args) {
@@ -1199,24 +1193,17 @@
                     timeout = setTimeout(() => func.apply(this, args), wait);
                 };
             }
-            // 自动同步执行函数 
             const queueAutoSync = debounce(function() {
                 if (!autoSyncEnabled) return;
                 const repo = dom.githubRepo.value.trim();
                 const path = dom.githubFilePath.value.trim();
                 const token = dom.githubToken.value.trim();
-                if (!repo || !path || !token) {
-                    console.log('自动同步: GitHub配置不完整，跳过');
-                    return;
-                }
-                // 调用上传，捕获错误避免影响主流程
-                uploadToGitHub().catch(err => console.error('自动同步失败', err));
+                if (!repo || !path || !token) return;
+                uploadToGitHub().catch(err => console.error('auto sync failed', err));
             }, 2000);
-            // 暴露给外部（导入导出等场景）
             window.triggerAutoSync = function() {
                 queueAutoSync();
             };
-            // 初始化自动同步UI和配置
             function initAutoSync() {
                 if (dom.autoSyncCheckbox) {
                     dom.autoSyncCheckbox.checked = autoSyncEnabled;
@@ -1225,10 +1212,8 @@
                         localStorage.setItem(AUTO_SYNC_KEY, autoSyncEnabled);
                     });
                 }
-                // 确保GitHub输入框有值（从localStorage加载）
                 loadGitHubConfig();
             }
-            // ================================================
             function renderIconHtml(icon, className = '') {
                 if (!icon) icon = '🌐';
                 if (/^(https?:\/\/|data:image\/|blob:)/i.test(icon)) {
@@ -1243,7 +1228,7 @@
             const getEngineById = (id) => getAllEngines().find(e => e.id === id) || presetEngines[0];
             const saveCustomEngines = () => {
                 localStorage.setItem('custom_engines', JSON.stringify(customEngines));
-                queueAutoSync(); // 自动同步
+                queueAutoSync();
             };
             const setSelectedEngine = (id) => { selectedEngineId = id; localStorage.setItem('selected_engine_id', id); updateCurrentEngineIcon(); };
             const updateCurrentEngineIcon = () => { const engine = getEngineById(selectedEngineId); if (engine) dom.currentEngineIcon.innerHTML = renderIconHtml(engine.icon); };
@@ -1287,7 +1272,7 @@
             function saveMultipageData(skipAutoSync = false) {
                 localStorage.setItem(MULTI_PAGE_KEY, JSON.stringify({ categories, currentCategoryId }));
                 if (!skipAutoSync) {
-                    queueAutoSync(); // 自动同步
+                    queueAutoSync();
                 }
             }
             function getCurrentTiles() { const cat = categories.find(c => c.id === currentCategoryId); return cat ? cat.tiles : []; }
@@ -1299,7 +1284,7 @@
                 tilesData = getCurrentTiles();
                 renderCategoryBar();
                 renderTiles();
-                saveMultipageData(true); // 切换分类不触发自动同步
+                saveMultipageData(true);
             }
             function deleteCategory(catId) {
                 if (catId === 'cat0') { alert('主页不能删除'); return; }
@@ -1566,7 +1551,7 @@
                 bgType = type; bgUrl = url; blurAmount = blur;
                 localStorage.setItem('background_settings', JSON.stringify({ type, url, blur }));
                 applyBackground(type, url, blur);
-                queueAutoSync(); // 自动同步
+                queueAutoSync();
             }
             function loadBackground() {
                 try {
@@ -1580,7 +1565,7 @@
                 dom.bgLayer.innerHTML = '';
                 bgType = 'image'; bgUrl = ''; blurAmount = 0;
                 setBlur(0);
-                queueAutoSync(); // 自动同步
+                queueAutoSync();
             }
             function openBgModal() {
                 currentBgType = bgType;
@@ -1686,6 +1671,21 @@
             function decodeBase64(str) {
                 return decodeURIComponent(escape(atob(str)));
             }
+
+            async function getFullRepo(inputRepo, token) {
+                if (inputRepo.includes('/')) {
+                    const parts = inputRepo.split('/');
+                    if (parts.length === 2) return { owner: parts[0], repo: parts[1] };
+                    throw new Error('仓库格式错误，应为 owner/repo 或 仓库名');
+                } else {
+                    if (!token) throw new Error('需要提供Token以获取所有者信息');
+                    const res = await fetch('https://api.github.com/user', { headers: { 'Authorization': `token ${token}` } });
+                    if (!res.ok) throw new Error(`获取用户失败: ${res.status}`);
+                    const user = await res.json();
+                    return { owner: user.login, repo: inputRepo };
+                }
+            }
+
             async function testGitHubConnection() {
                 const token = dom.githubToken.value.trim();
                 if (!token) { dom.githubStatus.textContent = '请输入 Token'; return; }
@@ -1703,28 +1703,26 @@
                 }
             }
             async function uploadToGitHub() {
-                const repo = dom.githubRepo.value.trim();
+                const repoInput = dom.githubRepo.value.trim();
                 const path = dom.githubFilePath.value.trim();
                 const token = dom.githubToken.value.trim();
-                if (!repo || !path || !token) { dom.githubStatus.textContent = '请填写完整信息'; return; }
+                if (!repoInput || !path || !token) { dom.githubStatus.textContent = '请填写完整信息'; return; }
                 saveGitHubConfig();
-                const parts = repo.split('/');
-                if (parts.length !== 2) { dom.githubStatus.textContent = '仓库格式应为 owner/repo'; return; }
-                const [owner, repoName] = parts;
-                const backup = {
-                    multipage: { categories, currentCategoryId },
-                    customEngines,
-                    selectedEngineId,
-                    background: (() => {
-                        const bg = localStorage.getItem('background_settings');
-                        return bg ? JSON.parse(bg) : null;
-                    })()
-                };
-                const contentBase64 = encodeBase64(JSON.stringify(backup, null, 2));
-                const apiUrl = `https://api.github.com/repos/${owner}/${repoName}/contents/${path}`;
-                const headers = { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' };
-                dom.githubStatus.textContent = '正在获取文件信息...';
                 try {
+                    const { owner, repo } = await getFullRepo(repoInput, token);
+                    const backup = {
+                        multipage: { categories, currentCategoryId },
+                        customEngines,
+                        selectedEngineId,
+                        background: (() => {
+                            const bg = localStorage.getItem('background_settings');
+                            return bg ? JSON.parse(bg) : null;
+                        })()
+                    };
+                    const contentBase64 = encodeBase64(JSON.stringify(backup, null, 2));
+                    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+                    const headers = { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' };
+                    dom.githubStatus.textContent = '正在获取文件信息...';
                     let sha = null;
                     const getRes = await fetch(apiUrl, { headers });
                     if (getRes.status === 404) {
@@ -1750,18 +1748,16 @@
                 }
             }
             async function downloadFromGitHub() {
-                const repo = dom.githubRepo.value.trim();
+                const repoInput = dom.githubRepo.value.trim();
                 const path = dom.githubFilePath.value.trim();
                 const token = dom.githubToken.value.trim();
-                if (!repo || !path || !token) { dom.githubStatus.textContent = '请填写完整信息'; return; }
+                if (!repoInput || !path || !token) { dom.githubStatus.textContent = '请填写完整信息'; return; }
                 saveGitHubConfig();
-                const parts = repo.split('/');
-                if (parts.length !== 2) { dom.githubStatus.textContent = '仓库格式应为 owner/repo'; return; }
-                const [owner, repoName] = parts;
-                const apiUrl = `https://api.github.com/repos/${owner}/${repoName}/contents/${path}`;
-                const headers = { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' };
-                dom.githubStatus.textContent = '正在下载...';
                 try {
+                    const { owner, repo } = await getFullRepo(repoInput, token);
+                    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+                    const headers = { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' };
+                    dom.githubStatus.textContent = '正在下载...';
                     const res = await fetch(apiUrl, { headers });
                     if (!res.ok) throw new Error(`下载失败: ${res.status}`);
                     const data = await res.json();
@@ -1777,7 +1773,6 @@
                             dom.githubStatus.textContent = '保存失败: ' + e.message;
                             return;
                         }
-                        // 触发自动同步后延迟刷新
                         window.triggerAutoSync();
                         setTimeout(() => {
                             dom.githubModal.classList.remove('show');
@@ -2015,12 +2010,11 @@
                 renderTiles();
                 updateCurrentEngineIcon();
                 loadBackground();
-                initAutoSync(); // 初始化自动同步
+                initAutoSync();
                 bindEvents();
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
 
-                // 左右滑动切换分类（捕获阶段，优先于拖拽）
                 let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
                 let swipeLock = false;
                 const SWIPE_THRESHOLD = 30;
@@ -2042,7 +2036,7 @@
                     const dy = e.touches[0].clientY - touchStartY;
                     const timeDiff = Date.now() - touchStartTime;
                     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SWIPE_THRESHOLD && timeDiff < SWIPE_TIME_MAX) {
-                        const direction = dx > 0 ? 'prev' : 'next'; // 向右滑动（dx>0）切换到上一个，向左滑动切换到下一个
+                        const direction = dx > 0 ? 'prev' : 'next';
                         const catList = categories.map(c => c.id);
                         const currentIdx = catList.indexOf(currentCategoryId);
                         let targetIdx = -1;
@@ -2055,7 +2049,7 @@
                             e.preventDefault();
                             e.stopPropagation();
                             swipeLock = true;
-                            clearAllLongPressTimers(); // 取消长按菜单
+                            clearAllLongPressTimers();
                             switchCategory(catList[targetIdx]);
                         }
                     }
@@ -2168,7 +2162,6 @@
                                     alert('保存失败：' + err.message);
                                     return;
                                 }
-                                // 触发自动同步后延迟刷新
                                 if (window.triggerAutoSync) window.triggerAutoSync();
                                 setTimeout(() => {
                                     if (tileModal) tileModal.classList.remove('show');
