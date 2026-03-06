@@ -254,7 +254,7 @@
         ]
       }
     ],
-    "currentCategoryId": "cat17723476317598sp3"
+    "currentCategoryId": "cat0"
   },
   "customEngines": [
     {
@@ -270,10 +270,10 @@
       "url": "https://www.missav365.icu/cn/search/%s"
     }
   ],
-  "selectedEngineId": "preset-2",
+  "selectedEngineId": "preset-1",
   "background": {
     "type": "image",
-    "url": "https://www.bing.com/th?id=OHR.GoremeTwilight_ZH-CN3731931947_1920x1080.jpg",
-    "blur": 10
+    "url": "https://icdn.binmt.cc/2602/699a570336d59.jpg",
+    "blur": 0
   }
 }
