@@ -25,7 +25,7 @@
             "name": "实用脚本",
             "url": "https://qq5855144.github.io/ScriptSearch/",
             "icon": "material-icon-theme:markojs",
-            "size": "1x1"
+            "size": "1x2"
           },
           {
             "id": "g5",
@@ -81,7 +81,7 @@
             "name": "抖音去水印",
             "url": "https://www.hellotik.app/zh/douyin",
             "icon": "https://icdn.binmt.cc/2603/69a409d2b20cf.png",
-            "size": "1x2"
+            "size": "2x1"
           },
           {
             "id": "t1772356512386z046",
@@ -254,7 +254,7 @@
         ]
       }
     ],
-    "currentCategoryId": "cat17723476317598sp3"
+    "currentCategoryId": "cat0"
   },
   "customEngines": [
     {
