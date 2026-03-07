@@ -207,14 +207,14 @@
             "name": "豆包",
             "url": "https://www.doubao.com/chat/?enable_bottom_share_style=1&hybrid_event_param=HybridEventParams(enterMethod%3Dmessage_markdown_url%2C%20localPage%3Dchat%2C%20chatType%3Ddefault%2C%20duration%3D0%2C%20isRichMediaPictureLink%3Dfalse%2C%20mobMap%3D%7Bmessage_id%3D39393602222966530%2C%20previous_page%3Dlanding%2C%20is_immersive_background%3D0%2C%20chat_type%3Ddefault%2C%20reply_id%3D39393602222964994%2C%20enter_method%3Dlanding%2C%20conversation_id%3D48241470198018%2C%20enter_chat_method%3Dlanding%2C%20bot_id%3D7234781073513644036%2C%20current_page%3Dchat%7D%2C%20extra%3Dnull)&use_xbridge3=true&need_sec_link=1&sec_link_scene=im&is_inapp=1&api_host=api-normal.doubao.com&theme=light",
             "icon": "https://icdn.binmt.cc/2603/69a4056f8fd8b.png",
-            "size": "1x1"
+            "size": "1x2"
           },
           {
             "id": "t1772357091758lx5k",
             "name": "DeepSeek",
             "url": "https://www.deepseek.com",
             "icon": "https://icdn.binmt.cc/2603/69a405dac245f.png",
-            "size": "1x1"
+            "size": "1x2"
           },
           {
             "id": "t1772357161928dfm2",
@@ -228,7 +228,7 @@
             "name": "腾讯元宝",
             "url": "https://yuanbao.tencent.com/",
             "icon": "https://icdn.binmt.cc/2603/69a407081a58f.png",
-            "size": "2x1"
+            "size": "1x1"
           }
         ]
       },
