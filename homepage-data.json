@@ -243,18 +243,11 @@
             "url": "https://www.mwcy.net/",
             "icon": "https://icdn.binmt.cc/2603/69a40d0a74035.png",
             "size": "1x1"
-          },
-          {
-            "id": "t1772359066027w2jv",
-            "name": "网飞猫",
-            "url": "https://www.ncat21.com/",
-            "icon": "https://vf.dkhtad.com/vod_pc_static_ncat/images/p/logo.png?ver=sadjl23",
-            "size": "1x1"
           }
         ]
       }
     ],
-    "currentCategoryId": "cat0"
+    "currentCategoryId": "cat1772358849187ertg"
   },
   "customEngines": [
     {
