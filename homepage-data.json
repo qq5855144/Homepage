@@ -231,23 +231,9 @@
             "size": "1x1"
           }
         ]
-      },
-      {
-        "id": "cat1772358849187ertg",
-        "name": "影视",
-        "icon": "ri:movie-2-line",
-        "tiles": [
-          {
-            "id": "t17723589334297nd1",
-            "name": "喵物次元",
-            "url": "https://www.mwcy.net/",
-            "icon": "https://icdn.binmt.cc/2603/69a40d0a74035.png",
-            "size": "1x1"
-          }
-        ]
       }
     ],
-    "currentCategoryId": "cat1772358849187ertg"
+    "currentCategoryId": "cat0"
   },
   "customEngines": [
     {
