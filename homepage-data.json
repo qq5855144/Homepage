@@ -233,7 +233,7 @@
         ]
       }
     ],
-    "currentCategoryId": "cat1772348207274afro"
+    "currentCategoryId": "cat0"
   },
   "customEngines": [
     {
@@ -253,6 +253,6 @@
   "background": {
     "type": "image",
     "url": "https://icdn.binmt.cc/2602/699a570336d59.jpg",
-    "blur": 20
+    "blur": 0
   }
 }
