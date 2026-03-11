@@ -53,7 +53,7 @@
             "name": "MT论坛",
             "url": "https://bbs.binmt.cc/forum.php?mod=guide&view=newthread&index=1",
             "icon": "https://icdn.binmt.cc/2603/69a3e22be1f47.png",
-            "size": "2x1"
+            "size": "2x2"
           },
           {
             "id": "g6",
@@ -240,7 +240,7 @@
         ]
       }
     ],
-    "currentCategoryId": "cat1772355539600gyau"
+    "currentCategoryId": "cat0"
   },
   "customEngines": [
     {
@@ -262,7 +262,7 @@
       "url": "https://apkpure.com/search?q=%s"
     }
   ],
-  "selectedEngineId": "preset-1",
+  "selectedEngineId": "custom-1773103891798-x6hs",
   "background": {
     "type": "image",
     "url": "https://icdn.binmt.cc/2602/699a570336d59.jpg",
