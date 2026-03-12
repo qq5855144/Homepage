@@ -8,6 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- 轻量农历库 solarlunar (用于显示农历和节日) -->
+    <script src="https://cdn.jsdelivr.net/npm/solarlunar@2.0.7/lib/solarlunar.min.js"></script>
     <style>
         html { font-size: 16px; }
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
@@ -371,14 +373,14 @@
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;                                 
-            margin-bottom: 0.1875rem;                         
+                                     
             flex-shrink: 0;
             color: inherit;
             overflow: hidden;
             position: relative;
         }
         .tile[data-size="1x1"] .tile-icon, .tile[data-size="2x1"] .tile-icon { height: 2.75rem; }
-        .tile[data-size="1x2"] .tile-icon, .tile[data-size="2x2"] .tile-icon { height: calc(2 * 2.75rem + 0.1875rem + 1.375rem); }
+        .tile[data-size="1x2"] .tile-icon, .tile[data-size="2x2"] .tile-icon { height: calc(2 * 2.75rem + 1.375rem); }
         .tile-icon img {
             max-width: 90%;
             max-height: 90%;
@@ -2002,6 +2004,95 @@
                 }
                 bindGitHubInputsSave();
             }
+            // ================== 更新日期时间（带农历、节日）==================
+            function updateDateTime() {
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                const day = now.getDate();
+                const year = now.getFullYear();
+                
+                // 公历日期
+                const dateStr = `${month}月${day}日`;
+                // 星期（短格式）
+                const weekdayStr = now.toLocaleDateString('zh-CN', { weekday:'short' });
+                
+                let lunarStr = '';
+                let festivalStr = '';
+                
+                // 使用 solarlunar 库计算农历（如果可用）
+                if (typeof solarlunar !== 'undefined') {
+                    try {
+                        const lunar = solarlunar.solar2lunar(year, month, day);
+                        if (lunar) {
+                            const lMonth = lunar.lMonth;       // 农历月 1-12
+                            const lDay = lunar.lDay;           // 农历日 1-30
+                            const isLeap = lunar.isLeap;       // 是否闰月
+                            
+                            const monthNames = ['正月', '二月', '三月', '四月', '五月', '六月', 
+                                                '七月', '八月', '九月', '十月', '十一月', '十二月'];
+                            const dayNames = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+                                             '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+                                             '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+                            
+                            let lunarMonthStr = monthNames[lMonth - 1];
+                            if (isLeap) lunarMonthStr = '闰' + lunarMonthStr;
+                            const lunarDayStr = dayNames[lDay - 1] || lDay + ''; // 防止越界
+                            lunarStr = lunarMonthStr + lunarDayStr;
+                            
+                            // 农历节日 (月日两位)
+                            const lunarFestivals = {
+                                '0101': '春节',
+                                '0115': '元宵节',
+                                '0505': '端午节',
+                                '0707': '七夕节',
+                                '0715': '中元节',
+                                '0815': '中秋节',
+                                '0909': '重阳节',
+                                '1208': '腊八节'
+                            };
+                            // 公历节日
+                            const solarFestivals = {
+                                '0101': '元旦',
+                                '0214': '情人节',
+                                '0308': '妇女节',
+                                '0312': '植树节',
+                                '0401': '愚人节',
+                                '0501': '劳动节',
+                                '0601': '儿童节',
+                                '0701': '建党节',
+                                '0801': '建军节',
+                                '0910': '教师节',
+                                '1001': '国庆节',
+                                '1224': '平安夜',
+                                '1225': '圣诞节'
+                            };
+                            
+                            // 先判断农历节日
+                            const lunarKey = (lMonth < 10 ? '0' + lMonth : '' + lMonth) + (lDay < 10 ? '0' + lDay : '' + lDay);
+                            if (lunarFestivals[lunarKey]) {
+                                festivalStr = lunarFestivals[lunarKey];
+                            } else {
+                                // 再判断公历节日
+                                const solarKey = (month < 10 ? '0' + month : '' + month) + (day < 10 ? '0' + day : '' + day);
+                                if (solarFestivals[solarKey]) {
+                                    festivalStr = solarFestivals[solarKey];
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('农历转换出错', e);
+                    }
+                }
+                
+                // 组合最终字符串： 3月12日 星期四 正月廿四 植树节
+                let fullDate = `${dateStr} ${weekdayStr}`;
+                if (lunarStr) fullDate += ` ${lunarStr}`;
+                if (festivalStr) fullDate += ` ${festivalStr}`;
+                
+                document.getElementById('currentDate').textContent = fullDate;
+                document.getElementById('currentTime').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
+            }
+            
             function init() {
                 renderEngineList();
                 loadMultipageData();
@@ -2061,11 +2152,7 @@
                     swipeLock = false;
                 }, { capture: true });
             }
-            function updateDateTime() {
-                const now = new Date();
-                document.getElementById('currentTime').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
-                document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
-            }
+            
             init();
             window.addEventListener('beforeunload', function() {
                 if (tilePressTimer) clearTimeout(tilePressTimer);
