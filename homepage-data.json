@@ -250,11 +250,18 @@
             "url": "https://yuanbao.tencent.com/",
             "icon": "https://icdn.binmt.cc/2603/69a407081a58f.png",
             "size": "1x1"
+          },
+          {
+            "id": "t17733425447707dm5",
+            "name": "秒哒",
+            "url": "https://www.miaoda.cn/",
+            "icon": "🌐",
+            "size": "1x1"
           }
         ]
       }
     ],
-    "currentCategoryId": "cat17723476317598sp3"
+    "currentCategoryId": "cat1772356133263h8ji"
   },
   "customEngines": [
     {
