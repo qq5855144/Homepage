@@ -1318,7 +1318,7 @@
                 tilesData.forEach(tile => {
                     let displayName = tile.name;
                     const hasChinese = /[\u4e00-\u9fff]/.test(displayName);
-                    const maxLen = hasChinese ? 5 : 8;
+                    const maxLen = hasChinese ? 6 : 10;
                     if (displayName.length > maxLen) displayName = displayName.slice(0, maxLen);
                     html += `<div class="tile" data-id="${tile.id}" data-url="${tile.url}" data-size="${tile.size || '1x1'}" data-name="${tile.name.toLowerCase()}"><span class="tile-icon">${renderIconHtml(tile.icon)}</span><span class="tile-name">${displayName}</span></div>`;
                 });
