@@ -126,18 +126,18 @@
             "size": "1x1"
           },
           {
-            "id": "t1773230134813p1fu",
-            "name": "lsp中文",
-            "url": "https://lsposed.cn/lsposed%e6%a8%a1%e5%9d%97?orderby=modified",
-            "icon": "https://ts1.tc.mm.bing.net/th/id/ODF.3GOVBWB2fR2Y_oRpU84PTg?w=32&h=32&qlt=91&pcl=fffffa&o=6&pid=1.2",
-            "size": "2x1"
-          },
-          {
             "id": "t1773228943073ah8j",
             "name": "lsp仓库",
             "url": "https://modules.lsposed.org/",
             "icon": "https://ts1.tc.mm.bing.net/th/id/ODF.3GOVBWB2fR2Y_oRpU84PTg?w=32&h=32&qlt=91&pcl=fffffa&o=6&pid=1.2",
             "size": "1x1"
+          },
+          {
+            "id": "t1773230134813p1fu",
+            "name": "lsp中文",
+            "url": "https://lsposed.cn/lsposed%e6%a8%a1%e5%9d%97?orderby=modified",
+            "icon": "https://ts1.tc.mm.bing.net/th/id/ODF.3GOVBWB2fR2Y_oRpU84PTg?w=32&h=32&qlt=91&pcl=fffffa&o=6&pid=1.2",
+            "size": "2x1"
           }
         ]
       },
