@@ -14,13 +14,6 @@
             "size": "2x1"
           },
           {
-            "id": "t1772425336761knsd",
-            "name": "实用脚本",
-            "url": "https://qq5855144.github.io/ScriptSearch/",
-            "icon": "material-icon-theme:markojs",
-            "size": "1x1"
-          },
-          {
             "id": "g5",
             "name": "GitHub",
             "url": "https://qq5855144.github.io/GitHub/",
@@ -60,6 +53,13 @@
             "name": "MT论坛",
             "url": "https://bbs.binmt.cc/forum.php?mod=guide&view=newthread&index=1",
             "icon": "https://icdn.binmt.cc/2603/69a3e22be1f47.png",
+            "size": "1x1"
+          },
+          {
+            "id": "t1772425336761knsd",
+            "name": "实用脚本",
+            "url": "https://qq5855144.github.io/ScriptSearch/",
+            "icon": "material-icon-theme:markojs",
             "size": "1x1"
           },
           {
