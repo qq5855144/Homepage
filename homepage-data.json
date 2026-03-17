@@ -21,6 +21,13 @@
             "size": "1x1"
           },
           {
+            "id": "t1772347987197qxba",
+            "name": "MT论坛",
+            "url": "https://bbs.binmt.cc/forum.php?mod=guide&view=newthread&index=1",
+            "icon": "https://icdn.binmt.cc/2603/69a3e22be1f47.png",
+            "size": "2x1"
+          },
+          {
             "id": "t1772425018824pdm3",
             "name": "格式转换",
             "url": "https://qq5855144.github.io/ImageConverter/",
@@ -46,13 +53,6 @@
             "name": "Iconify",
             "url": "https://yesicon.app/",
             "icon": "ph:hand-fist",
-            "size": "1x1"
-          },
-          {
-            "id": "t1772347987197qxba",
-            "name": "MT论坛",
-            "url": "https://bbs.binmt.cc/forum.php?mod=guide&view=newthread&index=1",
-            "icon": "https://icdn.binmt.cc/2603/69a3e22be1f47.png",
             "size": "1x1"
           },
           {
