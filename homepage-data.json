@@ -138,6 +138,13 @@
             "url": "https://modules.lsposed.org/",
             "icon": "https://ts1.tc.mm.bing.net/th/id/ODF.3GOVBWB2fR2Y_oRpU84PTg?w=32&h=32&qlt=91&pcl=fffffa&o=6&pid=1.2",
             "size": "1x1"
+          },
+          {
+            "id": "t1773751277207ir6t",
+            "name": "工作日记",
+            "url": "https://qq5855144.github.io/zddss/",
+            "icon": "bi:journal-bookmark",
+            "size": "1x1"
           }
         ]
       },
@@ -268,7 +275,7 @@
         ]
       }
     ],
-    "currentCategoryId": "cat0"
+    "currentCategoryId": "cat17723476317598sp3"
   },
   "customEngines": [
     {
