@@ -7,18 +7,18 @@
         "icon": "mdi:home",
         "tiles": [
           {
-            "id": "g2",
-            "name": "YouTube",
-            "url": "https://youtube.com",
-            "icon": "logos:youtube-icon",
-            "size": "2x1"
-          },
-          {
             "id": "g5",
             "name": "GitHub",
             "url": "https://qq5855144.github.io/GitHub/",
             "icon": "icon-park:github",
             "size": "1x1"
+          },
+          {
+            "id": "g2",
+            "name": "YouTube",
+            "url": "https://youtube.com",
+            "icon": "logos:youtube-icon",
+            "size": "2x1"
           },
           {
             "id": "t1772347987197qxba",
