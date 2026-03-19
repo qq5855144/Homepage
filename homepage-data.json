@@ -42,17 +42,17 @@
             "size": "1x1"
           },
           {
-            "id": "g6",
-            "name": "Iconify",
-            "url": "https://yesicon.app/",
-            "icon": "ph:hand-fist",
-            "size": "1x1"
-          },
-          {
             "id": "t1772347412634l7yr",
             "name": "ScriptCat",
             "url": "https://scriptcat.org/zh-CN/search",
             "icon": "https://icdn.binmt.cc/2603/69a3e0aedb2cb.jpg",
+            "size": "1x1"
+          },
+          {
+            "id": "g6",
+            "name": "Iconify",
+            "url": "https://yesicon.app/",
+            "icon": "ph:hand-fist",
             "size": "1x1"
           },
           {
