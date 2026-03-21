@@ -119,13 +119,6 @@
             "size": "1x1"
           },
           {
-            "id": "t1773230134813p1fu",
-            "name": "lsp中文",
-            "url": "https://lsposed.cn/lsposed%e6%a8%a1%e5%9d%97?orderby=modified",
-            "icon": "https://ts1.tc.mm.bing.net/th/id/ODF.3GOVBWB2fR2Y_oRpU84PTg?w=32&h=32&qlt=91&pcl=fffffa&o=6&pid=1.2",
-            "size": "1x2"
-          },
-          {
             "id": "t1772628675024yfjf",
             "name": "crxsoso",
             "url": "https://www.crxsoso.com/",
@@ -145,6 +138,13 @@
             "url": "https://qq5855144.github.io/zddss/",
             "icon": "noto-v1:notebook-with-decorative-cover",
             "size": "1x1"
+          },
+          {
+            "id": "t1773230134813p1fu",
+            "name": "lsp中文",
+            "url": "https://lsposed.cn/lsposed%e6%a8%a1%e5%9d%97?orderby=modified",
+            "icon": "https://ts1.tc.mm.bing.net/th/id/ODF.3GOVBWB2fR2Y_oRpU84PTg?w=32&h=32&qlt=91&pcl=fffffa&o=6&pid=1.2",
+            "size": "1x2"
           }
         ]
       },
@@ -275,7 +275,7 @@
         ]
       }
     ],
-    "currentCategoryId": "cat0"
+    "currentCategoryId": "cat17723476317598sp3"
   },
   "customEngines": [
     {
