@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-03-29T13:52:50.042Z",
+  "timestamp": "2026-03-29T14:24:41.041Z",
   "desktop": {
     "items": [
       {
@@ -162,14 +162,6 @@
     "capacity": 6,
     "items": [
       {
-        "id": "app_sync",
-        "type": "app",
-        "title": "云同步",
-        "url": "#sync",
-        "icon": "mdi:cloud-sync",
-        "bgStyle": "background:linear-gradient(135deg,#00c6ff,#0072ff);"
-      },
-      {
         "id": "dock_phone",
         "type": "app",
         "title": "电话",
@@ -200,12 +192,20 @@
         "url": "https://image.baidu.com",
         "icon": "mdi:image-outline",
         "bgStyle": "background:linear-gradient(135deg,#ff512f,#dd2476);"
+      },
+      {
+        "id": "app_sync",
+        "type": "app",
+        "title": "云同步",
+        "url": "#sync",
+        "icon": "mdi:cloud-sync",
+        "bgStyle": "background:linear-gradient(135deg,#00c6ff,#0072ff);"
       }
     ]
   },
-  "currentPage": 0,
+  "currentPage": 1,
   "currentQuote": "生活不是等待风暴过去，而是学会在雨中跳舞。",
-  "currentEngineId": "preset-1",
+  "currentEngineId": "preset-2",
   "customEngines": [],
-  "wallpaper": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&q=80"
+  "wallpaper": null
 }
